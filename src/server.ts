@@ -1,14 +1,12 @@
 import fastify from "fastify";
-import fjwt, {FastifyJWT} from '@fastify/jwt';
+import jwt, {Secret} from '@fastify/jwt';
 import bcrypt from "bcrypt";
 
 import db from "./db";
 
 const app = fastify();
 
-// app.register(fjwt, {secret: process.env.JWT_SECRET});
-
-// app.register(jwt, {secret: process.env.JWT_SECRET});
+app.register(jwt, {secret: process.env.JWT_SECRET as Secret});
 
 app.post("/register", async (req, res) => {
     const { username, password } = req.body as { username: string; password: string };
