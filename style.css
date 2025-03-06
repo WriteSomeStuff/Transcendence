@@ -1,0 +1,49 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap');
+body {
+	background: url("background.jpg") center center;
+	color: pink;
+}
+
+.wrapper {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100vh;
+}
+
+@keyframes rainbow {
+	0%   { border-color: red; box-shadow: 0 0 20px red; }
+	10%  { border-color: orange; box-shadow: 0 0 20px orange; }
+	20%  { border-color: yellow; box-shadow: 0 0 20px yellow; }
+	30%  { border-color: lime; box-shadow: 0 0 20px lime; }
+	40%  { border-color: green; box-shadow: 0 0 20px green; }
+	50%  { border-color: cyan; box-shadow: 0 0 20px cyan; }
+	60%  { border-color: blue; box-shadow: 0 0 20px blue; }
+	70%  { border-color: indigo; box-shadow: 0 0 20px indigo; }
+	80%  { border-color: violet; box-shadow: 0 0 20px violet; }
+	90%  { border-color: pink; box-shadow: 0 0 20px pink; }
+	100% { border-color: red; box-shadow: 0 0 20px red; }
+}
+
+.content {
+	width: 800px;
+	height: 100vh;
+	background: black;
+	color: pink;
+	padding: 20px;
+	text-align: center;
+	border: 5px solid red;
+	animation: rainbow 6s linear infinite;
+}
+
+h1 {
+	color: pink;
+}
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	font-family: "Comic Neue", cursive;
+}
