@@ -1,8 +1,9 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap');
 body {
-	background: url("background.jpg") center center;
+	background: url("aTrippyBackground.gif") center center;
 	color: pink;
+	background-size: 10%;
 }
 
 .wrapper {
@@ -10,6 +11,13 @@ body {
 	justify-content: center;
 	align-items: center;
 	height: 100vh;
+}
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	font-family: "Comic Neue", cursive;
 }
 
 @keyframes rainbow {
@@ -29,21 +37,15 @@ body {
 .content {
 	width: 800px;
 	height: 100vh;
-	background: black;
+	background: rgba(0, 0, 0, 0.7);
 	color: pink;
 	padding: 20px;
 	text-align: center;
 	border: 5px solid red;
-	animation: rainbow 6s linear infinite;
+	animation: rainbow 20s linear infinite;
 }
 
 h1 {
 	color: pink;
 }
 
-* {
-	margin: 0;
-	padding: 0;
-	box-sizing: border-box;
-	font-family: "Comic Neue", cursive;
-}
