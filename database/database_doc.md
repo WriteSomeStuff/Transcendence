@@ -75,8 +75,19 @@ This documentation provides a detailed description of the database schema for th
 
 #### Notes
 - Dates in TEXT type as ISO-8601 string (e.g., YYYY-MM-DD HH:MM:SS)
-________________________________________________________________________________
 
+
+## Indexes
+| **Table** | **Indexed Column** |
+| --- | --- |
+| user | `username` |
+| match_state | `tournament_id` |
+| match_participant | `match_id`, `user_id` |
+| score | `match_id`, `user_id` |
+| tournament | `tournament_status` |
+| game_history | `match_id` |
+| game_history | `tournament_id` |
+| user_statistics | `user_id` |
 ## Relationships
 - **Foreign Keys**: Describes how tables are related through foreign keys.
 - **Example**: The `match_state` table references the `tournament` table via `tournament_id`.
