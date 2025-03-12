@@ -1,0 +1,87 @@
+# Database Schema Documentation
+
+## Overview
+This documentation provides a detailed description of the database schema for the Pong game application. It includes information about tables, columns, relationships, and example queries.
+## Tables
+
+### User Table
+**Purpose**: Stores user account information.
+| **Columns** | **Type** | **Constraints** | **Description** | **Default** | **Options** |
+| --- | --- | --- | --- | --- | --- |
+| `user_id`         | INTEGER    | PRIMARY KEY     | Unique identifier for the user     | | |
+| `username`        | TEXT       | NOT NULL, UNIQUE| Username of the user               | | |
+| `password_hash`   | TEXT       | NOT NULL        | Hashed password of the user        | | |
+| `created_at`      | TEXT       |                 | Account creation timestamp 		| datetime('now', 'localtime') | |
+| `last_login`      | TEXT       |                 | Last login timestamp               | | |
+| `profile_picture` | BLOB       |                 | Profile picture of the user        | | |
+| `account_status`  | TEXT       |                 | Status of the user account         | | 'online', 'offline', 'suspended', 'banned' |
+
+### Match State Table
+**Purpose**: Stores information about each match.
+| **Columns** | **Type** | **Constraints** | **Description** | **Default** | **Options** |
+| --- | --- | --- | --- | --- | --- |
+| `match_id`        | INTEGER    | PRIMARY KEY     | Unique identifier for the match    | | |
+| `match_date`      | TEXT       |                 | Date of the match 					| datetime('now', 'localtime') | |
+| `match_status`    | TEXT       |                 | Status of the match                | | 'ongoing', 'finished' |
+| `last_updated`    | TEXT       |                 | Last updated timestamp 			| datetime('now', 'localtime') | |
+| `winner_id`       | INTEGER    |                 | Identifier of the winning user     | | |
+| `tournament_id`   | INTEGER    | FOREIGN KEY     | Identifier of the related tournament| | |
+
+### Match Participant Table
+**Purpose**: Stores information about participants in each match.
+| **Columns** | **Type** | **Constraints** | **Description** | **Default** | **Options** |
+| --- | --- | --- | --- | --- | --- |
+| `match_id`        | INTEGER    | NOT NULL, FOREIGN KEY        | Identifier of the match            | | |
+| `user_id`         | INTEGER    | NOT NULL, FOREIGN KEY        | Identifier of the user             | | |
+
+### Score Table
+**Purpose**: Stores scores for a user in a match.
+| **Columns** | **Type** | **Constraints** | **Description** | **Default** | **Options** |
+| --- | --- | --- | --- | --- | --- |
+| `score_id`        | INTEGER    | PRIMARY KEY     | Unique identifier for the score    | | |
+| `match_id`        | INTEGER    | FOREIGN KEY     | Identifier of the match            | | |
+| `user_id`         | INTEGER    | FOREIGN KEY     | Identifier of the user             | | |
+| `score`           | INTEGER    |                 | Score of the user 				    | 0 | |
+
+### Tournament Table
+**Purpose**: Stores information about tournaments.
+| **Columns** | **Type** | **Constraints** | **Description** | **Default** | **Options** |
+| --- | --- | --- | --- | --- | --- |
+| `tournament_id`           | INTEGER    | PRIMARY KEY     | Unique identifier for the tournament| | |
+| `tournament_name`         | TEXT       |                 | Name of the tournament             | | |
+| `created_at`              | TEXT       |                 | Tournament creation timestamp 		| datetime('now', 'localtime') | |
+| `tournament_status`       | TEXT       |                 | Status of the tournament 			| "ongoing" | 'ongoing', 'finished' |
+
+### Game History Table
+**Purpose**: Stores historical data of finished matches.
+| **Columns** | **Type** | **Constraints** | **Description** | **Default** | **Options** |
+| --- | --- | --- | --- | --- | --- |
+| `match_id`        | INTEGER    | PRIMARY KEY, FOREIGN KEY     | Unique identifier for the match    | | |
+| `match_date`      | TEXT       |                 | Date of the match                  | | |
+| `winner_id`       | INTEGER    |                 | Identifier of the winning user     | | |
+| `tournament_id`   | INTEGER    | FOREIGN KEY                | Identifier of the related tournament| | |
+
+### User Statistics Table
+**Purpose**: Stores statistical data for users.
+| **Columns** | **Type** | **Constraints** | **Description** | **Default** | **Options** |
+| --- | --- | --- | --- | --- | --- |
+| `user_id`                 | INTEGER    | PRIMARY KEY, FOREIGN KEY     | Unique identifier for the user     | | |
+| `total_games_played`      | INTEGER    |                 | Total number of games played 		| 0 | |
+| `total_wins`              | INTEGER    |                 | Total number of wins 				| 0 | |
+| `total_losses`            | INTEGER    |                 | Total number of losses 			| 0 | |
+| `win_rate`                | REAL       |                 | Win rate of the user 				| 0 | |
+| `total_score`             | INTEGER    |                 | Total score of the user 			| 0 | |
+| `average_score`           | INTEGER    |                 | Average score of the user 			| 0 | |
+
+#### Notes
+- Dates in TEXT type as ISO-8601 string (e.g., YYYY-MM-DD HH:MM:SS)
+________________________________________________________________________________
+
+## Relationships
+- **Foreign Keys**: Describes how tables are related through foreign keys.
+- **Example**: The `match_state` table references the `tournament` table via `tournament_id`.
+
+## Example Queries
+- **Retrieve User Information**:
+  ```sql
+  SELECT * FROM user WHERE user_id = ?;
