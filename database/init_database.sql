@@ -112,7 +112,7 @@ END;
 CREATE TRIGGER IF NOT EXISTS update_user_statistics
 	AFTER UPDATE OF match_status ON match_state
 	FOR EACH ROW
-	WHEN WHEN NEW.match_status = 'completed'
+	WHEN NEW.match_status = 'completed'
 BEGIN
 	FOR EACH ROW IN
 	(SELECT user_id FROM match_participant WHERE match_id = NEW.match_id)
