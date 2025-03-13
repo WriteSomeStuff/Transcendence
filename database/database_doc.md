@@ -35,13 +35,13 @@ This documentation provides a detailed description of the database schema for th
 | `user_id`         | INTEGER    | NOT NULL, FOREIGN KEY        | Identifier of the user             | | |
 
 ### Score Table
-**Purpose**: Stores scores for a user in a match.
+**Purpose**: Stores amount of points for a user in a match.
 | **Columns** | **Type** | **Constraints** | **Description** | **Default** | **Options** |
 | --- | --- | --- | --- | --- | --- |
 | `score_id`        | INTEGER    | PRIMARY KEY     | Unique identifier for the score    | | |
 | `match_id`        | INTEGER    | FOREIGN KEY     | Identifier of the match            | | |
 | `user_id`         | INTEGER    | FOREIGN KEY     | Identifier of the user             | | |
-| `score`           | INTEGER    |                 | Score of the user 				    | 0 | |
+| `points`           | INTEGER    |                 | Points of the user 				    | 0 | |
 
 ### Tournament Table
 **Purpose**: Stores information about tournaments.
@@ -70,8 +70,8 @@ This documentation provides a detailed description of the database schema for th
 | `total_wins`              | INTEGER    |                 | Total number of wins 				| 0 | |
 | `total_losses`            | INTEGER    |                 | Total number of losses 			| 0 | |
 | `win_rate`                | REAL       |                 | Win rate of the user 				| 0 | |
-| `total_score`             | INTEGER    |                 | Total score of the user 			| 0 | |
-| `average_score`           | INTEGER    |                 | Average score of the user 			| 0 | |
+| `total_points`             | INTEGER    |                 | Total points of the user 			| 0 | |
+| `average_points_per_match`           | INTEGER    |                 | Average points of the user 			| 0 | |
 
 #### Notes
 - Dates in TEXT type as ISO-8601 string (e.g., YYYY-MM-DD HH:MM:SS)
@@ -93,19 +93,21 @@ This documentation provides a detailed description of the database schema for th
 **Purpose**: Data (Table: Updated Column) gets automattically update with certain conditions (When). 
 | **Table** | **Updated Column** | **When** |
 | --- | --- | --- |
-| user_statistics | `win_rate` | UPDATE on `total_games_played` |
-| user_statistics | `win_rate` | UPDATE on `total_wins` |
-| user_statistics | `average_score` | UPDATE on `total_games_played` |
-| user_statistics | `average_score` | UPDATE on `total_score` |
+| game_history | all | game_state.match_status = 'completed' |
+| game_state | `last_updated` | UPDATE on any column |
+| user_statistics | all | game_state.match_status = 'completed' |
 
 #### Notes
-- Two triggers on `win_rate` and `average_score` to ensure consistency. If one is updated earlier then the other, it gets re-calculated too when the other is updated. 
 
 ---
 
-### Relationships
-- **Foreign Keys**: Describes how tables are related through foreign keys.
-- **Example**: The `match_state` table references the `tournament` table via `tournament_id`.
+### Relationships (Foreign Keys)
+- Foreign keys describe how tables are related. Any value inserted into the foreign key column of one table MUST exist in the referenced table.
+	- Example: `match_id` in *match_history* table must exist in `match_id` in *match_state* table since it's a foreign key to this column. 
+		```sql 
+		FOREIGN KEY (match_id) REFERENCES match_state(match_id) [ON DELETE CASCADE];
+- A record in *match_state* can't be deleted if it has corresponding records through a foreign key elsewhere.</br>
+- ON DELETE CASCADE or ON UPDATE CASCADE: updates foreign keys automatically if refrenced column is deleted or updated.
 
 ### Example Queries
 - **Retrieve User Information**:
