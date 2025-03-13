@@ -76,8 +76,8 @@ This documentation provides a detailed description of the database schema for th
 #### Notes
 - Dates in TEXT type as ISO-8601 string (e.g., YYYY-MM-DD HH:MM:SS)
 
-
 ## Indexes
+**Purpose**: Helps improve query performance. Normal lookup is on `rowid` (INTEGER PRIMARY KEY) with relationship: (rowid, row). Index adds an opposite relationship: (row, rowid). SQLite uses a Balanced-tree (B-tree) structure to organize indexes, assuring the amount of data is balanced on both sides. Therefore the number of levels traversed to locate a row is always the same approximate number. So the index gets added to the B-tree structure, ensuring faster query performance on this row.
 | **Table** | **Indexed Column** |
 | --- | --- |
 | user | `username` |
@@ -88,11 +88,26 @@ This documentation provides a detailed description of the database schema for th
 | game_history | `match_id` |
 | game_history | `tournament_id` |
 | user_statistics | `user_id` |
-## Relationships
+
+## Triggers
+**Purpose**: Data (Table: Updated Column) gets automattically update with certain conditions (When). 
+| **Table** | **Updated Column** | **When** |
+| --- | --- | --- |
+| user_statistics | `win_rate` | UPDATE on `total_games_played` |
+| user_statistics | `win_rate` | UPDATE on `total_wins` |
+| user_statistics | `average_score` | UPDATE on `total_games_played` |
+| user_statistics | `average_score` | UPDATE on `total_score` |
+
+#### Notes
+- Two triggers on `win_rate` and `average_score` to ensure consistency. If one is updated earlier then the other, it gets re-calculated too when the other is updated. 
+
+---
+
+### Relationships
 - **Foreign Keys**: Describes how tables are related through foreign keys.
 - **Example**: The `match_state` table references the `tournament` table via `tournament_id`.
 
-## Example Queries
+### Example Queries
 - **Retrieve User Information**:
   ```sql
-  SELECT * FROM user WHERE user_id = ?;
+  SELECT * FROM user WHERE username = tymon;

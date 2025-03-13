@@ -87,3 +87,49 @@ CREATE INDEX idx_game_history_tournament_id ON game_history (tournament_id);
 CREATE INDEX idx_user_statistics_user_id ON user_statistics (user_id);
 
 -- Set triggers.
+
+-- Update win_rate if either total_games_played or total_wins is updated.
+CREATE TRIGGER IF NOT EXISTS update_win_rate_games_played
+	AFTER UPDATE OF total_games_played ON user_statistics
+BEGIN
+	UPDATE user_statistics
+	SET win_rate =	CASE
+						WHEN total_games_played = 0 THEN 0
+						ELSE (total_wins / total_games_played) * 100
+					END
+	WHERE user_id = NEW.user_id;
+END;
+
+CREATE TRIGGER IF NOT EXISTS update_win_rate_total_wins
+	AFTER UPDATE OF total_wins ON user_statistics
+BEGIN
+	UPDATE user_statistics
+	SET win_rate =	CASE
+						WHEN total_games_played = 0 THEN 0
+						ELSE (total_wins / total_games_played) * 100
+					END
+	WHERE user_id = NEW.user_id;
+END;
+
+-- Update average_score if either total_games_played or total_score is updated.
+CREATE TRIGGER IF NOT EXISTS update_average_score_total_games
+	AFTER UPDATE OF total_games_played ON user_statistics
+BEGIN
+	UPDATE user_statistics
+	SET average_score =	CASE
+							WHEN total_games_played = 0 THEN 0
+							ELSE round(total_score / total_games_played)
+						END
+	WHERE user_id = NEW.user_id;
+END;
+
+CREATE TRIGGER IF NOT EXISTS update_average_score_total_score
+	AFTER UPDATE OF total_score ON user_statistics
+BEGIN
+	UPDATE user_statistics
+	SET average_score =	CASE
+							WHEN total_games_played = 0 THEN 0
+							ELSE round(total_score / total_games_played)
+						END
+	WHERE user_id = NEW.user_id;
+END;
