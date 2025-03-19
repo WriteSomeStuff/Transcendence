@@ -58,7 +58,7 @@ This documentation provides a detailed description of the database schema for th
 **Purpose**: Data (Table: Updated Column) gets automattically update with certain conditions (When). 
 | **Table** | **Updated Column** | **When** |
 | --- | --- | --- |
-| game_state | `last_updated` | UPDATE on any column |
+| match_state | `last_updated` | UPDATE on any column |
 
 #### Notes
 
@@ -76,9 +76,6 @@ This documentation provides a detailed description of the database schema for th
 **Purpose**: Packing a query into a named object stored in the database.
 - winner_id
 - user_statistics
-- (game_history)
+- (match_history)
 
 ### Example Queries
-- **Retrieve User Information**:
-  ```sql
-  SELECT * FROM user WHERE username = tymon;

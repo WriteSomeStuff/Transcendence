@@ -1,4 +1,4 @@
--- CREATE TABLES
+-- CREATE TABLES ---------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS user (
 	user_id			INTEGER	PRIMARY KEY,
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS tournament (
 	tournament_status	TEXT	DEFAULT "ongoing"
 );
 
--- INDEXES
+-- INDEXES ---------------------------------------------------------------------
 
 CREATE INDEX idx_user_username ON user(username);
 
@@ -46,8 +46,7 @@ CREATE INDEX idx_match_state_tournament_id ON match_state(tournament_id);
 
 CREATE INDEX idx_tournament_tournament_status ON tournament(tournament_status);
 
-
--- TRIGGERS
+-- TRIGGERS --------------------------------------------------------------------
 
 -- Update last_updated in match_state.
 CREATE TRIGGER IF NOT EXISTS update_last_updated_match
@@ -59,21 +58,20 @@ BEGIN
 	WHERE rowid = NEW.rowid;
 END;
 
+-- VIEWS -----------------------------------------------------------------------
 
--- VIEWS
-
--- match winner view
+-- Match winner view.
 CREATE VIEW IF NOT EXISTS match_winner AS
 SELECT
 	ms.match_id,
 	ms.match_date,
 	ms.tournament_id,
-	mp.user_id AS winner_id, -- AS renames the column name in the view (to clarify)
+	mp.user_id AS winner_id,
 	u.username AS winner_name
 FROM
-	match_state ms -- create alias ms for readability
+	match_state ms
 JOIN
-	match_participant mp ON ms.match_id = mp.match_id -- only get the rows where match ids match
+	match_participant mp ON ms.match_id = mp.match_id
 JOIN
 	user u ON mp.user_id = u.user_id
 WHERE
@@ -84,16 +82,89 @@ WHERE
 		WHERE ms.match_id = mp.match_id
 	);
 
--- SELECT
--- 	[columns you want in the final table]
--- FROM
--- 	[table to get the colums from]
--- JOIN
--- 	[join a table (table2) to get more columns from table2 accorinding to corresponding data]
--- WHERE
--- 	[constraints]
+-- Wins per user view.
+CREATE VIEW IF NOT EXISTS wins_per_user AS
+SELECT
+	winner_id,
+	COUNT(*) AS total_wins
+FROM
+	match_winner mw
+GROUP BY
+	winner_id;
+
+-- Match history
+CREATE VIEW IF NOT EXISTS match_history AS
+SELECT
+	ms.match_id,
+    ms.match_date,
+    ms.tournament_id,
+	mp1.user_id AS p1_id,
+    u1.username AS p1_name,
+    mp1.score AS p1_score,
+	mp2.user_id AS p2_id,
+    u2.username AS p2_name,
+    mp2.score AS p2_score,
+    CASE
+    	WHEN mp1.score > mp2.score THEN u1.user_id
+        ELSE u2.user_id
+    END AS winner_id,
+    CASE
+    	WHEN mp1.score > mp2.score THEN u1.username
+        ELSE u1.username
+    END AS winner_name
+FROM
+	match_participant mp1
+JOIN
+	match_participant mp2 ON mp1.match_id = mp2.match_id
+    AND mp1.user_id < mp2.user_id
+JOIN
+	user u1 ON mp1.user_id = u1.user_id
+JOIN
+	user u2 ON mp2.user_id = u2.user_id
+JOIN
+	match_state ms USING (match_id)
+WHERE
+	ms.match_status = 'completed';
+
+-- User statistics view.
+CREATE VIEW IF NOT EXISTS user_statistics AS
+WITH basic_user_stats as (
+	SELECT
+		mp.user_id,
+		COUNT(DISTINCT mp.match_id) AS total_matches_played,
+		COALESCE(wpu.total_wins, 0) AS total_wins,
+		SUM(mp.score) AS total_score
+	FROM
+		match_participant mp
+	LEFT JOIN
+		wins_per_user wpu ON mp.user_id = wpu.winner_id
+	GROUP BY
+		mp.user_id
+)
+SELECT
+	u.user_id,
+	u.username,
+	bus.total_matches_played,
+	bus.total_wins,
+	bus.total_matches_played - bus.total_wins AS total_losses,
+	CASE
+		WHEN bus.total_matches_played = 0 THEN 0
+		ELSE CAST(bus.total_wins AS REAL) / bus.total_matches_played * 100
+	END AS win_rate,
+	bus.total_score,
+	CASE
+		WHEN bus.total_matches_played = 0 THEN 0
+		ELSE bus.total_score / bus.total_matches_played
+	END AS average_score
+FROM
+	user u
+LEFT JOIN basic_user_stats bus USING (user_id);
+
+-- User match history get from match history
+
+-- Ongoing matches.
 
 /** TODO
-* user_statistics -> view
+* link total_wins to match_history instead of match_winner
 * update documentation: views
 */
