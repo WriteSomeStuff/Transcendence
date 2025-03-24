@@ -12,6 +12,7 @@
   "license": "ISC",
   "packageManager": "pnpm@10.4.1",
   "dependencies": {
+    "@fastify/http-proxy": "^11.1.2",
     "@fastify/jwt": "^9.0.4",
     "@types/bcrypt": "^5.0.2",
     "@types/better-sqlite3": "^7.6.12",
@@ -20,7 +21,8 @@
     "better-sqlite3": "^11.8.1",
     "fastify": "^5.2.1",
     "tsx": "^4.19.3",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "uuid": "^11.1.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
