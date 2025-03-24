@@ -84,12 +84,15 @@ app.addHook("onRequest", async (req, res) => {
   if (["/health", "/login", "/register", "/guest"].includes(req.url)) return;
   try {
     await req.jwtVerify();
+    req.headers.user_id = req.user.id;
+    req.headers.user_type = req.user.type;
+    delete req.headers.authorization;
   } catch (error) {
     res.status(401).send({ error: "Unauthorized" });
   }
 });
 
-app.register(proxy, { upstream: "http://localhost:8545" }); // TODO replace with some normal value
+app.register(proxy, { upstream: "http://routing:8081" }); // TODO replace with some normal value
 
 app.listen(
   { port: 8080, host: "0.0.0.0" },

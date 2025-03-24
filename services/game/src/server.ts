@@ -5,7 +5,7 @@ const app = fastify();
 
 app.register(require('@fastify/static'), {
     root: path.join(__dirname, '..', 'assets'),
-    prefix: "/game/assets/",
+    prefix: "/assets/",
 });
 
 class Point {
@@ -75,7 +75,7 @@ setInterval(() => {
     }
 }, 50);
 
-app.get('/game/start', (req, res) => {
+app.get('/start', (req, res) => {
     let user1: string = req.query.user1;
     let user2: string = req.query.user2;
     if (!user1 || !user2)
@@ -92,7 +92,7 @@ app.get('/game/start', (req, res) => {
     return res.status(200).send((lastId - 1).toString());
 })
 
-app.get('/game/state', (req, res) => {
+app.get('/state', (req, res) => {
     let gameId = +req.query.gameid;
     if (gameId === undefined || gameId < 0 || gameId >= lastId) {
         return res.status(400).send('invalid gameId');
@@ -115,12 +115,12 @@ function update_point(initial: Point, action: 'up' | 'down'): Point {
     }
 }
 
-app.get('/game/action', (req, res) => {
+app.get('/action', (req, res) => {
     let gameId = +req.query.gameid;
     if (gameId === undefined || gameId < 0 || gameId >= lastId) {
         return res.status(400).send('invalid gameId');
     }
-    let user: string = req.query.user;
+    let user: string = req.headers.user_id as string;
     if (!user || (user !== games[gameId].user1 && user !== games[gameId].user2)) {
         return res.status(400).send('invalid user');
     }
@@ -141,7 +141,7 @@ app.get('/', (req, res) => {
     res.sendFile('index.html');
 })
 
-app.listen({port: 8080, host: '0.0.0.0'}, (err, address) => {
+app.listen({port: 8083, host: '0.0.0.0'}, (err, address) => {
     if (err) {
         console.log(err);
         return;

@@ -1,0 +1,56 @@
+services:
+  authentication:
+    container_name: transcendence_authentication
+    restart: always
+    build:
+      context: services/authentication
+    environment:
+      - JWT_SECRET="Some secret"
+    ports:
+      - "8080:8080"
+    volumes:
+      - auth_data:/var/authentication
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://authentication:8080/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    stop_grace_period: 2m
+    depends_on:
+      - routing
+  routing:
+    container_name: transcendence_routing
+    restart: always
+    build:
+      context: services/routing
+    networks:
+      - internal
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://routing:8081/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    stop_grace_period: 2m
+    depends_on:
+      - game
+  game:
+    container_name: transcendence_game
+    restart: always
+    build:
+      context: services/game
+    networks:
+      - internal
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://game:8082/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    stop_grace_period: 2m
+
+networks:
+  internal:
+
+volumes:
+  auth_data:
