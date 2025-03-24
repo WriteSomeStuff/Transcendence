@@ -138,27 +138,33 @@ WITH basic_user_stats as (
 		match_participant mp
 	LEFT JOIN
 		wins_per_user wpu ON mp.user_id = wpu.winner_id
+	JOIN
+		match_state ms USING (match_id)
+	WHERE
+		ms.match_status = 'completed'
 	GROUP BY
 		mp.user_id
 )
 SELECT
 	u.user_id,
 	u.username,
-	bus.total_matches_played,
-	bus.total_wins,
-	bus.total_matches_played - bus.total_wins AS total_losses,
+	COALESCE(bus.total_matches_played, 0) AS total_matches_played,
+	COALESCE(bus.total_wins, 0) AS total_wins,
+	COALESCE(bus.total_matches_played - bus.total_wins, 0) AS total_losses,
 	CASE
-		WHEN bus.total_matches_played = 0 THEN 0
-		ELSE CAST(bus.total_wins AS REAL) / bus.total_matches_played * 100
+		WHEN bus.total_matches_played THEN CAST(bus.total_wins AS REAL) / bus.total_matches_played * 100
+		ELSE 0.0
 	END AS win_rate,
-	bus.total_score,
+	COALESCE(bus.total_score, 0) AS total_score,
 	CASE
-		WHEN bus.total_matches_played = 0 THEN 0
-		ELSE bus.total_score / bus.total_matches_played
+		WHEN bus.total_matches_played THEN bus.total_score / bus.total_matches_played
+		ELSE 0
 	END AS average_score
 FROM
 	user u
 LEFT JOIN basic_user_stats bus USING (user_id);
+-- ORDER BY bus.total_wins DESC;
+
 
 -- User match history get from match history
 
