@@ -2,7 +2,7 @@ import fastify from "fastify";
 import jwt, {Secret} from '@fastify/jwt';
 import bcrypt from "bcrypt";
 
-import db from "./db";
+import db from "./db.ts";
 
 const app = fastify();
 
@@ -24,7 +24,7 @@ app.get("/health", (req, res) => {
     res.send({message: "Success"});
 });
 
-app.listen({port: 8080}, (err: Error | null, address: string) => {
+app.listen({port: 8080, host: '0.0.0.0'}, (err: Error | null, address: string) => {
     if (err) {
         console.log(err);
         process.exit(1);
