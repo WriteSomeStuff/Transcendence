@@ -25,9 +25,6 @@
     "uuid": "^11.1.0"
   },
   "pnpm": {
-    "onlyBuiltDependencies": [
-      "better-sqlite3",
-      "bcrypt"
-    ]
+    "onlyBuiltDependencies": ["better-sqlite3", "bcrypt"]
   }
 }
