@@ -74,8 +74,9 @@ This documentation provides a detailed description of the database schema for th
 
 ### Views
 **Purpose**: Packing a query into a named object stored in the database.
-- winner_id
+- match_winner
+- wins_per_user
+- match_history
 - user_statistics
-- (match_history)
 
 ### Example Queries
