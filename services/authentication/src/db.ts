@@ -6,8 +6,6 @@ const DB_PATH: string = "database.sqlite3";
 class DatabaseService {
   private static instance: BetterSqlite3.Database;
 
-  private constructor() {}
-
   public static getInstance(): BetterSqlite3.Database {
     if (!DatabaseService.instance) {
       DatabaseService.instance = new Database(DB_PATH, {

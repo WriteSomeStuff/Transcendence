@@ -1,8 +1,15 @@
 import fastify from "fastify";
-import bcrypt from "bcrypt";
-import { v6 as uuidv6 } from "uuid";
 import jwt from "@fastify/jwt";
 import proxy from "@fastify/http-proxy";
+import {
+  serializerCompiler,
+  validatorCompiler,
+  type ZodTypeProvider,
+} from "fastify-type-provider-zod";
+
+import { z } from "zod";
+import bcrypt from "bcrypt";
+import { v6 as uuidv6 } from "uuid";
 
 import db from "./db.ts";
 
@@ -11,19 +18,26 @@ const insert = db.prepare(
   "INSERT into users (id, username, password) VALUES (@id, @username, @password)",
 );
 
-const app = fastify();
+const app = fastify().withTypeProvider<ZodTypeProvider>();
+app.setValidatorCompiler(validatorCompiler);
+app.setSerializerCompiler(serializerCompiler);
+
+const LOGIN_SCHEMA = z
+  .object({
+    username: z.string().min(3).max(32),
+    password: z.string().min(6).max(64),
+  })
+  .required();
 
 app.register(jwt, { secret: process.env.JWT_SECRET as string });
 
-app.post("/register", async (req, res) => {
-  const { username, password } = req.body as {
-    username: string;
-    password: string;
-  };
+app.addHook("onError", async (_, res, err) => {
+  console.error(err.stack);
+  return res.status(500).send("Internal Server Error");
+});
 
-  if (!username || !password) {
-    return res.status(400).send({ error: "Username and password is required" });
-  }
+app.post("/register", { schema: { body: LOGIN_SCHEMA } }, async (req, res) => {
+  const { username, password } = req.body;
 
   const hashedPassword = await bcrypt.hash(password, 10); // TODO possibly replace with own hash calculation
 
@@ -35,22 +49,12 @@ app.post("/register", async (req, res) => {
     insert.run({ id, username, password });
     return res.status(201).send("User created!");
   });
-  try {
-    return checkedInsert(username, hashedPassword);
-  } catch (error) {
-    return res.status(500).send("Unknown error");
-  }
+  return checkedInsert(username, hashedPassword);
 });
 
-app.post("/login", async (req, res) => {
-  const { username, password } = req.body as {
-    username: string;
-    password: string;
-  };
+app.post("/login", { schema: { body: LOGIN_SCHEMA } }, async (req, res) => {
+  const { username, password } = req.body;
 
-  if (!username || !password) {
-    return res.status(400).send({ error: "Username and password is required" });
-  }
   const user = select.get(username) as {
     id: string;
     username: string;
@@ -76,7 +80,7 @@ app.post("/guest", async (req, res) => {
   }
 });
 
-app.get("/health", (req, res) => {
+app.get("/health", (_, res) => {
   res.send({ message: "Success" });
 });
 
@@ -84,9 +88,10 @@ app.addHook("onRequest", async (req, res) => {
   if (["/health", "/login", "/register", "/guest"].includes(req.url)) return;
   try {
     await req.jwtVerify();
-    req.headers.user_id = req.user.id;
-    req.headers.user_type = req.user.type;
-    delete req.headers.authorization;
+    const { id, type } = req.user as { id: string; type: string };
+    req.headers.user_id = id;
+    req.headers.user_type = type;
+    req.headers.authorization = undefined;
   } catch (error) {
     res.status(401).send({ error: "Unauthorized" });
   }
@@ -101,6 +106,6 @@ app.listen(
       console.log(err);
       process.exit(1);
     }
-    console.log("Server listening on port 8080");
+    console.log("Server listening on " + address);
   },
 );
