@@ -97,15 +97,15 @@ app.addHook("onRequest", async (req, res) => {
   }
 });
 
-app.register(proxy, { upstream: "http://routing:8081" }); // TODO replace with some normal value
+app.register(proxy, { upstream: "http://routing" }); // TODO replace with some normal value
 
 app.listen(
-  { port: 8080, host: "0.0.0.0" },
+  { port: 80, host: "0.0.0.0" },
   (err: Error | null, address: string) => {
     if (err) {
       console.log(err);
       process.exit(1);
     }
-    console.log("Server listening on " + address);
+    console.log(`Server·listening·on·${address}`);
   },
 );
