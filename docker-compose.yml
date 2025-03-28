@@ -43,6 +43,22 @@ services:
       retries: 10
     stop_grace_period: 2m
     depends_on:
+      - matchmaking
+      - game
+  matchmaking:
+    container_name: transcendence_matchmaking
+    restart: always
+    build:
+      context: services/matchmaking
+    networks:
+      - internal
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://matchmaking/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    stop_grace_period: 2m
+    depends_on:
       - game
   game:
     container_name: transcendence_game
