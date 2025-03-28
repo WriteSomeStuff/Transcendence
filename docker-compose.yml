@@ -22,7 +22,7 @@ services:
     networks:
       - internal
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://authentication:8080/health"]
+      test: ["CMD", "curl", "-f", "http://authentication/health"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -37,7 +37,7 @@ services:
     networks:
       - internal
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://routing:8081/health" ]
+      test: [ "CMD", "curl", "-f", "http://routing/health" ]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -52,7 +52,7 @@ services:
     networks:
       - internal
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://game:8082/health" ]
+      test: [ "CMD", "curl", "-f", "http://game/health" ]
       interval: 5s
       timeout: 5s
       retries: 10
