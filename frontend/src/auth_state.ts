@@ -1,23 +1,16 @@
-import type { SPA } from "./app.ts";
+import type { App } from "./app.ts";
+import { AppState } from "./app_state.ts";
 
-export class Auth {
-  private spa: SPA;
-  private appContainer: HTMLElement;
-
-  constructor(spa: SPA) {
-    this.spa = spa;
-    const appContainer: HTMLElement | null = document.getElementById("app");
-    if (appContainer == null) {
-      throw new Error("Incorrect html");
-    }
-    this.appContainer = appContainer;
+export class Auth_state extends AppState {
+  constructor(app: App) {
+    super(app);
   }
 
   public isLoggedIn(): boolean {
-    return !!localStorage.getItem("token");
+    return !!localStorage.getItem("token"); // TODO add additional check with endpoint call
   }
 
-  public renderLoginForm() {
+  private renderLoginForm() {
     this.appContainer.innerHTML = `
             <h2>Login</h2>
             <form id="loginForm">
@@ -76,7 +69,7 @@ export class Auth {
 
       const data = await response.json();
       localStorage.setItem("token", data.token);
-      this.spa.render();
+      this.app.updateState();
     } catch (error) {
       alert("Login failed, try again.");
     }
@@ -108,5 +101,15 @@ export class Auth {
     } catch (error) {
       alert("Registration failed, please try again.");
     }
+  }
+
+  enterState(): void {
+    this.renderLoginForm();
+    console.log("Entering auth state");
+  }
+
+  exitState(): void {
+    this.appContainer.innerHTML = '';
+    console.log("Exiting auth state");
   }
 }

@@ -1,4 +1,5 @@
-import type { SPA } from "./app.ts";
+import type { App } from "./app.ts";
+import { AppState } from "./app_state.ts";
 
 interface User {
   user_id: string;
@@ -13,20 +14,12 @@ interface GameRoom {
   game_id?: string;
 }
 
-export class Dashboard {
-  private spa: SPA;
-  private appContainer: HTMLElement;
+export class Dashboard_state extends AppState {
   private room?: GameRoom;
-  private readonly updater: number;
+  private updater?: number;
 
-  constructor(spa: SPA) {
-    this.spa = spa;
-    const appContainer: HTMLElement | null = document.getElementById("app");
-    if (appContainer == null) {
-      throw new Error("Incorrect html");
-    }
-    this.appContainer = appContainer;
-    this.updater = setInterval(() => this.fetchRoom(), 1000);
+  constructor(app: App) {
+    super(app);
   }
 
   public render() {
@@ -37,26 +30,22 @@ export class Dashboard {
     }
   }
 
-  public getGameId(): string | undefined {
-    return this.room?.game_id;
-  }
-
-  public stopUpdating(): void {
-    clearInterval(this.updater);
+  public isGameReady(): boolean {
+    return !!localStorage.getItem("game_id");
   }
 
   private renderStartPage() {
     this.appContainer.innerHTML = `
             <h2>Dashboard</h2>
-            <button id="create_room">Create Room</button>
-            <button id="join_room">Join Room</button>
+            <button id="create-room">Create Room</button>
+            <button id="join-room">Join Room</button>
             <button id="logout">Logout</button>
         `;
     document
-      .getElementById("create_room")
+      .getElementById("create-room")
       ?.addEventListener("click", () => this.handleCreateRoom());
     document
-      .getElementById("join_room")
+      .getElementById("join-room")
       ?.addEventListener("click", () => this.handleJoinRoom());
     document
       .getElementById("logout")
@@ -79,7 +68,7 @@ export class Dashboard {
 
   private handleLogout() {
     localStorage.removeItem("token");
-    this.spa.render();
+    this.app.updateState();
   }
 
   private async handleCreateRoom() {
@@ -89,7 +78,7 @@ export class Dashboard {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     }).then((res) => res.json());
-    this.spa.render();
+    this.renderRoom();
   }
 
   private async handleJoinRoom() {
@@ -99,16 +88,38 @@ export class Dashboard {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     }).then((res) => res.json());
-    this.spa.render();
+    this.renderRoom();
   }
 
   private async fetchRoom() {
-    this.room = await fetch("/matchmaking/get_room", {
+    if (this.room === undefined) {
+      return;
+    }
+    const room: GameRoom = await fetch("/matchmaking/get_room", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     }).then((res) => res.json());
-    this.spa.render();
+    if (room !== this.room) {
+      this.room = room;
+      this.renderRoom();
+      if (room.game_id !== undefined) {
+        localStorage.setItem("game_id", room.game_id);
+        this.app.updateState();
+      }
+    }
+  }
+
+  public enterState(): void {
+    this.renderStartPage();
+    this.updater = setInterval(() => this.fetchRoom(), 1000);
+    console.log("Entering dashboard state");
+  }
+
+  public exitState(): void {
+    clearInterval(this.updater);
+    this.appContainer.innerHTML = "";
+    console.log("Exiting dashboard state");
   }
 }

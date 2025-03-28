@@ -1,34 +1,41 @@
-import { Auth } from "./auth.ts";
-import { Dashboard } from "./dashboard.ts";
-import { GameState } from "./game.ts";
+import { AppState } from "./app_state.ts";
 
-class SPA {
-  private auth: Auth;
-  private dashboard: Dashboard;
-  private game: GameState;
+import { Auth_state } from "./auth_state.ts";
+import { Dashboard_state } from "./dashboard_state.ts";
+import { GameState } from "./game_state.ts";
+
+class App {
+  private readonly auth: Auth_state;
+  private readonly dashboard: Dashboard_state;
+  private readonly game: GameState;
+
+  private state: AppState;
 
   constructor() {
-    this.auth = new Auth(this);
-    this.dashboard = new Dashboard(this);
+    this.auth = new Auth_state(this);
+    this.dashboard = new Dashboard_state(this);
     this.game = new GameState(this);
-    this.render();
+    this.state = this.getState();
+    this.state.enterState();
   }
 
-  public render() {
-    if (this.auth.isLoggedIn()) {
-      const gameId = this.dashboard.getGameId();
-      if (gameId) {
-        this.dashboard.stopUpdating();
-        this.game.render(gameId);
-      } else {
-        this.dashboard.render();
-      }
-    } else {
-      this.auth.renderLoginForm();
+  private getState(): AppState {
+    if (!this.auth.isLoggedIn()) {
+      return this.auth;
     }
+    if (!this.dashboard.isGameReady()) {
+      return this.dashboard;
+    }
+    return this.game;
+  }
+  
+  public updateState() {
+    this.state.exitState();
+    this.state = this.getState();
+    this.state.enterState();
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => new SPA());
+document.addEventListener("DOMContentLoaded", () => new App());
 
-export type { SPA };
+export type { App };
