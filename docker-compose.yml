@@ -26,7 +26,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-    stop_grace_period: 2m
     depends_on:
       - routing
   routing:
@@ -41,7 +40,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-    stop_grace_period: 2m
     depends_on:
       - matchmaking
       - game
@@ -57,7 +55,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-    stop_grace_period: 2m
     depends_on:
       - game
   game:
@@ -72,7 +69,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-    stop_grace_period: 2m
 
 networks:
   internal:
