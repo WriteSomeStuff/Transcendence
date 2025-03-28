@@ -69,7 +69,10 @@ export class Auth {
         body: JSON.stringify({ username, password }),
       });
 
-      if (!response.ok) throw new Error("Login failed");
+      if (!response.ok) {
+        alert("Login failed.");
+        return;
+      }
 
       const data = await response.json();
       localStorage.setItem("token", data.token);
@@ -95,7 +98,10 @@ export class Auth {
         body: JSON.stringify({ username, password }),
       });
 
-      if (!response.ok) throw new Error("Registration failed");
+      if (!response.ok) {
+        alert("Register failed.");
+        return;
+      }
 
       alert("Registration successful! Please log in.");
       this.renderLoginForm();
