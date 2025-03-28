@@ -1,11 +1,6 @@
-import type { App } from "./app.ts";
 import { AppState } from "./app_state.ts";
 
-export class Auth_state extends AppState {
-  constructor(app: App) {
-    super(app);
-  }
-
+export class AuthState extends AppState {
   public isLoggedIn(): boolean {
     return !!localStorage.getItem("token"); // TODO add additional check with endpoint call
   }
@@ -109,7 +104,7 @@ export class Auth_state extends AppState {
   }
 
   exitState(): void {
-    this.appContainer.innerHTML = '';
+    this.appContainer.innerHTML = "";
     console.log("Exiting auth state");
   }
 }

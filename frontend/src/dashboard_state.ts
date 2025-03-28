@@ -1,4 +1,3 @@
-import type { App } from "./app.ts";
 import { AppState } from "./app_state.ts";
 
 interface User {
@@ -14,13 +13,9 @@ interface GameRoom {
   game_id?: string;
 }
 
-export class Dashboard_state extends AppState {
+export class DashboardState extends AppState {
   private room?: GameRoom;
   private updater?: number;
-
-  constructor(app: App) {
-    super(app);
-  }
 
   public render() {
     if (this.room === undefined) {

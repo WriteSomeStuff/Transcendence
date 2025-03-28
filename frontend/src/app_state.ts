@@ -4,7 +4,7 @@ abstract class AppState {
   protected app: App;
   protected appContainer: HTMLElement;
 
-  protected constructor(app: App) {
+  public constructor(app: App) {
     this.app = app;
     const appContainer: HTMLElement | null = document.getElementById("app");
     if (appContainer == null) {

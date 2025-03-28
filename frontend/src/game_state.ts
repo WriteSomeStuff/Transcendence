@@ -1,5 +1,4 @@
 import { AppState } from "./app_state.ts";
-import type { App } from "./app.ts";
 
 interface Point {
   x: number;
@@ -22,10 +21,6 @@ export class GameState extends AppState {
   private upPressed = false;
   private downPressed = false;
 
-  constructor(app: App) {
-    super(app);
-  }
-
   private render() {
     this.appContainer.innerHTML = `
             <canvas id="game-canvas" width="200" height="100"></canvas>
@@ -46,7 +41,7 @@ export class GameState extends AppState {
     if (e.key === "s") {
       this.downPressed = false;
     }
-  }
+  };
 
   private processKeydown = (e: KeyboardEvent) => {
     if (e.key === "w") {
@@ -55,7 +50,7 @@ export class GameState extends AppState {
     if (e.key === "s") {
       this.downPressed = true;
     }
-  }
+  };
 
   private renderGame(game: Game) {
     const ctx = this.gameCanvas?.getContext("2d");
@@ -73,18 +68,29 @@ export class GameState extends AppState {
     if (!localStorage.getItem("game_id") || this.gameCanvas === undefined) {
       return;
     }
-    const action = this.upPressed != this.downPressed ? (this.upPressed ? 'up' : 'down') : null;
+    const action =
+      this.upPressed !== this.downPressed
+        ? this.upPressed
+          ? "up"
+          : "down"
+        : null;
     if (this.action !== action) {
       this.action = action;
     }
     if (this.action) {
-      await fetch(`/game/action?gameid=${localStorage.getItem("game_id")}&action=${this.action}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
+      await fetch(
+        `/game/action?gameid=${localStorage.getItem("game_id")}&action=${this.action}`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        },
+      );
     }
-    const game: Game = await fetch(`/game/state?gameid=${localStorage.getItem("game_id")}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-    }).then((res) => res.json());
+    const game: Game = await fetch(
+      `/game/state?gameid=${localStorage.getItem("game_id")}`,
+      {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      },
+    ).then((res) => res.json());
     if (game) {
       this.renderGame(game);
     }
