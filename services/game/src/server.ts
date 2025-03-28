@@ -141,7 +141,7 @@ app.get('/', (req, res) => {
     res.sendFile('index.html');
 })
 
-app.listen({port: 8083, host: '0.0.0.0'}, (err, address) => {
+app.listen({port: 80, host: '0.0.0.0'}, (err, address) => {
     if (err) {
         console.log(err);
         return;
