@@ -87,6 +87,10 @@ app.get("/health", (_, res) => {
 app.addHook("onRequest", async (req, res) => {
   if (["/health", "/login", "/register", "/guest"].includes(req.url)) return;
   try {
+    if (req.headers["sec-websocket-protocol"] !== undefined) {
+      req.headers.authorization = `Bearer ${req.headers["sec-websocket-protocol"]}`;
+      req.headers["sec-websocket-protocol"] = undefined;
+    }
     await req.jwtVerify();
     const { id, type } = req.user as { id: string; type: string };
     req.headers.user_id = id;
@@ -97,7 +101,10 @@ app.addHook("onRequest", async (req, res) => {
   }
 });
 
-app.register(proxy, { upstream: "http://routing" }); // TODO replace with some normal value
+app.register(proxy, {
+  upstream: "http://routing",
+  websocket: true,
+});
 
 app.listen(
   { port: 80, host: "0.0.0.0" },

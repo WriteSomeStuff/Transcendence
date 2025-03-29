@@ -1,12 +1,18 @@
-import fastify from "fastify";
-const path = require("path");
+import Fastify from "fastify";
+import fastifyWebsocket from "@fastify/websocket";
 
-const app = fastify();
+import { WebSocket } from "ws";
 
-app.register(require('@fastify/static'), {
-    root: path.join(__dirname, '..', 'assets'),
-    prefix: "/assets/",
-});
+const app = Fastify();
+
+await app.register(fastifyWebsocket);
+
+app.get('/ws', { websocket: true }, (socket: WebSocket) => {
+    socket.on('message', (data, isBinary) => {
+        const message = data.toString();
+        socket.send(`hello client from game, you sent us ${message}`);
+    })
+})
 
 class Point {
     x: number;
@@ -138,7 +144,7 @@ app.get('/action', (req, res) => {
 })
 
 app.get('/', (req, res) => {
-    res.sendFile('index.html');
+    res.status(200).send("Success");
 })
 
 app.listen({port: 80, host: '0.0.0.0'}, (err, address) => {

@@ -15,6 +15,7 @@ app.register(proxy, {
 app.register(proxy, {
   upstream: "http://game",
   prefix: "/game",
+  websocket: true,
 });
 
 app.listen(
