@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS match_state (
 CREATE TABLE IF NOT EXISTS match_participant (
 	match_id	INTEGER	NOT NULL,
 	user_id		INTEGER	NOT NULL,
-	score		INTEGER	DEFAULT 0,
+	score		INTEGER	DEFAULT (0),
 	
 	PRIMARY KEY (match_id, user_id),
 	FOREIGN KEY (match_id) REFERENCES match_state(match_id),
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS tournament (
 	tournament_id		INTEGER	PRIMARY KEY,
 	tournament_name		TEXT,
 	created_at			TEXT	DEFAULT (datetime('now', 'localtime')),
-	tournament_status	TEXT	DEFAULT "ongoing"
+	tournament_status	TEXT	DEFAULT ("ongoing")
 );
 
 -- INDEXES ---------------------------------------------------------------------
@@ -171,6 +171,5 @@ LEFT JOIN basic_user_stats bus USING (user_id);
 -- Ongoing matches.
 
 /** TODO
-* link total_wins to match_history instead of match_winner
 * update documentation: views
 */
