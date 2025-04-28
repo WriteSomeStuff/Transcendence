@@ -10,23 +10,23 @@
 	</head>
 	<body>
 		<div class="main">
-			<nav>
-				<button page="home">Home</button>
-				<button page="profile">Profile</button>
-			</nav>
 			
 			<div class="wrapper">
+				<div class="nav-buttons flex flex-row">
+					<button page="home">Home</button>
+					<button page="login">Log in</button>
+				</div>
 				<div class="content">
 					<div id="spa"></div>
 				</div>
+				<div class="footer"></div>
 			</div>
-
-			<footer></footer>
 		</div>
 	</body>
 </html>
 
 <!-- To do:
- do we do a dropdown menu or just buttons in a row?
  add buttons
+ if not logged in, show sign in button. if logged in, show all other buttons (game, profile, log out).
+ if buttons clicked like, redirect to log in page if not logged in.
 -->

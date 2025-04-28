@@ -14,22 +14,52 @@ body {
 	overflow-y: hidden;
 }
 
+.nav-buttons {
+	display: flex;
+	gap: 1rem;
+	height: 4rem;
+  }
+
+button[page] {
+	padding: 1rem 2rem;
+	background-color: #413ca1;
+	color: pink;
+	border: none;
+	border-radius: 8px;
+	font-size: 1rem;
+	cursor: pointer;
+	transition: background-color 0.2s ease-in-out, transform 0.1s;
+	box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+button[page]:hover {
+background-color: #894ae2;
+}
+
+button[page]:active {
+transform: scale(0.50);
+}
+
 .main {
 	display: flex;
 	flex-direction: column;
 	height: 100vh;
-}
-
-nav {
-	background: url("/assets/backgrounds/rainbowSquares.gif");
-	padding: 1.44rem;
+	width: 100vw;
+	position: relative;
 }
 
 .wrapper {
+	gap: 2rem;
 	display: flex;
+	flex-direction: column;
 	justify-content: center;
 	align-items: center;
 	height: 100vh;
+	width: 100%;
+}
+
+.footer {
+	height: 4rem;
 }
 
 @keyframes rainbow {
@@ -48,16 +78,11 @@ nav {
 
 .content {
 	width: 800px;
-	height: 80vh;
+	height: 70vh;
 	background: rgba(0, 0, 0, 0.7);
 	color: pink;
 	padding: 20px;
 	text-align: center;
 	border: 5px solid red;
 	animation: rainbow 20s linear infinite;
-}
-
-footer {
-	background: url("/assets/backgrounds/rainbowSquares.gif");
-	padding: 2rem;
 }
