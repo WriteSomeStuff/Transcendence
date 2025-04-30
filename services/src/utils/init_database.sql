@@ -35,16 +35,16 @@ CREATE TABLE IF NOT EXISTS tournament (
 	tournament_id		INTEGER	PRIMARY KEY,
 	tournament_name		TEXT,
 	created_at			TEXT	DEFAULT (datetime('now', 'localtime')),
-	tournament_status	TEXT	DEFAULT ("ongoing")
+	tournament_status	TEXT	DEFAULT ('ongoing')
 );
 
 -- INDEXES ---------------------------------------------------------------------
 
-CREATE INDEX idx_user_username ON user(username);
+-- CREATE INDEX idx_user_username ON user(username);
 
-CREATE INDEX idx_match_state_tournament_id ON match_state(tournament_id);
+-- CREATE INDEX idx_match_state_tournament_id ON match_state(tournament_id);
 
-CREATE INDEX idx_tournament_tournament_status ON tournament(tournament_status);
+-- CREATE INDEX idx_tournament_tournament_status ON tournament(tournament_status);
 
 -- TRIGGERS --------------------------------------------------------------------
 
@@ -169,7 +169,3 @@ LEFT JOIN basic_user_stats bus USING (user_id);
 -- User match history get from match history
 
 -- Ongoing matches.
-
-/** TODO
-* update documentation: views
-*/
