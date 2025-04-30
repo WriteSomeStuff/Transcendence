@@ -1,0 +1,34 @@
+{
+  "name": "transcendence",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node src/server.ts",
+    "build": "tsc",
+    "test-db": "ts-node src/testDb.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WriteSomeStuff/Transcendence.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/WriteSomeStuff/Transcendence/issues"
+  },
+  "homepage": "https://github.com/WriteSomeStuff/Transcendence#readme",
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22.15.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.9.1",
+    "express": "^5.1.0",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7"
+  }
+}
