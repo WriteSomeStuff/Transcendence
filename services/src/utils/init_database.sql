@@ -165,7 +165,7 @@ FROM
 LEFT JOIN basic_user_stats bus USING (user_id);
 -- ORDER BY bus.total_wins DESC;
 
-
--- User match history get from match history
-
--- Ongoing matches.
+/* Additional views to add later
+*	User match history get from match history.
+*	Ongoing matches.
+*/
