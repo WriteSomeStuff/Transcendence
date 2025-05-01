@@ -1,4 +1,3 @@
-import { table } from "console";
 import { setupDatabase } from "./utils/db";
 import type BetterSqlite3 from "better-sqlite3";
 
