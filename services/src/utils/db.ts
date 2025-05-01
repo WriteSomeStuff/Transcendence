@@ -12,7 +12,7 @@ const openDbConnection = () => {
 	db = new Database(DB_PATH, {
 		verbose: console.log,
 	});
-	console.log("databse connection opened.");
+	console.log('\x1b[32m%s\x1b[0m', "database connection opened.");
 	} catch (e) {
 		if (e instanceof Error) {
 			console.error('Error opening the database connection:', e.message);
@@ -29,11 +29,10 @@ export const setupDatabase = async () => {
 		openDbConnection();
 		const sqlFilePath = path.join(__dirname, 'init_database.sql');
 		const sql = await fs.readFile(sqlFilePath, 'utf-8');
-		// console.log("SQL file content: " + sql);
 		if (db) {
 			db.exec(sql);
 		}
-		console.log("Database setup completed");
+		console.log('\x1b[32m%s\x1b[0m', "Database setup completed");
 	} catch (e) {
 		if (e instanceof Error) {
 			console.error('Error setting up the database:', e.message);
