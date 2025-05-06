@@ -27,7 +27,7 @@ const openDbConnection = () => {
 export const setupDatabase = async () => {
 	try {
 		openDbConnection();
-		const sqlFilePath = path.join(__dirname, 'init_database.sql');
+		const sqlFilePath = path.join(__dirname, 'initDb.sql');
 		const sql = await fs.readFile(sqlFilePath, 'utf-8');
 		if (db) {
 			db.exec(sql);
