@@ -1,7 +1,7 @@
 import Database from "better-sqlite3";
 import type BetterSqlite3 from "better-sqlite3";
-import fs from 'fs/promises';
-import path from 'path';
+import fs from "fs/promises";
+import path from "path";
 
 const DB_PATH: string = "database.sqlite3";
 
@@ -39,6 +39,15 @@ export const setupDatabase = async () => {
 		} else {
 			console.error('Unknown error:', e);
 		}
+		throw e;
+	}
+	return db;
+};
+
+// Checks if database connection is open and returns it if so
+export const getDb = (): BetterSqlite3.Database => {
+	if (!db) {
+		throw new Error("Database connection is not open.");
 	}
 	return db;
 };

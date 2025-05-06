@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS user (
 	created_at		TEXT	DEFAULT (datetime('now', 'localtime')),
 	last_login		TEXT,
 	profile_picture	BLOB,
-	account_status	TEXT
+	account_status	TEXT	DEFAULT ('offline')
 );
 
 CREATE TABLE IF NOT EXISTS match_state (

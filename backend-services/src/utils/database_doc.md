@@ -14,7 +14,7 @@ This documentation provides a detailed description of the database schema for th
 | `created_at`      | TEXT       |                 | Account creation timestamp 		| datetime('now', 'localtime') | |
 | `last_login`      | TEXT       |                 | Last login timestamp               | | |
 | `profile_picture` | BLOB       |                 | Profile picture of the user        | | |
-| `account_status`  | TEXT       |                 | Status of the user account         | | 'online', 'offline', 'suspended', 'banned' |
+| `account_status`  | TEXT       |                 | Status of the user account         | 'offline' | 'online', 'offline', 'suspended', 'banned' |
 
 ### Match State Table
 **Purpose**: Stores information about each match.
