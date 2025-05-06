@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && cp src/utils/initDb.sql dist/utils/initDb.sql",
     "start": "ts-node src/server.ts",
 	"clean": "rm -rf dist database.sqlite3",
     "test-db": "ts-node src/testDb.ts"
