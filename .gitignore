@@ -3,3 +3,6 @@ node_modules/
 
 # database
 *.sqlite3
+
+# folders
+dist/
