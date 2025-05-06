@@ -6,6 +6,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "ts-node src/server.ts",
+	"clean": "rm -rf dist database.sqlite3",
     "test-db": "ts-node src/testDb.ts"
   },
   "repository": {
