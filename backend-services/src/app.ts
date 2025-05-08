@@ -28,14 +28,20 @@ app.register(fastifyStatic, {
 	root : frontendPath,
 	prefix: '/'
 });
+app.register(fastifyFormbody);
 
 app.get('/register', (request, reply) => {
 	reply.sendFile('register.html');
 });
-app.register(fastifyFormbody);
-
 app.get('/registerSuccess', (request, reply) => {
 	reply.sendFile('registerSuccess.html');
+});
+
+app.get('/login', (request, reply) => {
+	reply.sendFile('login.html');
+});
+app.get('/loginSuccess', (request, reply) => {
+	reply.sendFile('loginSuccess.html');
 });
 
 app.register(authRoutes);

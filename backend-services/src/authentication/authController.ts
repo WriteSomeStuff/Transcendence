@@ -7,7 +7,7 @@
  */
 
 import { FastifyRequest, FastifyReply } from "fastify";
-import { register } from "./authService";
+import { register, login } from "./authService";
 import { z } from "zod";
 
 const REGISTER_SCHEMA = z.object({
@@ -20,15 +20,15 @@ const REGISTER_SCHEMA = z.object({
 })
 .required();
 
-// const LOGIN_SCHEMA = z.object({
-// 	username: z.string()
-// 		.min(3, "Username is required")
-// 		.max(32, "Username too long"),
-// 	password: z.string()
-// 		.min(6, "Password too short")
-// 		.max(64, "Password too long"),
-// })
-// .required();
+const LOGIN_SCHEMA = z.object({
+	username: z.string()
+		.min(3, "Username too short")
+		.max(32, "Username too long"),
+	password: z.string()
+		.min(6, "Password too short")
+		.max(64, "Password too long"),
+})
+.required();
 
 export const registerUser = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
@@ -48,5 +48,28 @@ export const registerUser = async (request: FastifyRequest, reply: FastifyReply)
 		} else {
 			reply.status(400).send({ error: e });
 		}
+	}
+};
+
+export const loginUser = async (request: FastifyRequest, reply: FastifyReply) => {
+	try {
+		const parsedData = LOGIN_SCHEMA.parse(request.body);
+		const { username, password } = parsedData;
+
+		const isVerified = await login(username, password);
+
+		if (isVerified) {
+			// TODO set cookie JWT thingie
+			console.log("Login successful");
+			reply.redirect('loginSuccess', 301); // TODO make landing page when log in success
+		} else {
+			reply.status(401).send({ error: 'Invalid username or password' });
+		}
+	} catch (e) {
+		if (e instanceof z.ZodError) {
+      		reply.status(400).send({ error: e.errors });
+    	} else {
+      		reply.status(500).send({ error: 'An error occurred during login' });
+    	}
 	}
 };

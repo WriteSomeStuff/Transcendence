@@ -7,10 +7,11 @@
 
 // 1.
 import { FastifyInstance } from "fastify";
-import { registerUser } from "./authController";
+import { registerUser, loginUser } from "./authController";
 
 // 2. & 4.
-export const authRoutes = async (fastify: FastifyInstance) => {
+export const authRoutes = async (app: FastifyInstance) => {
 	// 3.
-	fastify.post('/register', registerUser);
+	app.post('/register', registerUser);
+	app.post('/login', loginUser);
 };
