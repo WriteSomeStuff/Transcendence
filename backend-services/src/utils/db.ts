@@ -9,10 +9,10 @@ let db: BetterSqlite3.Database | null = null;
 
 const openDbConnection = () => {
 	try {
-	db = new Database(DB_PATH, {
-		verbose: console.log,
-	});
-	console.log('\x1b[32m%s\x1b[0m', "database connection opened.");
+		db = new Database(DB_PATH, {
+			verbose: console.log,
+		});
+		console.log('\x1b[32m%s\x1b[0m', "database connection opened.");
 	} catch (e) {
 		if (e instanceof Error) {
 			console.error('Error opening the database connection:', e.message);
