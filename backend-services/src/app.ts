@@ -7,6 +7,9 @@
 
 // 1.
 import fastify from "fastify";
+import path from "path";
+import fastifyStatic from "@fastify/static";
+import fastifyFormbody from "@fastify/formbody";
 import { serializerCompiler, validatorCompiler, ZodTypeProvider } from "fastify-type-provider-zod";
 import { authRoutes } from "./authentication/authRoutes";
 
@@ -20,6 +23,17 @@ app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);
 
 // 3.
+const frontendPath = path.join(__dirname, '..', '..', 'frontend', 'public');
+app.register(fastifyStatic, {
+	root : frontendPath,
+	prefix: '/'
+});
+
+app.get('/register', (request, reply) => {
+	reply.sendFile('register.html');
+});
+app.register(fastifyFormbody);
+
 app.register(authRoutes);
 
 // Testing
