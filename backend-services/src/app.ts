@@ -34,6 +34,10 @@ app.get('/register', (request, reply) => {
 });
 app.register(fastifyFormbody);
 
+app.get('/registerSuccess', (request, reply) => {
+	reply.sendFile('registerSuccess.html');
+});
+
 app.register(authRoutes);
 
 // Testing

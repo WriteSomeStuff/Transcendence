@@ -37,11 +37,13 @@ export const registerUser = async (request: FastifyRequest, reply: FastifyReply)
 
 		// call the service function to register user into database
 		await register(username, password);
-		reply.status(201).send({ message: "User registered successfully"});
+		reply.redirect('registerSuccess', 301); 
+		// Use 201 Created if you want to follow RESTful conventions and let the client handle navigation.
+		// Use 303 See Other if you want the server to handle navigation to the success page. Avoid 301 for this use case.
 	} catch (e) {
-		if (e instanceof z.ZodError) {
+		if (e instanceof z.ZodError) { // Schema error (e.g. password too short)
 			reply.status(400).send({ error: e.errors });
-		} else if (e instanceof Error) {
+		} else if (e instanceof Error) { // Failed stmt (e.g. username exists)
 			reply.status(400).send({ error: e.message });
 		} else {
 			reply.status(400).send({ error: e });
