@@ -11,7 +11,7 @@ import fs from "fs";
 import path from "path";
 
 const defaultAvatarPath = path.join(__dirname, '..', '..', 
-	'public', 'assets', 'avatars', 'defaults', 'default-avatar-1.png');
+	'public', 'assets', 'avatars', 'defaults', 'default_avatar_1.png');
 const defaultAvatarBlob = fs.readFileSync(defaultAvatarPath);
 
 export const register = async (username: string, password: string): Promise<number> => {
@@ -21,7 +21,7 @@ export const register = async (username: string, password: string): Promise<numb
 		const hashedPassword = await argon2.hash(password);
 		const stmt = db.prepare(`
 			INSERT INTO user (username, password_hash, avatar) 
-			VALUES (?, ?, ?)'
+			VALUES (?, ?, ?)
 		`);
 		const result = stmt.run(username, hashedPassword, defaultAvatarBlob);
 		console.log(`Inserted row with ID: ${result.lastInsertRowid}`);
@@ -46,5 +46,21 @@ export const login = async (username: string, password: string): Promise<boolean
 	} catch (e) {
 		console.error('Error during login:', e);
 		throw new Error("An error occured during login");
+	}
+};
+
+export const updateAvatar = async (userId: number, avatarBuffer: Buffer): Promise<void> => {
+	const db = getDb();
+
+	try {
+		const stmt = db.prepare(`
+			UPDATE user
+			SET avatar = ?
+			WHERE user_id = ?
+		`);
+
+		stmt.run(avatarBuffer, userId);
+	} catch (e) {
+		throw new Error("An error occured updating avatar");
 	}
 };
