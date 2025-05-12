@@ -13,7 +13,7 @@ This documentation provides a detailed description of the database schema for th
 | `password_hash`   | TEXT       | NOT NULL        | Hashed password of the user        | | |
 | `created_at`      | TEXT       |                 | Account creation timestamp 		| datetime('now', 'localtime') | |
 | `last_login`      | TEXT       |                 | Last login timestamp               | | |
-| `profile_picture` | BLOB       |                 | Profile picture of the user        | | |
+| `avatar` | BLOB       |                 | Profile picture of the user        | | |
 | `account_status`  | TEXT       |                 | Status of the user account         | 'offline' | 'online', 'offline', 'suspended', 'banned' |
 
 ### Match State Table
