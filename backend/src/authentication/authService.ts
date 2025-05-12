@@ -7,14 +7,23 @@
 
 import argon2 from "argon2";
 import { getDb } from "../utils/db";
+import fs from "fs";
+import path from "path";
+
+const defaultAvatarPath = path.join(__dirname, '..', '..', 
+	'public', 'assets', 'avatars', 'defaults', 'default-avatar-1.png');
+const defaultAvatarBlob = fs.readFileSync(defaultAvatarPath);
 
 export const register = async (username: string, password: string): Promise<number> => {
 	const db = getDb();
 	
 	try {
 		const hashedPassword = await argon2.hash(password);
-		const stmt = db.prepare('INSERT INTO user (username, password_hash) VALUES (?, ?)');
-		const result = stmt.run(username, hashedPassword);
+		const stmt = db.prepare(`
+			INSERT INTO user (username, password_hash, avatar) 
+			VALUES (?, ?, ?)'
+		`);
+		const result = stmt.run(username, hashedPassword, defaultAvatarBlob);
 		console.log(`Inserted row with ID: ${result.lastInsertRowid}`);
 		return Number(result.lastInsertRowid);
 	} catch (e) {
