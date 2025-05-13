@@ -6,3 +6,6 @@ node_modules/
 
 # folders
 dist/
+
+# user uploads
+uploads/
