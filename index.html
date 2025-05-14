@@ -4,7 +4,7 @@
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>Transcendence</title>
-		<link rel="stylesheet" href="/css/home.css">
+		<link rel="stylesheet" href="/css/output.css">
 		<script defer src="/js/selectView.js"></script>
 		<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16x16.png">
 	</head>
@@ -26,9 +26,10 @@
 </html>
 
 
-<!-- to run script and build js from ts: npm run build -->
+<!-- to run script and build js from ts: npm run build 
+	to run tailwind cli build process: npx tailwindcss -i ./src/input.css -o ./src/output.css --watch
+-->
 <!-- To do:
- make tailwind css work in docker
  add buttons
  if not logged in, show sign in button. if logged in, show all other buttons (game, profile, log out).
  redirect to log in page if not logged in.
