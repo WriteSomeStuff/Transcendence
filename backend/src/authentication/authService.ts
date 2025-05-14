@@ -48,19 +48,3 @@ export const login = async (username: string, password: string): Promise<boolean
 		throw new Error("An error occured during login");
 	}
 };
-
-// export const updateAvatar = async (userId: number, avatarBuffer: Buffer): Promise<void> => {
-// 	const db = getDb();
-
-// 	try {
-// 		const stmt = db.prepare(`
-// 			UPDATE user
-// 			SET avatar = ?
-// 			WHERE user_id = ?
-// 		`);
-
-// 		stmt.run(avatarBuffer, userId);
-// 	} catch (e) {
-// 		throw new Error("An error occured updating avatar");
-// 	}
-// };

@@ -10,7 +10,12 @@ import fastify from "fastify";
 import path from "path";
 import fastifyStatic from "@fastify/static";
 import fastifyFormbody from "@fastify/formbody";
-import { serializerCompiler, validatorCompiler, ZodTypeProvider } from "fastify-type-provider-zod";
+import {
+	serializerCompiler,
+	validatorCompiler,
+	ZodTypeProvider
+} from "fastify-type-provider-zod";
+
 import { authRoutes } from "./authentication/authRoutes";
 
 // 2.
