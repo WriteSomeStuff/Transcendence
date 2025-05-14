@@ -9,6 +9,7 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { register, login } from "./authService";
 import { z } from "zod";
+import jwt from "jsonwebtoken";
 
 const REGISTER_SCHEMA = z.object({
 	username: z.string()
@@ -59,9 +60,13 @@ export const loginUser = async (request: FastifyRequest, reply: FastifyReply) =>
 		const isVerified = await login(username, password);
 
 		if (isVerified) {
-			// TODO set cookie JWT thingie
+			const token = jwt.sign(
+				{ username },
+				process.env.JWT_SECRET || 'default_secret', // TODO: make this work with .env
+				{ expiresIn: '1d' }
+			);
 			console.log("Login successful");
-			reply.redirect('loginSuccess', 301); // TODO make landing page when log in success
+			reply.status(200).send({ token: token });
 		} else {
 			reply.status(401).send({ error: 'Invalid username or password' });
 		}
@@ -69,7 +74,28 @@ export const loginUser = async (request: FastifyRequest, reply: FastifyReply) =>
 		if (e instanceof z.ZodError) {
       		reply.status(400).send({ error: e.errors });
     	} else {
-      		reply.status(500).send({ error: 'An error occurred during login' });
+			if (e instanceof Error) {
+				reply.status(500).send({ error: 'An error occurred during login:' + e.message });
+			}
     	}
 	}
 };
+// setAuthCookie
+
+// export const createAuthToken = async (
+// 	userId: number,
+// 	username: string,
+// 	app: FastifyInstance
+// 	) => {
+// 	const token = app.jwt.sign({
+// 			id: userId,
+// 			username: username,
+// 			type: "registered"
+// 		},
+// 		{ expiresIn: '1d' } // Token expires in 1 day
+// 	);
+// };
+
+// export const setAuthCookie = ( reply: FastifyReply, token: string) => {
+// 	reply.setCookie()
+// };
