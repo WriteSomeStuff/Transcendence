@@ -37,9 +37,9 @@ export const registerUser = async (request: FastifyRequest, reply: FastifyReply)
 
 		// call the service function to register user into database
 		await register(username, password);
-		reply.redirect('registerSuccess', 301); 
-		// Use 201 Created if you want to follow RESTful conventions and let the client handle navigation.
-		// Use 303 See Other if you want the server to handle navigation to the success page. Avoid 301 for this use case.
+
+		reply.redirect('registerSuccess', 303);
+	
 	} catch (e) {
 		if (e instanceof z.ZodError) { // Schema error (e.g. password too short)
 			reply.status(400).send({ error: e.errors });
@@ -58,18 +58,22 @@ export const loginUser = async (request: FastifyRequest, reply: FastifyReply) =>
 
 		const isVerified = await login(username, password);
 
-		if (isVerified) {
-			const token = request.jwt.sign({ username: username, type: "registered" }, { expiresIn: "1d" });
-			console.log("Login successful");
-			reply.setCookie("access_token", token, {
-				path: '/',
-				httpOnly: true,
-				secure: true,
-			});
-			reply.redirect('profile', 301);
-		} else {
+		if (!isVerified) {
 			reply.status(401).send({ error: 'Invalid username or password' });
 		}
+		console.log("User verified");
+	
+		const token = request.jwt.sign({ username: username, type: "registered" }, { expiresIn: "1d" });
+		console.log("Login successful");
+		
+		reply.setCookie('access_token', token, {
+			path: '/',
+			httpOnly: true,
+			secure: true,
+		});
+		
+		reply.redirect('profile', 303);
+
 	} catch (e) {
 		if (e instanceof z.ZodError) {
       		reply.status(400).send({ error: e.errors });
