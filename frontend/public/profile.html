@@ -8,21 +8,7 @@
 	<h1>Authentication successful!</h1>
 
 	<p><a href="/index.html">Home</a></p>
+
 	<button id="logoutButton">Logout</button>
-	<script>
-		document.getElementById('logoutButton').addEventListener('click', function() {
-			fetch('/logout', { method: 'DELETE' })
-				.then(response => {
-					if (response.ok) {
-						window.location.href = '/index.html';
-					} else {
-						alert('Logout failed.');
-					}
-				})
-				.catch(error => {
-					console.error('Error:', error);
-					alert('An error occurred.');
-				});
-		});
-	</script>
+	<script src="scripts/logout.js"></script>
 </body>
