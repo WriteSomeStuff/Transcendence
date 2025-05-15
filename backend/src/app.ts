@@ -94,3 +94,5 @@ app.get('/ping', async (request, reply) => {
 
 // 4.
 export default app;
+
+// TODO: clean up cookies when quitting server
