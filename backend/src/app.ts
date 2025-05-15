@@ -5,11 +5,12 @@
 * 4. Exports the configured Fastify instance.
  */
 
-// 1.
-import fastify from "fastify";
+import fastify, { FastifyReply, FastifyRequest } from "fastify";
 import path from "path";
 import fastifyStatic from "@fastify/static";
 import fastifyFormbody from "@fastify/formbody";
+import fastifyJwt, { FastifyJWT } from "@fastify/jwt";
+import fastifyCookie from "@fastify/cookie";
 import {
 	serializerCompiler,
 	validatorCompiler,
@@ -18,7 +19,7 @@ import {
 
 import { authRoutes } from "./authentication/authRoutes";
 
-// 2.
+// Create a fastify instance
 const app = fastify({
 	logger: true
 })
@@ -27,7 +28,7 @@ const app = fastify({
 app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);
 
-// 3.
+// Register routes
 const frontendPath = path.join(__dirname, '..', '..', 'frontend', 'public');
 app.register(fastifyStatic, {
 	root : frontendPath,
@@ -48,6 +49,41 @@ app.get('/login', (request, reply) => {
 app.get('/loginSuccess', (request, reply) => {
 	reply.sendFile('loginSuccess.html');
 });
+
+app.register(fastifyJwt, { secret: process.env.JWT_SECRET as string || "default_secret" });
+app.addHook('preHandler', (request, reply, done) => {
+	request.jwt = app.jwt;
+	done();
+}); // hook logic in different file?
+
+app.register(fastifyCookie, {
+	secret: 'cookie_secret',
+	hook: 'preHandler'
+});
+
+app.decorate(
+	'authenticate',
+	async (request: FastifyRequest, reply: FastifyReply) => {
+		const token = request.cookies.access_token;
+		console.log('Token:', token);
+		if (!token) {
+			return reply.status(401).send({ message: "Authentication required" });
+		}
+		try {
+			const decoded = request.jwt.verify<FastifyJWT['user']>(token);
+			console.log('Decoded user:', decoded);
+			request.user = decoded;
+		} catch (e) {
+			reply.status(401).send({ message: "Invalid or expired token" });
+		}
+	},
+);
+
+app.get('/profile', { preHandler: [app.authenticate] }, (request, reply) => {
+	reply.sendFile('profile.html');
+});
+
+app.delete
 
 app.register(authRoutes);
 

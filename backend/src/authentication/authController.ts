@@ -9,7 +9,6 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { register, login } from "./authService";
 import { z } from "zod";
-import jwt from "jsonwebtoken";
 
 const REGISTER_SCHEMA = z.object({
 	username: z.string()
@@ -60,13 +59,14 @@ export const loginUser = async (request: FastifyRequest, reply: FastifyReply) =>
 		const isVerified = await login(username, password);
 
 		if (isVerified) {
-			const token = jwt.sign(
-				{ username },
-				process.env.JWT_SECRET || 'default_secret', // TODO: make this work with .env
-				{ expiresIn: '1d' }
-			);
+			const token = request.jwt.sign({ username: username, type: "registered" }, { expiresIn: "1d" });
 			console.log("Login successful");
-			reply.status(200).send({ token: token });
+			reply.setCookie("access_token", token, {
+				path: '/',
+				httpOnly: true,
+				secure: true,
+			});
+			return {accessToken: token };
 		} else {
 			reply.status(401).send({ error: 'Invalid username or password' });
 		}
@@ -80,22 +80,8 @@ export const loginUser = async (request: FastifyRequest, reply: FastifyReply) =>
     	}
 	}
 };
-// setAuthCookie
 
-// export const createAuthToken = async (
-// 	userId: number,
-// 	username: string,
-// 	app: FastifyInstance
-// 	) => {
-// 	const token = app.jwt.sign({
-// 			id: userId,
-// 			username: username,
-// 			type: "registered"
-// 		},
-// 		{ expiresIn: '1d' } // Token expires in 1 day
-// 	);
-// };
-
-// export const setAuthCookie = ( reply: FastifyReply, token: string) => {
-// 	reply.setCookie()
-// };
+export const logoutUser = async (request: FastifyRequest, reply: FastifyReply) => {
+	reply.clearCookie('access_token');
+	return reply.send({ message: "Logout successfull" });
+}
