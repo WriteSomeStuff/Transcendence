@@ -66,7 +66,7 @@ export const loginUser = async (request: FastifyRequest, reply: FastifyReply) =>
 				httpOnly: true,
 				secure: true,
 			});
-			return {accessToken: token };
+			reply.redirect('profile', 301);
 		} else {
 			reply.status(401).send({ error: 'Invalid username or password' });
 		}
