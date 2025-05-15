@@ -19,12 +19,15 @@ export const register = async (username: string, password: string): Promise<numb
 	
 	try {
 		const hashedPassword = await argon2.hash(password);
+		
 		const stmt = db.prepare(`
 			INSERT INTO user (username, password_hash, avatar) 
 			VALUES (?, ?, ?)
 		`);
-		const result = stmt.run(username, hashedPassword, defaultAvatarBlob);
+		
+		const result = stmt.run(username, hashedPassword, defaultAvatarBlob);	
 		console.log(`Inserted row with ID: ${result.lastInsertRowid}`);
+	
 		return Number(result.lastInsertRowid);
 	} catch (e) {
 		console.error('Error during registration:', e);
@@ -38,11 +41,14 @@ export const login = async (username: string, password: string): Promise<boolean
 	try {
 		const stmt = db.prepare('SELECT password_hash FROM user WHERE username = ?');
 		const row = stmt.get(username) as {	password_hash: string };
+		
 		if (!row) {
 			return false; // User not found
 		}
+
 		const isVerified = await argon2.verify(row.password_hash, password);
 		return isVerified;
+	
 	} catch (e) {
 		console.error('Error during login:', e);
 		throw new Error("An error occured during login");
