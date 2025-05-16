@@ -48,7 +48,6 @@ app.get('/login', (request, reply) => {
 	reply.sendFile('login.html');
 });
 
-
 app.register(fastifyJwt, { secret: process.env.JWT_SECRET as string || "default_secret" });
 app.addHook('preHandler', (request, reply, done) => {
 	request.jwt = app.jwt;
