@@ -26,9 +26,9 @@ const startServer = async () => {
 };
 
 const shutdown = async (server: FastifyInstance) => {
-	console.log("Shutting down server...");
+	console.log('\x1b[33m%s\x1b[0m', "\nShutting down server...");
 	await server.close();
-	console.log("Server shut down");
+	console.log('\x1b[32m%s\x1b[0m', "Server shutdown successful");
 	process.exit(0);
 };
 
