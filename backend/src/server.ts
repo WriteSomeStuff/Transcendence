@@ -1,11 +1,4 @@
-/** Starts up Fastify server and sets up the database
-* 1. Imports the Fastify instance and database setup function.
-* 2. Sets up the database.
-* 3. Starts the Fastify server and listens on a specified port.
-* 4. Logs server status.
- */
-
-// 1.
+import { FastifyInstance } from "fastify";
 import app from "./app"
 import { setupDatabase } from "./utils/db";
 
@@ -13,13 +6,14 @@ const PORT = 8080;
 
 const startServer = async () => {
 	try {
-		// 2.
 		await setupDatabase();
 		console.log('\x1b[32m%s\x1b[0m', 'Database connection established');
-		// 3.
+
+		// Start up the server.
 		await app.listen({ port: PORT });
-		// 4.
 		console.log('\x1b[32m%s\x1b[0m', `Server is running on port ${PORT}`);
+
+		process.on('SIGINT', () => shutdown(app));
 
 	} catch (e) {
 		if (e instanceof Error) {
@@ -29,6 +23,13 @@ const startServer = async () => {
 		}
 		process.exit(1);
 	}
+};
+
+const shutdown = async (server: FastifyInstance) => {
+	console.log("Shutting down server...");
+	await server.close();
+	console.log("Server shut down");
+	process.exit(0);
 };
 
 startServer();
