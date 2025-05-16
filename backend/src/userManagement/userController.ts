@@ -12,9 +12,7 @@ export const getUserData = async (request: FastifyRequest, reply: FastifyReply) 
 		
 		console.log('username:', userData);
 
-		const username =
-
-		return reply.send({ username });
+		reply.send({ userData });
 
 	} catch (e) {
 		reply.status(500).send({ error: "An error occured getting the user data" });
