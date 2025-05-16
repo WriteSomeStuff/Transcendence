@@ -14,7 +14,7 @@ const defaultAvatarPath = path.join(__dirname, '..', '..',
 	'public', 'assets', 'avatars', 'defaults', 'default_avatar_1.png');
 const defaultAvatarBlob = fs.readFileSync(defaultAvatarPath);
 
-export const register = async (username: string, password: string): Promise<number> => {
+export const register = async (username: string, password: string): Promise<void> => {
 	const db = getDb();
 	
 	try {
@@ -28,7 +28,6 @@ export const register = async (username: string, password: string): Promise<numb
 		const result = stmt.run(username, hashedPassword, defaultAvatarBlob);	
 		console.log(`Inserted row with ID: ${result.lastInsertRowid}`);
 	
-		return Number(result.lastInsertRowid);
 	} catch (e) {
 		console.error('Error during registration:', e);
 		throw new Error("An error occured during registration");
