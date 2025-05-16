@@ -26,7 +26,14 @@ const openDbConnection = () => {
 // Open the database connection
 export const setupDatabase = async () => {
 	try {
+		const dbExists = await fs.access(DB_PATH).then(() => true).catch(() => false);
 		openDbConnection();
+		
+		if (dbExists) {
+			console.log('\x1b[33m%s\x1b[0m', "Database already exists. Skipping initialization.");
+			return;
+		}
+		
 		const sqlFilePath = path.join(__dirname, 'initDb.sql');
 		const sql = await fs.readFile(sqlFilePath, 'utf-8');
 		if (db) {
