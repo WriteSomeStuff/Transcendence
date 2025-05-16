@@ -6,8 +6,9 @@
   "scripts": {
     "build": "tsc -p tsconfig.json && cp src/utils/initDb.sql dist/utils/initDb.sql",
     "start": "node dist/server.js",
-    "re": "npm run build && npm run start",
-    "clear-db": "rm -rf dist database.sqlite3",
+	"clean": "rm -rf dist",
+    "re": "npm run clean && npm run build && npm run start",
+    "clear-db": "rm -rf database.sqlite3",
     "test-db": "ts-node src/testDb.ts"
   },
   "repository": {
