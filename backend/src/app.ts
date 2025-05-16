@@ -18,6 +18,7 @@ import {
 } from "fastify-type-provider-zod";
 
 import { authRoutes } from "./authentication/authRoutes";
+import { userRoutes } from "./userManagement/userRoutes";
 
 // Create a fastify instance
 const app = fastify({
@@ -46,9 +47,7 @@ app.get('/registerSuccess', (request, reply) => {
 app.get('/login', (request, reply) => {
 	reply.sendFile('login.html');
 });
-app.get('/loginSuccess', (request, reply) => {
-	reply.sendFile('loginSuccess.html');
-});
+
 
 app.register(fastifyJwt, { secret: process.env.JWT_SECRET as string || "default_secret" });
 app.addHook('preHandler', (request, reply, done) => {
@@ -61,6 +60,7 @@ app.register(fastifyCookie, {
 	hook: 'preHandler'
 });
 
+// TODO: move this to auth.ts files
 app.decorate(
 	'authenticate',
 	async (request: FastifyRequest, reply: FastifyReply) => {
@@ -79,13 +79,8 @@ app.decorate(
 	},
 );
 
-app.get('/profile', { preHandler: [app.authenticate] }, (request, reply) => {
-	reply.sendFile('profile.html');
-});
-
-app.delete
-
 app.register(authRoutes);
+app.register(userRoutes);
 
 // Testing
 app.get('/ping', async (request, reply) => {

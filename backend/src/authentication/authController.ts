@@ -7,6 +7,7 @@
  */
 
 import { FastifyRequest, FastifyReply } from "fastify";
+// import { FastifyJWT } from "@fastify/jwt";
 import { register, login } from "./authService";
 import { z } from "zod";
 
@@ -89,3 +90,18 @@ export const logoutUser = async (request: FastifyRequest, reply: FastifyReply) =
 	reply.clearCookie('access_token');
 	return reply.send({ message: "Logout successfull" });
 }
+
+// export const authenticate = async (request: FastifyRequest, reply: FastifyReply) => {
+// 		const token = request.cookies.access_token;
+// 		console.log('Token:', token);
+// 		if (!token) {
+// 			return reply.status(401).send({ message: "Authentication required" });
+// 		}
+// 		try {
+// 			const decoded = request.jwt.verify<FastifyJWT['user']>(token);
+// 			console.log('Decoded user:', decoded);
+// 			request.user = decoded;
+// 		} catch (e) {
+// 			reply.status(401).send({ message: "Invalid or expired token" });
+// 		}
+// }; 
