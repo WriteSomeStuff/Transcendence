@@ -63,7 +63,7 @@ export const loginUser = async (request: FastifyRequest, reply: FastifyReply) =>
 		}
 		console.log('User %d verified', verifiedUserId);
 	
-		const token = request.jwt.sign({ user_id: verifiedUserId, type: "registered" }, { expiresIn: "1d" }); //TODO: link this to user_id instead of username
+		const token = request.jwt.sign({ user_id: verifiedUserId, type: "registered" }, { expiresIn: "1d" });
 		console.log("Login successful");
 		
 		reply.setCookie('access_token', token, {
@@ -71,6 +71,8 @@ export const loginUser = async (request: FastifyRequest, reply: FastifyReply) =>
 			httpOnly: true,
 			secure: true,
 		});
+
+		// TODO: set last_login and account_status in db
 		
 		reply.redirect('profile', 303);
 
