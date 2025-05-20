@@ -24,10 +24,9 @@ export const register = async (username: string, password: string): Promise<void
 			INSERT INTO user (username, password_hash, avatar) 
 			VALUES (?, ?, ?)
 		`);
-		
 		const result = stmt.run(username, hashedPassword, defaultAvatarBlob);	
+		
 		console.log(`Inserted row with ID: ${result.lastInsertRowid}`);
-	
 	} catch (e) {
 		console.error('Error during registration:', e);
 		throw new Error("An error occured during registration");
@@ -84,14 +83,33 @@ export const setAccountStatusOnline = async (user_id: number) => {
 	try {
 		const stmt = db.prepare(`
 			UPDATE user
-			SET
-				last_login = ?,
+			SET	last_login = ?,
 				account_status = ?
 			WHERE
 				user_id = ?	
 		`);
-		const result = stmt.run(formatDate(new Date()), 'online', user_id);
-		console.log('Account status updated for user with id:', user_id);
+		stmt.run(formatDate(new Date()), 'online', user_id);
+		
+		console.log('Account status updated to online for user:', user_id);
+	} catch (e) {
+		console.error('Error setting account status:', e);
+		throw new Error("An error occured setting the account status");
+	}
+}
+
+export const setAccountStatusOffline = async (user_id: number) => {
+	const db = getDb();
+
+	try {
+		const stmt = db.prepare(`
+			UPDATE user
+			SET	account_status = ?
+			WHERE
+				user_id = ?
+		`);
+		stmt.run('offline', user_id);
+		
+		console.log('Account status updated to offline for user:', user_id);
 	} catch (e) {
 		console.error('Error setting account status:', e);
 		throw new Error("An error occured setting the account status");

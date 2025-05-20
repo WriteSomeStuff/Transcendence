@@ -7,8 +7,14 @@
  */
 
 import { FastifyRequest, FastifyReply } from "fastify";
-import { register, login, setAccountStatusOnline } from "./authService";
 import { z } from "zod";
+
+import {
+	register,
+	login,
+	setAccountStatusOnline,
+	setAccountStatusOffline
+} from "./authService";
 
 const REGISTER_SCHEMA = z.object({
 	username: z.string()
@@ -89,5 +95,8 @@ export const loginUser = async (request: FastifyRequest, reply: FastifyReply) =>
 
 export const logoutUser = async (request: FastifyRequest, reply: FastifyReply) => {
 	reply.clearCookie('access_token');
+
+	setAccountStatusOffline(request.user.user_id);
+
 	return reply.send({ message: "Logout successfull" });
 }
