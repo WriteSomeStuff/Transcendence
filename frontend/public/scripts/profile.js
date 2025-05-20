@@ -11,6 +11,7 @@ async function fetchUserData() {
 		}
 		
 		const result = await response.json();
+		console.log('Userdata in profile.js:', result.data);
 		return result.data;
 
 	} catch (e) {
