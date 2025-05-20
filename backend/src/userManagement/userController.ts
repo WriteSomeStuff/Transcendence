@@ -10,13 +10,19 @@ export const getUserData = async (request: FastifyRequest, reply: FastifyReply) 
 		console.log('[User Controller] Fetching user data for:', request.user.user_id);
 		const userData = await getUserDataFromDb(request.user.user_id);
 		
-		console.log('username:', userData);
+		console.log('userdata in controller:', userData);
 
-		reply.send({ userData });
+		reply.send({
+			success: true,
+			data: userData
+		});
 
 	} catch (e) {
 		if (e instanceof Error) {
-			reply.status(500).send({ error: 'An error occured getting the user data: '+ e.message });
+			reply.status(500).send({
+				success: false,
+				error: 'An error occured getting the user data: '+ e.message
+			});
 		}
 	}
 };
