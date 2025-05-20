@@ -34,19 +34,24 @@ export const register = async (username: string, password: string): Promise<void
 	}
 };
 
-export const login = async (username: string, password: string): Promise<boolean> => {
+export const login = async (username: string, password: string): Promise<number> => {
 	const db = getDb();	
 
 	try {
-		const stmt = db.prepare('SELECT password_hash FROM user WHERE username = ?');
-		const row = stmt.get(username) as {	password_hash: string };
+		const stmt = db.prepare('SELECT user_id, password_hash FROM user WHERE username = ?');
+		const row = stmt.get(username) as {	user_id: number, password_hash: string };
 		
+		console.log('User_id:', row.user_id);
+
 		if (!row) {
-			return false; // User not found
+			return 0; // User not found
 		}
 
-		const isVerified = await argon2.verify(row.password_hash, password);
-		return isVerified;
+		if (await argon2.verify(row.password_hash, password)) {
+			return (row.user_id);
+		} else {
+			return 0;
+		}
 	
 	} catch (e) {
 		console.error('Error during login:', e);

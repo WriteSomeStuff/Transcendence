@@ -7,7 +7,6 @@
  */
 
 import { FastifyRequest, FastifyReply } from "fastify";
-// import { FastifyJWT } from "@fastify/jwt";
 import { register, login } from "./authService";
 import { z } from "zod";
 
@@ -57,14 +56,14 @@ export const loginUser = async (request: FastifyRequest, reply: FastifyReply) =>
 		const parsedData = LOGIN_SCHEMA.parse(request.body);
 		const { username, password } = parsedData;
 
-		const isVerified = await login(username, password);
+		const verifiedUserId = await login(username, password);
 
-		if (!isVerified) {
+		if (verifiedUserId === 0) {
 			reply.status(401).send({ error: 'Invalid username or password' });
 		}
-		console.log("User verified");
+		console.log('User %d verified', verifiedUserId);
 	
-		const token = request.jwt.sign({ username: username, type: "registered" }, { expiresIn: "1d" });
+		const token = request.jwt.sign({ user_id: verifiedUserId, type: "registered" }, { expiresIn: "1d" }); //TODO: link this to user_id instead of username
 		console.log("Login successful");
 		
 		reply.setCookie('access_token', token, {
@@ -90,18 +89,3 @@ export const logoutUser = async (request: FastifyRequest, reply: FastifyReply) =
 	reply.clearCookie('access_token');
 	return reply.send({ message: "Logout successfull" });
 }
-
-// export const authenticate = async (request: FastifyRequest, reply: FastifyReply) => {
-// 		const token = request.cookies.access_token;
-// 		console.log('Token:', token);
-// 		if (!token) {
-// 			return reply.status(401).send({ message: "Authentication required" });
-// 		}
-// 		try {
-// 			const decoded = request.jwt.verify<FastifyJWT['user']>(token);
-// 			console.log('Decoded user:', decoded);
-// 			request.user = decoded;
-// 		} catch (e) {
-// 			reply.status(401).send({ message: "Invalid or expired token" });
-// 		}
-// }; 

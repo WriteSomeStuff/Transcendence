@@ -10,7 +10,8 @@ declare module 'fastify' {
 }
 
 type UserPayload = {
-	username: string
+	// username: string
+	user_id: number
 }
 
 declare module '@fastify/jwt' {

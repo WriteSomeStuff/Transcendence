@@ -8,6 +8,7 @@
 import fastify, { FastifyReply, FastifyRequest } from "fastify";
 import path from "path";
 import fastifyStatic from "@fastify/static";
+
 import fastifyFormbody from "@fastify/formbody";
 import fastifyJwt, { FastifyJWT } from "@fastify/jwt";
 import fastifyCookie from "@fastify/cookie";
@@ -69,11 +70,14 @@ app.decorate(
 			return reply.status(401).send({ message: "Authentication required" });
 		}
 		try {
-			const decoded = request.jwt.verify<FastifyJWT['user']>(token);
+			const decoded = request.jwt.verify<{ user_id: number }>(token);
 			console.log('Decoded user:', decoded);
 			request.user = decoded;
 		} catch (e) {
-			reply.status(401).send({ message: "Invalid or expired token" });
+			if (e instanceof Error) {
+				console.error('[Authenticate] ', e.message);
+				reply.status(401).send({ error: 'Invalid or expired token' });
+			}
 		}
 	},
 );
