@@ -74,7 +74,7 @@ export const loginUser = async (request: FastifyRequest, reply: FastifyReply) =>
 
 		// TODO: set last_login and account_status in db
 		
-		reply.redirect('profile', 303);
+		reply.redirect('profile.html', 303);
 
 	} catch (e) {
 		if (e instanceof z.ZodError) {
