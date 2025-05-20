@@ -38,7 +38,15 @@ export const login = async (username: string, password: string): Promise<number>
 	const db = getDb();	
 
 	try {
-		const stmt = db.prepare('SELECT user_id, password_hash FROM user WHERE username = ?');
+		const stmt = db.prepare(`
+			SELECT 
+				user_id,
+				password_hash
+			FROM
+				user
+			WHERE
+				username = ?
+		`);
 		const row = stmt.get(username) as {	user_id: number, password_hash: string };
 		
 		console.log('User_id:', row.user_id);
@@ -58,3 +66,34 @@ export const login = async (username: string, password: string): Promise<number>
 		throw new Error("An error occured during login");
 	}
 };
+
+function formatDate(date: Date): string {
+	const year = date.getFullYear();
+	const month = String(date.getMonth() + 1).padStart(2, '0');
+	const day = String(date.getDay()).padStart(2, '0');
+	const hours = String(date.getHours()).padStart(2, '0');
+	const minutes = String(date.getMinutes()).padStart(2, '0');
+	const seconds = String(date.getSeconds()).padStart(2, '0');
+
+	return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
+export const setAccountStatusOnline = async (user_id: number) => {
+	const db = getDb();
+
+	try {
+		const stmt = db.prepare(`
+			UPDATE user
+			SET
+				last_login = ?,
+				account_status = ?
+			WHERE
+				user_id = ?	
+		`);
+		const result = stmt.run(formatDate(new Date()), 'online', user_id);
+		console.log('Account status updated for user with id:', user_id);
+	} catch (e) {
+		console.error('Error setting account status:', e);
+		throw new Error("An error occured setting the account status");
+	}
+}

@@ -7,7 +7,7 @@
  */
 
 import { FastifyRequest, FastifyReply } from "fastify";
-import { register, login } from "./authService";
+import { register, login, setAccountStatusOnline } from "./authService";
 import { z } from "zod";
 
 const REGISTER_SCHEMA = z.object({
@@ -72,7 +72,7 @@ export const loginUser = async (request: FastifyRequest, reply: FastifyReply) =>
 			secure: true,
 		});
 
-		// TODO: set last_login and account_status in db
+		setAccountStatusOnline(verifiedUserId);
 		
 		reply.redirect('profile.html', 303);
 
