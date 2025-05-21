@@ -26,8 +26,8 @@ async function displayUserData() {
 		const user = userData[0];
 		document.getElementById('username').textContent = user.username;
 
-		// console.log('Avatar path:', user.avatar_path);
-		// document.getElementById('avatar').src = user.avatar_path;
+		console.log('Avatar path:', user.avatar_path);
+		document.getElementById('avatar').src = user.avatar_path;
 	}
 }
 
