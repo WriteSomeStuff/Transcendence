@@ -10,21 +10,22 @@ import { getDb } from "../utils/db";
 import fs from "fs";
 import path from "path";
 
-const defaultAvatarPath = path.join(__dirname, '..', '..', 
-	'public', 'assets', 'avatars', 'defaults', 'default_avatar_1.png');
-const defaultAvatarBlob = fs.readFileSync(defaultAvatarPath);
 
 export const register = async (username: string, password: string): Promise<void> => {
 	const db = getDb();
 	
 	try {
 		const hashedPassword = await argon2.hash(password);
+
+		// TODO: pick random default avatar
+		const avatarPath = './public/assets/avatars/defaults/default_avatar_1.png';
 		
 		const stmt = db.prepare(`
-			INSERT INTO user (username, password_hash, avatar) 
+			INSERT INTO user (username, password_hash, avatar_path) 
 			VALUES (?, ?, ?)
 		`);
-		const result = stmt.run(username, hashedPassword, defaultAvatarBlob);	
+
+		const result = stmt.run(username, hashedPassword, avatarPath);	
 		
 		console.log(`Inserted row with ID: ${result.lastInsertRowid}`);
 	} catch (e) {

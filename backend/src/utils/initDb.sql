@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS user (
 	password_hash	TEXT	NOT NULL,
 	created_at		TEXT	DEFAULT (datetime('now', 'localtime')),
 	last_login		TEXT,
-	avatar			BLOB,
+	avatar_path		TEXT,
 	account_status	TEXT	DEFAULT ('offline')
 );
 
