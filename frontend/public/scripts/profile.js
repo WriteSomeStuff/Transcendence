@@ -25,6 +25,9 @@ async function displayUserData() {
 	if (userData && userData.length > 0) {
 		const user = userData[0];
 		document.getElementById('username').textContent = user.username;
+
+		// console.log('Avatar path:', user.avatar_path);
+		// document.getElementById('avatar').src = user.avatar_path;
 	}
 }
 
