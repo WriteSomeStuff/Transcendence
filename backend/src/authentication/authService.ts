@@ -18,7 +18,7 @@ export const register = async (username: string, password: string): Promise<void
 		const hashedPassword = await argon2.hash(password);
 
 		// TODO: pick random default avatar
-		const avatarPath = './public/assets/avatars/defaults/default_avatar_1.png';
+		const avatarPath = './public/assets/avatars/defaults/default_avatar_1.png'; // WHAT SHOULD THIS PATH BE
 		
 		const stmt = db.prepare(`
 			INSERT INTO user (username, password_hash, avatar_path) 
