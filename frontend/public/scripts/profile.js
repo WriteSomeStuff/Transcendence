@@ -6,7 +6,7 @@ async function fetchUserData() {
 		
 		if (!response.ok) {
 			alert('Fetching user data failed');
-			window.location.href = '/index.html';
+			window.location.href = '/';
 			throw new Error("Error fetching profile data");
 		}
 		

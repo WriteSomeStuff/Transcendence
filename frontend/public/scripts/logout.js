@@ -2,7 +2,7 @@ document.getElementById('logoutButton').addEventListener('click', function() {
 	fetch('/logout', { method: 'DELETE' })
 		.then(response => {
 			if (response.ok) {
-				window.location.href = '/index.html';
+				window.location.href = '/';
 			} else {
 				alert('Logout failed.');
 			}
