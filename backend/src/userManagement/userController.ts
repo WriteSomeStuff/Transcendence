@@ -10,7 +10,7 @@ export const getUserData = async (request: FastifyRequest, reply: FastifyReply) 
 		console.log('[User Controller] Fetching user data for:', request.user.user_id);
 		const userData = await getUserDataFromDb(request.user.user_id);
 		
-		console.log('userdata in controller:', userData);
+		console.log('[User Controller] User data:', userData);
 
 		reply.send({
 			success: true,
