@@ -10,9 +10,11 @@ import { FastifyInstance } from "fastify";
 import { registerUser, loginUser, logoutUser } from "./authController";
 
 // 2. & 4.
-export const authRoutes = async (app: FastifyInstance) => {
+const authRoutes = async (app: FastifyInstance) => {
 	// 3.
 	app.post('/register', registerUser);
 	app.post('/login', loginUser);
 	app.delete('/logout', { preHandler: [app.authenticate] }, logoutUser);
 };
+
+export default authRoutes;

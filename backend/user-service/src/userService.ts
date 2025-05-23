@@ -1,4 +1,4 @@
-import { getDb } from "../utils/db";
+import { getDb } from "../database/db";
 
 export const updateUserAvatar = async (userId: number) => {
 	const db = getDb();

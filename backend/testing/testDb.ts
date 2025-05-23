@@ -1,4 +1,4 @@
-import { setupDatabase } from "./utils/db";
+import { setupDatabase } from "../database/db";
 import type BetterSqlite3 from "better-sqlite3";
 
 const fillDatabase = (db: BetterSqlite3.Database) => {

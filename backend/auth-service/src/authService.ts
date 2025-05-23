@@ -6,9 +6,7 @@
 */
 
 import argon2 from "argon2";
-import { getDb } from "../utils/db";
-import fs from "fs";
-import path from "path";
+import { getDb } from "../../database/db";
 
 
 export const register = async (username: string, password: string): Promise<void> => {

@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 import app from "./app"
-import { setupDatabase } from "./utils/db";
+import { setupDatabase } from "../database/db";
 
 const PORT = 8080;
 

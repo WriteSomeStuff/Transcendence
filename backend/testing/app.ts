@@ -19,7 +19,7 @@ import {
 } from "fastify-type-provider-zod";
 
 import { authRoutes } from "./authentication/authRoutes";
-import { userRoutes } from "./userManagement/userRoutes";
+import { userRoutes } from "./user-service/userRoutes";
 
 // Create a fastify instance
 const app = fastify({

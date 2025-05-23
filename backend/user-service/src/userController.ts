@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { updateUserAvatar, getUserDataFromDb } from "./userService";
+import { updateUserAvatar, getUserDataFromDb } from "../src/userManagement/userService";
 
 export const updateAvatar = async (request: FastifyRequest, reply: FastifyReply) => {
 
