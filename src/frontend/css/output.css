@@ -563,7 +563,7 @@ video {
 }
 
 body {
-  background: url("/assets/backgrounds/movingStars.gif") center center;
+  background: url("/frontend/assets/backgrounds/movingStars.gif") center center;
   color: pink;
   background-size: 10%;
 }

@@ -10,7 +10,7 @@ RUN openssl req -x509 -nodes \
 
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 
-COPY ./index.html /etc/nginx/html/index.html
+COPY ./src/index.html /etc/nginx/html/index.html
 
 WORKDIR	/etc/nginx/html
 
