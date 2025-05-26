@@ -1,7 +1,7 @@
 NAME= inception
 
 all:
-	mkdir -p ${HOME}/Documents/Transcendence/wp
+# mkdir -p ${HOME}/Documents/Transcendence/wp
 	docker compose -f docker-compose.yml up
 
 # prep:
@@ -12,7 +12,7 @@ down:
 
 prune:
 	docker builder prune -f && docker system prune -a -f
-	rm -rf ${HOME}/Documents/Transcendence/wp
+# rm -rf ${HOME}/Documents/Transcendence/wp
 
 status:
 	docker compose -f docker-compose.yml ps
