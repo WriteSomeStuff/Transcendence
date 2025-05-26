@@ -8,7 +8,7 @@ import {
 import fastifyJwt from "@fastify/jwt";
 import fastifyCookie from "@fastify/cookie";
 
-import authRoutes from "./src/authRoutes";
+import authRoutes from "./authRoutes";
 
 const app = fastify({
 	logger: true
