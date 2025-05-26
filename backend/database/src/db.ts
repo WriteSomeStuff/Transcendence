@@ -3,7 +3,8 @@ import type BetterSqlite3 from "better-sqlite3";
 import fs from "fs/promises";
 import path from "path";
 
-const DB_PATH: string = "database.sqlite3";
+const DB_HOST: string = process.env.DB_HOST || "database.sqlite3";
+const DB_PATH: string = process.env.DB_PATH || "database.sqlite3";
 
 let db: BetterSqlite3.Database | null = null;
 

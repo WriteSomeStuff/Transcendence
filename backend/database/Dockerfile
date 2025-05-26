@@ -16,7 +16,7 @@ RUN --mount=type=bind,source=package.json,target=package.json \
 
 COPY . .
 
-RUN npm rebuild better-sqlite3
+# RUN npm rebuild better-sqlite3
 
 RUN npm run build
 

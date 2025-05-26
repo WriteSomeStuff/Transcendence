@@ -5,8 +5,11 @@ import {
 	ZodTypeProvider
 } from "fastify-type-provider-zod";
 
+import path from "path";
+
 import fastifyJwt from "@fastify/jwt";
 import fastifyCookie from "@fastify/cookie";
+import fastifyStatic from "@fastify/static"
 
 import authRoutes from "./authRoutes";
 
@@ -48,6 +51,23 @@ app.decorate(
 		}
 	},
 );
+
+app.register(fastifyStatic, {
+	root: path.join(__dirname, 'static'),
+	prefix: '/'
+});
+
+app.get('/register', (request, reply) => {
+	reply.sendFile('register.html');
+});
+
+app.get('/login', (request, reply) => {
+	reply.sendFile('login.html');
+});
+
+app.get('/ping', async (request, reply) => {
+	return 'pong\n'
+});
 
 app.register(authRoutes);
 

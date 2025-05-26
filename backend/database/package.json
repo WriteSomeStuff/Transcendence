@@ -1,9 +1,11 @@
 {
   "name": "database",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/db.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/db.ts",
+    "build": "tsc"
   },
   "author": "",
   "license": "ISC",
@@ -13,5 +15,8 @@
     "better-sqlite3": "^11.10.0",
     "fs": "^0.0.1-security",
     "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
   }
 }
