@@ -1,3 +1,11 @@
+FROM node AS frontend_build
+
+WORKDIR /app
+
+COPY src src
+
+RUN (cd src && npm i && npm run build && npx tailwindcss -i ./frontend/css/home.css -o ./frontend/css/output.css)
+
 FROM nginx:alpine
 
 RUN	apk add --no-cache openssl && \
@@ -10,7 +18,8 @@ RUN openssl req -x509 -nodes \
 
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 
-COPY ./src/index.html /etc/nginx/html/index.html
+COPY --from=frontend_build /app/src/index.html /etc/nginx/html/index.html
+COPY --from=frontend_build /app/src/frontend /etc/nginx/html/frontend
 
 WORKDIR	/etc/nginx/html
 

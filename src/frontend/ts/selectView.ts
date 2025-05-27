@@ -1,6 +1,6 @@
 function selectView(page: string, push: boolean)
 {
-	fetch(`/js/views/${page}.html`)
+	fetch(`./frontend/js/views/${page}.html`)
 	.then(response => {
 		if (!response.ok) {
 			throw new Error(`Failed to load ${page}.html`);
