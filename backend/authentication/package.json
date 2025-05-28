@@ -1,0 +1,24 @@
+{
+	"name": "authentication",
+	"version": "1.0.0",
+	"main": "server.js",
+	"scripts": {
+		"start": "node dist/server.js",
+		"build": "tsc -p tsconfig.json",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "",
+	"license": "ISC",
+	"description": "",
+	"dependencies": {
+		"@fastify/cookie": "^11.0.2",
+		"@fastify/jwt": "^9.1.0",
+		"argon2": "^0.43.0",
+		"better-sqlite3": "^11.10.0",
+		"fastify": "^5.3.3",
+		"zod": "^3.25.32"
+	},
+	"devDependencies": {
+		"@types/better-sqlite3": "^7.6.13"
+	}
+}
