@@ -52,6 +52,7 @@ export const updateUsernameHandler = async (request: FastifyRequest, reply: Fast
 
 		reply.send({
 			success: true,
+			message: 'Username successfully changed'
 		});
 	} catch (e) {
 		reply.status(500).send({
