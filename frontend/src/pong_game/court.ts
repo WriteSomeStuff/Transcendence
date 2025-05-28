@@ -6,8 +6,8 @@ export class Court {
   private paddleOffsets: number[];
 
   constructor() {
-    this.values = new CourtValues(2, 200, 100, 5, 20, 4);
-    this.paddleOffsets = [0, 0];
+    this.values = new CourtValues(3, 100, 100, 5, 20, 4);
+    this.paddleOffsets = [0, 0, 0, 0];
   }
 
   private translatePoint(ctx: CanvasRenderingContext2D, p: Vector2): Vector2 {
@@ -17,7 +17,6 @@ export class Court {
   }
 
   private addQuadrilateral(ctx: CanvasRenderingContext2D, points: Vector2[]) {
-    console.log(points[0], points[1], points[2], points[3]);
     ctx.beginPath();
     ctx.moveTo(...this.translatePoint(ctx, points[0]).toTuple());
     ctx.lineTo(...this.translatePoint(ctx, points[1]).toTuple());
@@ -29,9 +28,9 @@ export class Court {
   }
 
   public render(ctx: CanvasRenderingContext2D) {
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 3; i++) {
       this.addQuadrilateral(ctx, this.values.getSidelineQuadrilateral(i));
-      this.addQuadrilateral(ctx, this.values.getBaselinePaddleQuadrilateral(i, this.paddleOffsets[i], 0.1));
+      this.addQuadrilateral(ctx, this.values.getBaselinePaddleQuadrilateral(i, this.paddleOffsets[i], 0.4));
     }
   }
 }

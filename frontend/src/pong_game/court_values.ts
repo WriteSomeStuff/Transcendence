@@ -36,15 +36,15 @@ export class CourtValues {
       this.width = 2 * distanceToBaseline;
       this.height = 2 * (distanceToSideline + this.sidelineThickness);
     } else {
-      this.sidelineAngle = Math.PI - Math.PI / this.edgeCount;
+      this.sidelineAngle = Math.PI - Math.PI / playersCount;
       const extraBaselineDistance = sidelineThickness / Math.cos(this.sidelineAngle);
       const innerPolygonSide = distanceToBaseline * 2 * Math.tan(Math.PI / playersCount);
       const distanceToInnerPolygonVertex = innerPolygonSide / (2 * Math.sin(Math.PI / playersCount));
-      const distanceFromInnerPolygonVertex = (distanceToInnerPolygonVertex - distanceToSideline) / Math.cos((playersCount - 2) * Math.PI / playersCount);
+      const distanceFromInnerPolygonVertex = (distanceToInnerPolygonVertex - distanceToSideline) / Math.cos((playersCount - 2) * Math.PI / playersCount / 2);
       let innerPolygonVertices: Vector2[] = [];
       for (let i = 0; i < playersCount; i++) {
         const angle = 2 * Math.PI / playersCount * i;
-        innerPolygonVertices.push(new Vector2(Math.sin(angle), Math.cos(angle)).multiply(distanceToInnerPolygonVertex));
+        innerPolygonVertices.push(new Vector2(Math.sin(angle), -Math.cos(angle)).multiply(distanceToInnerPolygonVertex));
       }
       this.vertices = [];
       this.normals = [];
@@ -59,8 +59,8 @@ export class CourtValues {
       }
       const outerPolygonSide = (distanceToBaseline + extraBaselineDistance) * 2 * Math.tan(Math.PI / playersCount);
       const distanceToOuterPolygonVertex = outerPolygonSide / (2 * Math.sin(Math.PI / playersCount));
-      this.width = 2 * distanceToOuterPolygonVertex;
-      this.height = 2 * distanceToOuterPolygonVertex;
+      this.width = 4 * distanceToOuterPolygonVertex;
+      this.height = 4 * distanceToOuterPolygonVertex;
     }
   }
 
@@ -70,8 +70,8 @@ export class CourtValues {
     const shiftAtoB = b.subtract(a).normalize().multiply(Math.tan(this.sidelineAngle) * this.sidelineThickness);
     return [
       a, b,
-      b.add(this.normals[index * 2].multiply(-this.sidelineThickness)).add(shiftAtoB),
-      a.add(this.normals[index * 2].multiply(-this.sidelineThickness)).add(shiftAtoB.multiply(-1)),
+      b.add(this.normals[index * 2].multiply(-this.sidelineThickness)).add(shiftAtoB.multiply(-1)),
+      a.add(this.normals[index * 2].multiply(-this.sidelineThickness)).add(shiftAtoB),
     ];
   }
 
@@ -82,7 +82,6 @@ export class CourtValues {
     const paddleLength = length * ratio;
     const edgeDirection = b.subtract(a).normalize();
     const center = a.add(b).multiply(0.5).add(edgeDirection.multiply((length - paddleLength) / 2 * offset));
-    console.log(edgeDirection, center);
     return [
       center.subtract(edgeDirection.multiply((paddleLength - this.ballRadius) / 2)),
       center.add(edgeDirection.multiply((paddleLength - this.ballRadius) / 2)),
