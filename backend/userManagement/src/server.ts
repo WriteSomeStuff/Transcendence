@@ -4,7 +4,7 @@ import fastifyJwt from "@fastify/jwt";
 
 import userRoutes from "./userRoutes";
 
-const PORT: number = 8082;
+const PORT: number = 8080;
 const HOST: string = '0.0.0.0';
 
 const app = fastify({

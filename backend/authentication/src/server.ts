@@ -4,7 +4,7 @@ import fastifyJwt from "@fastify/jwt";
 
 import authRoutes from "./authRoutes";
 
-const PORT: number = 8081;
+const PORT: number = 8080;
 const HOST: string = '0.0.0.0';
 
 const app = fastify({
@@ -13,7 +13,7 @@ const app = fastify({
 
 app.register(fastifyCookie);
 app.register(fastifyJwt, {
-	secret: process.env.JWT_SECRET as string // TODO: same key as in authentication, where stored?
+	secret: process.env.JWT_SECRET as string
 });
 
 app.decorate(
