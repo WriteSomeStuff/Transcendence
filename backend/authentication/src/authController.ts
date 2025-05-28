@@ -45,7 +45,17 @@ export const registerUserHandler = async (request: FastifyRequest, reply: Fastif
 		// call the service function to register user into database
 		await register(username, password);
 
-		// TODO: do a request to the user management service to update its database
+		const response = await fetch('http://user_service:8080/users/new-user', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ username: username })
+		});
+
+		if (!response.ok) {
+			reply.status(500).send("Failed to update user service");
+		}
 
 		reply.status(201).send({
 			success: true,

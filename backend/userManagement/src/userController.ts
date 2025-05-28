@@ -1,5 +1,25 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { getUserDataFromDb,updateUsername } from "./userService";
+import { insertUser, getUserDataFromDb,updateUsername } from "./userService";
+
+export const insertUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+	try {
+		const { username } = request.body as { username: string };
+
+		console.log(`[User controller] Inserting user with username '${username}' into db`);
+
+		insertUser(username);
+
+		console.log(`[User controller] Successfully inserted user '${username}' into db`);
+
+		reply.send({ success: true });
+
+	} catch (e) {
+		reply.status(500).send({
+			success: false,
+			error: 'An error occured inserting a new user into user_service database'
+		});
+	}
+}
 
 export const getUserDataHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
