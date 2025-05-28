@@ -119,10 +119,11 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 	}
 };
 
-// export const logoutUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
-// 	reply.clearCookie('access_token');
+export const logoutUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+	reply.clearCookie('access_token'); // to clear cookie in browser
 
-// 	setAccountStatusOffline(request.user.user_id);
+	// setAccountStatusOffline(request.user.user_id);
+	// TODO: set status to offline in user service
 
-// 	return reply.send({ message: "Logout successfull" });
-// }
+	return reply.send({ message: "Logout successfull" });
+}

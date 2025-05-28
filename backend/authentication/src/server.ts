@@ -23,8 +23,15 @@ app.addHook('preHandler', (request, _, done) => {
 app.decorate(
 	'authenticate',
 	async function (request: FastifyRequest, reply: FastifyReply) {
+		const token = request.cookies.access_token;
+		console.log('Token: ', token);
+		if (!token) {
+			console.error("no token");
+			reply.code(401).send({ message: 'Unauthorized' });
+		}
 		try {
-			await request.jwtVerify();
+			const decoded = request.jwt.verify<{ user_id: number }>(token as string);
+			request.user = decoded;
 		} catch (err) {
 			reply.code(401).send({ message: 'Unauthorized' });
 		}
