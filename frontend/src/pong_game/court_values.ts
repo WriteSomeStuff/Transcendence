@@ -1,0 +1,101 @@
+import { Vector2 } from "./vector2.ts";
+
+export class CourtValues {
+  public ballRadius: number;
+  public sidelineAngle: number; // 0 - parallel
+  public sidelineThickness: number;
+  public paddleThickness: number;
+  public width: number;
+  public height: number;
+  private edgeCount: number;
+  private vertices: Vector2[];
+  private normals: Vector2[];
+
+  constructor(playersCount: number, distanceToBaseline: number, distanceToSideline: number, paddleThickness: number, sidelineThickness: number, ballRadius: number) {
+    this.edgeCount = playersCount * 2;
+    this.ballRadius = ballRadius;
+    this.paddleThickness = paddleThickness;
+    this.sidelineThickness = sidelineThickness;
+    if (!Number.isInteger(playersCount) || playersCount < 2) {
+      throw new Error("Invalid playersCount");
+    }
+    if (playersCount == 2) {
+      this.sidelineAngle = 0;
+      this.vertices = [
+        new Vector2(-distanceToBaseline, -distanceToSideline),
+        new Vector2(distanceToBaseline, -distanceToSideline),
+        new Vector2(distanceToBaseline, distanceToSideline),
+        new Vector2(-distanceToBaseline, distanceToSideline),
+      ];
+      this.normals = [
+        new Vector2(0, 1),
+        new Vector2(-1, 0),
+        new Vector2(0, -1),
+        new Vector2(1, 0),
+      ];
+      this.width = 2 * distanceToBaseline;
+      this.height = 2 * (distanceToSideline + this.sidelineThickness);
+    } else {
+      this.sidelineAngle = Math.PI - Math.PI / this.edgeCount;
+      const extraBaselineDistance = sidelineThickness / Math.cos(this.sidelineAngle);
+      const innerPolygonSide = distanceToBaseline * 2 * Math.tan(Math.PI / playersCount);
+      const distanceToInnerPolygonVertex = innerPolygonSide / (2 * Math.sin(Math.PI / playersCount));
+      const distanceFromInnerPolygonVertex = (distanceToInnerPolygonVertex - distanceToSideline) / Math.cos((playersCount - 2) * Math.PI / playersCount);
+      let innerPolygonVertices: Vector2[] = [];
+      for (let i = 0; i < playersCount; i++) {
+        const angle = 2 * Math.PI / playersCount * i;
+        innerPolygonVertices.push(new Vector2(Math.sin(angle), Math.cos(angle)).multiply(distanceToInnerPolygonVertex));
+      }
+      this.vertices = [];
+      this.normals = [];
+      for (let i = 0; i < playersCount; i++) {
+        const prev = innerPolygonVertices[(playersCount + i - 1) % playersCount];
+        const next = innerPolygonVertices[(playersCount + i + 1) % playersCount];
+        const curr = innerPolygonVertices[i];
+        this.vertices.push(curr.add(prev.subtract(curr).normalize().multiply(distanceFromInnerPolygonVertex)));
+        this.vertices.push(curr.add(next.subtract(curr).normalize().multiply(distanceFromInnerPolygonVertex)));
+        this.normals.push(this.vertices[i * 2].add(this.vertices[i * 2 + 1]).multiply(-1).normalize());
+        this.normals.push(curr.add(next).multiply(-1).normalize());
+      }
+      const outerPolygonSide = (distanceToBaseline + extraBaselineDistance) * 2 * Math.tan(Math.PI / playersCount);
+      const distanceToOuterPolygonVertex = outerPolygonSide / (2 * Math.sin(Math.PI / playersCount));
+      this.width = 2 * distanceToOuterPolygonVertex;
+      this.height = 2 * distanceToOuterPolygonVertex;
+    }
+  }
+
+  public getSidelineQuadrilateral(index: number): Vector2[] {
+    const a = this.vertices[(index * 2) % this.edgeCount];
+    const b = this.vertices[(index * 2 + 1) % this.edgeCount];
+    const shiftAtoB = b.subtract(a).normalize().multiply(Math.tan(this.sidelineAngle) * this.sidelineThickness);
+    return [
+      a, b,
+      b.add(this.normals[index * 2].multiply(-this.sidelineThickness)).add(shiftAtoB),
+      a.add(this.normals[index * 2].multiply(-this.sidelineThickness)).add(shiftAtoB.multiply(-1)),
+    ];
+  }
+
+  public getBaselinePaddleQuadrilateral(index: number, offset: number, ratio: number): Vector2[] {
+    const a = this.vertices[(index * 2 + 1) % this.edgeCount];
+    const b = this.vertices[(index * 2 + 2) % this.edgeCount];
+    const length = a.subtract(b).length();
+    const paddleLength = length * ratio;
+    const edgeDirection = b.subtract(a).normalize();
+    const center = a.add(b).multiply(0.5).add(edgeDirection.multiply((length - paddleLength) / 2 * offset));
+    console.log(edgeDirection, center);
+    return [
+      center.subtract(edgeDirection.multiply((paddleLength - this.ballRadius) / 2)),
+      center.add(edgeDirection.multiply((paddleLength - this.ballRadius) / 2)),
+      center.add(edgeDirection.multiply((paddleLength - this.ballRadius) / 2)).add(this.normals[index * 2 + 1].multiply(this.paddleThickness)),
+      center.subtract(edgeDirection.multiply((paddleLength - this.ballRadius) / 2)).add(this.normals[index * 2 + 1].multiply(this.paddleThickness)),
+    ];
+  }
+
+  public getSidelineSurface(index: number): Vector2[] {
+    return [this.vertices[index * 2], this.vertices[index * 2 + 1]];
+  }
+
+  public getBaselineSurface(index: number): Vector2[] {
+    return [this.vertices[index * 2 + 1], this.vertices[(index * 2 + 2) % this.edgeCount]];
+  }
+}

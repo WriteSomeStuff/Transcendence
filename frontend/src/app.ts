@@ -20,6 +20,7 @@ class App {
   }
 
   private getState(): AppState {
+    return this.game;
     if (!this.auth.isLoggedIn()) {
       return this.auth;
     }

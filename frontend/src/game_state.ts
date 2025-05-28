@@ -1,18 +1,6 @@
 import { AppState } from "./app_state.ts";
-
-interface Point {
-  x: number;
-  y: number;
-}
-
-interface Game {
-  paddle1: Point;
-  paddle2: Point;
-  ball: Point;
-  ball_direction: Point;
-  user1: string;
-  user2: string;
-}
+import { Court } from "./pong_game/court.ts";
+import type { App } from "./app.ts";
 
 export class GameState extends AppState {
   private updater?: number;
@@ -20,10 +8,15 @@ export class GameState extends AppState {
   private action: "up" | "down" | null = null;
   private upPressed = false;
   private downPressed = false;
+  private game: Court | null = null;
+
+  public constructor(app: App) {
+    super(app);
+  }
 
   private render() {
     this.appContainer.innerHTML = `
-            <canvas id="game-canvas" width="200" height="100"></canvas>
+            <canvas id="game-canvas" width="500" height="400"></canvas>
         `;
     const canvas: HTMLCanvasElement | null = document.getElementById(
       "game-canvas",
@@ -52,52 +45,52 @@ export class GameState extends AppState {
     }
   };
 
-  private renderGame(game: Game) {
+  private renderGame() {
     const ctx = this.gameCanvas?.getContext("2d");
     if (!ctx) {
       return;
     }
-    ctx.clearRect(0, 0, 200, 100);
-    ctx.strokeRect(0, 0, 200, 100);
-    ctx.fillRect(game.paddle1.x, game.paddle1.y - 10, 5, 20);
-    ctx.fillRect(game.paddle2.x - 5, game.paddle2.y - 10, 5, 20);
-    ctx.fillRect(game.ball.x - 2, game.ball.y - 2, 4, 4);
+    this.game?.render(ctx);
   }
 
   private async fetchGame() {
-    if (!localStorage.getItem("game_id") || this.gameCanvas === undefined) {
-      return;
-    }
-    const action =
-      this.upPressed !== this.downPressed
-        ? this.upPressed
-          ? "up"
-          : "down"
-        : null;
-    if (this.action !== action) {
-      this.action = action;
-    }
-    if (this.action) {
-      await fetch(
-        `/game/action?gameid=${localStorage.getItem("game_id")}&action=${this.action}`,
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        },
-      );
-    }
-    const game: Game = await fetch(
-      `/game/state?gameid=${localStorage.getItem("game_id")}`,
-      {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      },
-    ).then((res) => res.json());
-    if (game) {
-      this.renderGame(game);
-    }
+    // if (!localStorage.getItem("game_id") || this.gameCanvas === undefined) {
+    //   return;
+    // }
+    // const action =
+    //   this.upPressed !== this.downPressed
+    //     ? this.upPressed
+    //       ? "up"
+    //       : "down"
+    //     : null;
+    // if (this.action !== action) {
+    //   this.action = action;
+    // }
+    // this.game.movePaddle(action);
+    // // if (this.action) {
+    // //   await fetch(
+    // //     `/game/action?gameid=${localStorage.getItem("game_id")}&action=${this.action}`,
+    // //     {
+    // //       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    // //     },
+    // //   );
+    // // }
+    // // const game: Game = await fetch(
+    // //   `/game/state?gameid=${localStorage.getItem("game_id")}`,
+    // //   {
+    // //     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    // //   },
+    // // ).then((res) => res.json());
+    // // if (game) {
+    // //   this.renderGame(game);
+    // // }
+    this.renderGame();
   }
 
   public enterState(): void {
     this.render();
+    this.game = new Court();
+    console.log(this.game);
     document.addEventListener("keydown", this.processKeydown);
     document.addEventListener("keyup", this.processKeyup);
     this.updater = setInterval(() => this.fetchGame(), 50);
