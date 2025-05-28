@@ -1,5 +1,5 @@
 document.getElementById('logoutButton').addEventListener('click', function() {
-	fetch('/logout', { method: 'DELETE' })
+	fetch('/auth/logout', { method: 'DELETE' })
 		.then(response => {
 			if (response.ok) {
 				window.location.href = '/';

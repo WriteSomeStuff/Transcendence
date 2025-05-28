@@ -2,7 +2,7 @@
 // Fetch profile data from backend
 async function fetchUserData() {
 	try {
-		const response = await fetch('/profile', { method: 'GET' });
+		const response = await fetch('/users/profile', { method: 'GET' });
 		
 		if (!response.ok) {
 			alert('Fetching user data failed');
