@@ -1,0 +1,40 @@
+services:
+  authentication:
+    container_name: authentication
+    restart: always
+    build: ./backend/authentication
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://authentication/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - 8081:8080
+    # volumes: TODO
+    #   - ./backend/authentication:/app
+    networks:
+      - internal
+    environment:
+      - JWT_SECRET='secret_key'
+
+  user_management:
+    container_name: user_management
+    restart: always
+    build: ./backend/userManagement
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://user_management/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - 8082:8080
+    # volumes: TODO
+    #   - ./backend/authentication:/app
+    networks:
+      - internal
+    environment:
+      - JWT_SECRET='secret_key'
+
+networks:
+  internal:
+    driver: bridge
