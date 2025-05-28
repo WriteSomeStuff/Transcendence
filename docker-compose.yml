@@ -1,10 +1,10 @@
 services:
-  authentication:
+  auth_service:
     container_name: authentication
     restart: always
     build: ./backend/authentication
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://authentication/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -17,12 +17,12 @@ services:
     environment:
       - JWT_SECRET='secret_key'
 
-  user_management:
+  user_service:
     container_name: user_management
     restart: always
     build: ./backend/userManagement
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://user_management/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8082/health"]
       interval: 5s
       timeout: 5s
       retries: 10
