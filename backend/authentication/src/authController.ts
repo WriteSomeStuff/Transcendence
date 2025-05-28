@@ -15,7 +15,7 @@ import { z } from "zod";
 // 	setAccountStatusOnline,
 // 	setAccountStatusOffline
 // } from "./authService";
-import { register } from "./authService";
+import { register, login } from "./authService";
 
 const REGISTER_SCHEMA = z.object({
 	username: z.string()
@@ -82,41 +82,42 @@ export const registerUserHandler = async (request: FastifyRequest, reply: Fastif
 	}
 };
 
-// export const loginUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
-// 	try {
-// 		const parsedData = LOGIN_SCHEMA.parse(request.body);
-// 		const { username, password } = parsedData;
+export const loginUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+	try {
+		const parsedData = LOGIN_SCHEMA.parse(request.body);
+		const { username, password } = parsedData;
 
-// 		const verifiedUserId = await login(username, password);
+		const verifiedUserId = await login(username, password);
 
-// 		if (verifiedUserId === 0) {
-// 			reply.status(401).send({ error: 'Invalid username or password' });
-// 		}
-// 		console.log('User %d verified', verifiedUserId);
+		if (verifiedUserId === 0) {
+			reply.status(401).send({ error: 'Invalid username or password' });
+		}
+		console.log('User %d verified', verifiedUserId);
 	
-// 		const token = request.jwt.sign({ user_id: verifiedUserId, type: "registered" }, { expiresIn: "1d" });
-// 		console.log("Login successful");
+		const token = request.jwt.sign({ user_id: verifiedUserId, type: "registered" }, { expiresIn: "1d" });
+		console.log("Login successful");
 		
-// 		reply.setCookie('access_token', token, {
-// 			path: '/',
-// 			httpOnly: true,
-// 			secure: true,
-// 		});
+		reply.setCookie('access_token', token, {
+			path: '/',
+			httpOnly: true,
+			secure: true,
+		});
 
-// 		setAccountStatusOnline(verifiedUserId);
+		// setAccountStatusOnline(verifiedUserId);
+		// TODO: set status to online in user service
 		
-// 		reply.redirect('profile.html', 303);
+		reply.status(200).send({ message: `user '${username} logged in successfully` });
 
-// 	} catch (e) {
-// 		if (e instanceof z.ZodError) {
-//       		reply.status(400).send({ error: e.errors });
-//     	} else {
-// 			if (e instanceof Error) {
-// 				reply.status(500).send({ error: 'An error occurred during login:' + e.message });
-// 			}
-//     	}
-// 	}
-// };
+	} catch (e) {
+		if (e instanceof z.ZodError) {
+      		reply.status(400).send({ error: e.errors });
+    	} else {
+			if (e instanceof Error) {
+				reply.status(500).send({ error: 'An error occurred during login:' + e.message });
+			}
+    	}
+	}
+};
 
 // export const logoutUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 // 	reply.clearCookie('access_token');

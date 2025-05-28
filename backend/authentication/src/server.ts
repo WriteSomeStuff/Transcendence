@@ -15,6 +15,10 @@ app.register(fastifyCookie);
 app.register(fastifyJwt, {
 	secret: process.env.JWT_SECRET as string
 });
+app.addHook('preHandler', (request, _, done) => {
+	request.jwt = app.jwt;
+	done();
+});
 
 app.decorate(
 	'authenticate',

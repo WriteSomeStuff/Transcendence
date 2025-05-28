@@ -27,36 +27,36 @@ export const register = async (username: string, password: string): Promise<void
 	}
 };
 
-// export const login = async (username: string, password: string): Promise<number> => {
-// 	try {
-// 		const stmt = db.prepare(`
-// 			SELECT 
-// 				user_id,
-// 				password_hash
-// 			FROM
-// 				user
-// 			WHERE
-// 				username = ?
-// 		`);
-// 		const row = stmt.get(username) as {	user_id: number, password_hash: string };
+export const login = async (username: string, password: string): Promise<number> => {
+	try {
+		const stmt = db.prepare(`
+			SELECT 
+				user_id,
+				password_hash
+			FROM
+				user
+			WHERE
+				username = ?
+		`);
+		const row = stmt.get(username) as {	user_id: number, password_hash: string };
 		
-// 		console.log('User_id:', row.user_id);
+		console.log('User_id:', row.user_id);
 
-// 		if (!row) {
-// 			return 0; // User not found
-// 		}
+		if (!row) {
+			return 0; // User not found
+		}
 
-// 		if (await argon2.verify(row.password_hash, password)) {
-// 			return (row.user_id);
-// 		} else {
-// 			return 0;
-// 		}
+		if (await argon2.verify(row.password_hash, password)) {
+			return (row.user_id);
+		} else {
+			return 0;
+		}
 	
-// 	} catch (e) {
-// 		console.error('Error during login:', e);
-// 		throw new Error("An error occured during login");
-// 	}
-// };
+	} catch (e) {
+		console.error('Error during login:', e);
+		throw new Error("An error occured during login");
+	}
+};
 
 // function formatDate(date: Date): string {
 // 	const year = date.getFullYear();
