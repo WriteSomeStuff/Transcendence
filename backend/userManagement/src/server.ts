@@ -17,7 +17,7 @@ app.addHook('preHandler', (request, _, done) => {
 });
 app.register(fastifyCookie);
 app.register(fastifyJwt, {
-	secret: process.env.JWT_SECRET as string // TODO: same key as in authentication, where stored?
+	secret: process.env.JWT_SECRET as string
 });
 
 app.decorate(
