@@ -27,6 +27,8 @@ export const getUserDataFromDb = async (user_id: number) => {
 	}
 };
 
+//TODO check if username exists already or same as previous
+//TODO update authentication db
 export const updateUsername = async (user_id: number, newUsername: string) => {
 	try {
 		const stmt = db.prepare(`
