@@ -7,8 +7,8 @@ node_modules/
 # folders
 dist/
 
-# user uploads
-uploads/
+# container data
+data/
 
 # environment
 .env

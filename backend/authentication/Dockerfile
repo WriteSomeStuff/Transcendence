@@ -20,6 +20,8 @@ COPY package-lock.json .
 
 COPY src ./src
 
+RUN mkdir -p /data
+
 RUN npm run build
 
 EXPOSE 8081

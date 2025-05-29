@@ -10,8 +10,8 @@ services:
       retries: 10
     ports:
       - 8081:8080
-    # volumes: TODO
-    #   - ./backend/authentication:/app
+    volumes:
+      - auth_data:/app/data
     networks:
       - internal
     environment:
@@ -28,8 +28,8 @@ services:
       retries: 10
     ports:
       - 8082:8080
-    # volumes: TODO
-    #   - ./backend/authentication:/app
+    volumes:
+      - user_data:/app/data
     networks:
       - internal
     environment:
@@ -38,3 +38,17 @@ services:
 networks:
   internal:
     driver: bridge
+
+volumes:
+  auth_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/authentication/data
+      o: bind
+  user_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/userManagement/data
+      o: bind
