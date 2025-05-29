@@ -15,8 +15,6 @@ const sql = `
 		avatar_path		TEXT,
 		account_status	TEXT	DEFAULT ('offline')
 	);
-
-	CREATE INDEX idx_user_username ON user(username);
 `
 
 try {
