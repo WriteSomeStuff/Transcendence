@@ -15,7 +15,8 @@ services:
     networks:
       - internal
     environment:
-      - JWT_SECRET='secret_key'
+      - JWT_SECRET=secret_key
+      - NODE_ENV=development
 
   user_service:
     container_name: user_management
@@ -33,7 +34,7 @@ services:
     networks:
       - internal
     environment:
-      - JWT_SECRET='secret_key'
+      - JWT_SECRET=secret_key
 
 networks:
   internal:

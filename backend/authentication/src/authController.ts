@@ -91,16 +91,18 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 		const token = request.jwt.sign({ user_id: verifiedUserId, type: "registered" }, { expiresIn: "1d" });
 		console.log("Login successful");
 		
+		const isProduction = process.env.NODE_ENV === 'production';
+
 		reply.setCookie('access_token', token, {
 			path: '/',
 			httpOnly: true,
-			secure: true,
+			secure: isProduction,
 		});
 
 		// setAccountStatusOnline(verifiedUserId);
 		// TODO: set status to online in user service
 		
-		reply.status(200).send({ message: `user '${username} logged in successfully` });
+		reply.status(200).send({ message: `user '${username}' logged in successfully` });
 
 	} catch (e) {
 		if (e instanceof z.ZodError) {
