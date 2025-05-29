@@ -43,7 +43,7 @@ app.register(userRoutes, {
 	prefix: '/users'
 });
 
-app.get('/health', async (_, reply) => {
+app.get('/users/health', async (_, reply) => {
 	reply.send({ message: "User server is healthy" });
 });
 

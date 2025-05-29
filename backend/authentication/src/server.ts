@@ -42,7 +42,7 @@ app.register(authRoutes, {
 	prefix: '/auth'
 });
 
-app.get('/health', async (_, reply) => {
+app.get('/auth/health', async (_, reply) => {
 	reply.send({ message: "Auth server is healthy" });
 });
 
