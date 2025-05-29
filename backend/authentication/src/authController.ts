@@ -9,12 +9,6 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { z } from "zod";
 
-// import {
-// 	register,
-// 	login,
-// 	setAccountStatusOnline,
-// 	setAccountStatusOffline
-// } from "./authService";
 import { register, login } from "./authService";
 
 const REGISTER_SCHEMA = z.object({
@@ -66,12 +60,12 @@ export const registerUserHandler = async (request: FastifyRequest, reply: Fastif
 		if (e instanceof z.ZodError) { // Schema error (e.g. password too short)
 			reply.status(400).send({
 				success: false,
-				error: 'Schema error:' + e.errors
+				error: e.errors.map((err) => err.message).join(", ")
 			});
 		} else if (e instanceof Error) { // Failed stmt (e.g. username exists)
 			reply.status(400).send({
 				success: false,
-				error: 'Failed to insert into db: ' + e.message
+				error: e.message + ': username already exists'
 			});
 		} else {
 			reply.status(400).send({
