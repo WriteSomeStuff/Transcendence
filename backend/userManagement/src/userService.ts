@@ -39,7 +39,10 @@ export const updateUsername = async (user_id: number, newUsername: string) => {
 		`);
 
 		stmt.run(newUsername, user_id);
-	} catch (e) {
-		throw new Error("Error updating username in database");
+	} catch (e: any) {
+		if (e && e.code === "SQLITE_CONSTRAINT_UNIQUE") {
+			throw new Error("Username already exists.");
+		}
+		throw new Error(`${e.message || e}`);
 	}
 };

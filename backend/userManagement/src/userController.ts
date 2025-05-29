@@ -48,7 +48,7 @@ export const updateUsernameHandler = async (request: FastifyRequest, reply: Fast
 		const user_id = (request.user as { user_id: number } | undefined)?.user_id ?? 1;
 		const { newUsername } = request.body as { newUsername: string};
 
-		updateUsername(user_id, newUsername);
+		await updateUsername(user_id, newUsername);
 
 		reply.send({
 			success: true,
@@ -57,7 +57,7 @@ export const updateUsernameHandler = async (request: FastifyRequest, reply: Fast
 	} catch (e) {
 		reply.status(500).send({
 			success: false,
-			error: 'An error occured getting updating the username:' + e
+			error: 'An error occured updating the username:' + e
 		});
 	}
 };
