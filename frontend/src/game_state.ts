@@ -54,6 +54,7 @@ export class GameState extends AppState {
   }
 
   private async fetchGame() {
+    this.game?.update(1, [0, 0]);
     // if (!localStorage.getItem("game_id") || this.gameCanvas === undefined) {
     //   return;
     // }
