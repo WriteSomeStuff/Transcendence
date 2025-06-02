@@ -12,5 +12,3 @@ document.getElementById('logoutButton').addEventListener('click', function() {
 			alert('An error occurred.');
 		});
 });
-
-// TODO: is it allowed to wrtie js or should it be ts as well?
