@@ -30,16 +30,16 @@ export const login = async (username: string, password: string): Promise<number>
 			WHERE
 				username = ?
 		`);
-		const row = stmt.get(username) as {	userId: number, password_hash: string };
+		const row = stmt.get(username) as {	user_id: number, password_hash: string };
 		
-		console.log('userId:', row.userId);
-
+		console.log('userId:', row.user_id);
+		
 		if (!row) {
 			return 0; // User not found
 		}
 
 		if (await argon2.verify(row.password_hash, password)) {
-			return (row.userId);
+			return (row.user_id);
 		} else {
 			return 0;
 		}
