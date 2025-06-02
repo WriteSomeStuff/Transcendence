@@ -13,7 +13,7 @@ const sql = `
 		created_at		TEXT	DEFAULT (datetime('now', 'localtime')),
 		last_login		TEXT,
 		avatar_path		TEXT,
-		account_status	TEXT	DEFAULT ('offline')
+		account_status	TEXT	DEFAULT ('offline')	CHECK(account_status IN ('online', 'offline'))
 	);
 `
 
