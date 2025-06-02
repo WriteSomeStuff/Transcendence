@@ -9,7 +9,11 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { z } from "zod";
 
-import { register, login } from "./authService";
+import {
+	register,
+	login,
+	updateUsername
+} from "./authService";
 
 const REGISTER_SCHEMA = z.object({
 	username: z.string()
@@ -48,7 +52,7 @@ export const registerUserHandler = async (request: FastifyRequest, reply: Fastif
 		});
 
 		if (!response.ok) {
-			reply.status(500).send("Failed to update user service");
+			reply.status(500).send("Failed to update user service database");
 		}
 
 		reply.status(201).send({
@@ -122,4 +126,19 @@ export const logoutUserHandler = async (request: FastifyRequest, reply: FastifyR
 	// TODO: set status to offline in user service
 
 	return reply.send({ message: "Logout successfull" });
+}
+
+export const updateUsernameHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+	try {
+		const { newUsername, user_id } = request.body as { newUsername: string, user_id: number };
+
+		updateUsername(newUsername, user_id);
+
+		reply.send({ success: true });
+	} catch (e) {
+		reply.status(500).send({
+			success: false,
+			error: 'An error occured inserting a new username into authentication database'
+		});
+	}
 }

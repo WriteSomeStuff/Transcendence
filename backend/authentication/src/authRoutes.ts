@@ -1,13 +1,11 @@
-/** Defines the authentication routes and associates them with controller functions.
-* 1. Imports FastifyInstance and controller functions.
-* 2. Defines routes for /register
-* 3. Associates routes with controller functions.
-* 4. Exports the routes.
- */
-
-// 1.
 import { FastifyInstance } from "fastify";
-import { registerUserHandler, loginUserHandler, logoutUserHandler } from "./authController";
+
+import {
+	registerUserHandler,
+	loginUserHandler,
+	logoutUserHandler,
+	updateUsernameHandler
+} from "./authController";
 
 // 2. & 4.
 const authRoutes = async (app: FastifyInstance) => {
@@ -15,6 +13,7 @@ const authRoutes = async (app: FastifyInstance) => {
 	app.post('/register', registerUserHandler);
 	app.post('/login', loginUserHandler);
 	app.delete('/logout', { preHandler: [app.authenticate] }, logoutUserHandler);
+	app.put('/username', updateUsernameHandler);
 };
 
 export default authRoutes;

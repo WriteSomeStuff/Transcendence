@@ -1,4 +1,5 @@
 import { FastifyInstance } from "fastify";
+
 import {
 	insertUserHandler,
 	getUserDataHandler,
@@ -7,7 +8,7 @@ import {
 
 const userRoutes = async (app: FastifyInstance) => {
 	app.get('/profile', { preHandler: [app.authenticate] }, getUserDataHandler);
-	app.post('/username', { preHandler: [app.authenticate] }, updateUsernameHandler);
+	app.put('/username', { preHandler: [app.authenticate] }, updateUsernameHandler);
 	app.post('/new-user', insertUserHandler);
 };
 

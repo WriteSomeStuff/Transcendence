@@ -1,5 +1,10 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { insertUser, getUserDataFromDb,updateUsername } from "./userService";
+
+import {
+	insertUser,
+	getUserDataFromDb,
+	updateUsername
+} from "./userService";
 
 export const insertUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
@@ -50,7 +55,22 @@ export const updateUsernameHandler = async (request: FastifyRequest, reply: Fast
 
 		await updateUsername(user_id, newUsername);
 
-		reply.send({
+		const response = await fetch('http://auth_service:8080/auth/username', {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				newUsername,
+				user_id
+			})
+		});
+
+		if (!response.ok) {
+			reply.status(500).send("Failed to update authentication database");
+		}
+
+		reply.status(200).send({
 			success: true,
 			message: 'Username successfully changed'
 		});
