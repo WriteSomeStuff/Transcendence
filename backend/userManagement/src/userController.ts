@@ -28,10 +28,10 @@ export const insertUserHandler = async (request: FastifyRequest, reply: FastifyR
 
 export const getUserDataHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const user_id = (request.user as { user_id: number } | undefined)?.user_id ?? 1;
+		const userId = (request.user as { userId: number } | undefined)?.userId ?? 1;
 
-		console.log('[User Controller] Fetching user data for:', user_id);
-		const userData = await getUserDataFromDb(user_id);
+		console.log('[User Controller] Fetching user data for:', userId);
+		const userData = await getUserDataFromDb(userId);
 		
 		console.log('[User Controller] User data:', userData);
 
@@ -50,10 +50,10 @@ export const getUserDataHandler = async (request: FastifyRequest, reply: Fastify
 
 export const updateUsernameHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const user_id = (request.user as { user_id: number } | undefined)?.user_id ?? 1;
+		const userId = (request.user as { userId: number } | undefined)?.userId ?? 1;
 		const { newUsername } = request.body as { newUsername: string};
 
-		await updateUsername(user_id, newUsername);
+		await updateUsername(userId, newUsername);
 
 		const response = await fetch('http://auth_service:8080/auth/username', {
 			method: 'PUT',
@@ -62,7 +62,7 @@ export const updateUsernameHandler = async (request: FastifyRequest, reply: Fast
 			},
 			body: JSON.stringify({
 				newUsername,
-				user_id
+				userId
 			})
 		});
 

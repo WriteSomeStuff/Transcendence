@@ -14,20 +14,20 @@ export const insertUser = async (username: string) => {
 	}
 };
 
-export const getUserDataFromDb = async (user_id: number) => {
+export const getUserDataFromDb = async (userId: number) => {
 	try {
 		const stmt = db.prepare(`
 			SELECT * FROM user
 			WHERE user_id = ?
 		`);
 
-		return stmt.all(user_id);
+		return stmt.all(userId);
 	} catch (e) {
 		throw new Error("An error occured getting the profile information");
 	}
 };
 
-export const updateUsername = async (user_id: number, newUsername: string) => {
+export const updateUsername = async (userId: number, newUsername: string) => {
 	try {
 		const stmt = db.prepare(`
 			UPDATE user
@@ -36,7 +36,7 @@ export const updateUsername = async (user_id: number, newUsername: string) => {
 				user_id = ?
 		`);
 
-		stmt.run(newUsername, user_id);
+		stmt.run(newUsername, userId);
 	} catch (e: any) {
 		if (e && e.code === "SQLITE_CONSTRAINT_UNIQUE") {
 			throw new Error("Username already exists.");

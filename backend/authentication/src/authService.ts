@@ -30,16 +30,16 @@ export const login = async (username: string, password: string): Promise<number>
 			WHERE
 				username = ?
 		`);
-		const row = stmt.get(username) as {	user_id: number, password_hash: string };
+		const row = stmt.get(username) as {	userId: number, password_hash: string };
 		
-		console.log('User_id:', row.user_id);
+		console.log('userId:', row.userId);
 
 		if (!row) {
 			return 0; // User not found
 		}
 
 		if (await argon2.verify(row.password_hash, password)) {
-			return (row.user_id);
+			return (row.userId);
 		} else {
 			return 0;
 		}
@@ -50,7 +50,7 @@ export const login = async (username: string, password: string): Promise<number>
 	}
 };
 
-export const updateUsername = async (newUsername: string, user_id: number): Promise<void> => {
+export const updateUsername = async (newUsername: string, userId: number): Promise<void> => {
 	try {
 		const stmt = db.prepare(`
 			UPDATE user
@@ -59,7 +59,7 @@ export const updateUsername = async (newUsername: string, user_id: number): Prom
 				user_id = ?
 		`);
 
-		stmt.run(newUsername, user_id);
+		stmt.run(newUsername, userId);
 	} catch (e) {
 		throw new Error("An error occured updating the authentication database");
 	}
@@ -76,7 +76,7 @@ export const updateUsername = async (newUsername: string, user_id: number): Prom
 // 	return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 // }
 
-// export const setAccountStatusOnline = async (user_id: number) => {
+// export const setAccountStatusOnline = async (userId: number) => {
 // 	try {
 // 		const stmt = db.prepare(`
 // 			UPDATE user
@@ -85,16 +85,16 @@ export const updateUsername = async (newUsername: string, user_id: number): Prom
 // 			WHERE
 // 				user_id = ?	
 // 		`);
-// 		stmt.run(formatDate(new Date()), 'online', user_id);
+// 		stmt.run(formatDate(new Date()), 'online', userId);
 		
-// 		console.log('Account status updated to online for user:', user_id);
+// 		console.log('Account status updated to online for user:', userId);
 // 	} catch (e) {
 // 		console.error('Error setting account status:', e);
 // 		throw new Error("An error occured setting the account status");
 // 	}
 // }
 
-// export const setAccountStatusOffline = async (user_id: number) => {
+// export const setAccountStatusOffline = async (userId: number) => {
 // 	try {
 // 		const stmt = db.prepare(`
 // 			UPDATE user
@@ -102,9 +102,9 @@ export const updateUsername = async (newUsername: string, user_id: number): Prom
 // 			WHERE
 // 				user_id = ?
 // 		`);
-// 		stmt.run('offline', user_id);
+// 		stmt.run('offline', userId);
 		
-// 		console.log('Account status updated to offline for user:', user_id);
+// 		console.log('Account status updated to offline for user:', userId);
 // 	} catch (e) {
 // 		console.error('Error setting account status:', e);
 // 		throw new Error("An error occured setting the account status");

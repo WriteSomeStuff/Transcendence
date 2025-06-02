@@ -92,7 +92,7 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 		}
 		console.log('User %d verified', verifiedUserId);
 	
-		const token = request.jwt.sign({ user_id: verifiedUserId, type: "registered" }, { expiresIn: "1d" });
+		const token = request.jwt.sign({ userId: verifiedUserId, type: "registered" }, { expiresIn: "1d" });
 		console.log("Login successful");
 		
 		const isProduction = process.env.NODE_ENV === 'production';
@@ -122,7 +122,7 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 export const logoutUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	reply.clearCookie('access_token'); // to clear cookie in browser
 
-	// setAccountStatusOffline(request.user.user_id);
+	// setAccountStatusOffline(request.user.userId);
 	// TODO: set status to offline in user service
 
 	return reply.send({ message: "Logout successfull" });
@@ -130,9 +130,9 @@ export const logoutUserHandler = async (request: FastifyRequest, reply: FastifyR
 
 export const updateUsernameHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const { newUsername, user_id } = request.body as { newUsername: string, user_id: number };
+		const { newUsername, userId } = request.body as { newUsername: string, userId: number };
 
-		updateUsername(newUsername, user_id);
+		updateUsername(newUsername, userId);
 
 		reply.send({ success: true });
 	} catch (e) {

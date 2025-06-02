@@ -30,7 +30,7 @@ app.decorate(
 			reply.code(401).send({ message: 'Unauthorized' });
 		}
 		try {
-			const decoded = request.jwt.verify<{ user_id: number }>(token as string);
+			const decoded = request.jwt.verify<{ userId: number }>(token as string);
 			request.user = decoded;
 		} catch (err) {
 			console.error("not verified");
