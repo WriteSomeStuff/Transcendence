@@ -1,29 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memory</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-    <div class="your-element">
-        <div class="welcome-message">
-            Memory game
-        </div>
+	<div class="welcome-message">Memory game</div>
+
+	<div id='scoreboardLeft' class="scoreboard scoreboard-left"></div>
+	<div id='scoreboardRight' class="scoreboard scoreboard-right"></div>
+	
+	<button id="restart" class="restart-button"> Restart</button>
 
 	<!-- this inserts the pictures into image-container -->
 	<script src="loadCards.js"></script>
 	<!-- load the memory script logic-->
 	<script src="memory.js"></script>
-
-
-	<!-- <div class="links-container">
-		<a href="#link1">Link 1</a>
-		<a href="#link2">Link 2</a>
-		<a href="#link3">Link 3</a>
-	</div> -->
-	<button id="restart" class="restart-button"> Restart</button>
-</div>
 </body>
+
 </html>

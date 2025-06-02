@@ -47,6 +47,9 @@ html, body {
 .card.is-flipped {
     transform: rotateY(180deg); /* Flip the card */
 }
+.card.hidden {
+   opacity: 0;
+}
 
 .card .front,
 .card .back {
@@ -65,4 +68,24 @@ html, body {
 	position: absolute;
 	left: 50%;
 	top: 75%;
+}
+
+.scoreboard {
+    position: absolute;
+    top: 20px; /* Adjust as needed */
+    font-size: 30px; /* Adjust font size as needed */
+    color: white; /* Adjust text color as needed */
+    background-color: rgba(0, 0, 0, 0); /* Semi-transparent background */
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.scoreboard-left {
+	top: 10%;
+	left: 5%;
+}
+
+.scoreboard-right{
+	top: 10%;
+	right: 5%;
 }
