@@ -3,7 +3,8 @@ import { FastifyRequest, FastifyReply } from "fastify";
 import {
 	insertUser,
 	getUserDataFromDb,
-	updateUsername
+	updateUsername,
+	updateStatus
 } from "./userService";
 
 export const insertUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -50,15 +51,15 @@ export const getUserDataHandler = async (request: FastifyRequest, reply: Fastify
 
 export const updateUsernameHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const userId = (request.user as { userId: number } | undefined)?.userId ?? 1;
-		const { newUsername } = request.body as { newUsername: string};
+		const userId = (request.user as { userId: number } | undefined)?.userId ?? 1; //TODO get this from body or request
+		const { newUsername } = request.body as { newUsername: string };
 
 		await updateUsername(userId, newUsername);
 
 		const response = await fetch('http://auth_service:8080/auth/username', {
 			method: 'PUT',
 			headers: {
-				'Content-Type': 'application/json',
+				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify({
 				newUsername,
@@ -81,3 +82,20 @@ export const updateUsernameHandler = async (request: FastifyRequest, reply: Fast
 		});
 	}
 };
+
+export const setStatusHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+	try {
+		const { userId, status } = request.body as { userId: number, status: string };
+
+		console.log('Setting status for user,', userId, 'to', status);
+
+		await updateStatus(userId, status);
+
+		reply.send({ success: true });
+	} catch (e) {
+		reply.send({
+			success: false,
+			error: e
+		});
+	}
+}

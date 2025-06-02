@@ -44,3 +44,18 @@ export const updateUsername = async (userId: number, newUsername: string) => {
 		throw new Error(`${e.message || e}`);
 	}
 };
+
+export const updateStatus = async (userId: number, status: string) => {
+	try {
+		const stmt = db.prepare(`
+			UPDATE user
+			SET account_status = ?
+			WHERE
+				user_id = ?	
+		`);
+
+		stmt.run(status, userId);
+	} catch (e) {
+		throw new Error("An error occured updating account status");
+	}
+}

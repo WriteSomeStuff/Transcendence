@@ -92,7 +92,7 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 		}
 		console.log('User %d verified', verifiedUserId);
 	
-		const token = request.jwt.sign({ userId: verifiedUserId, type: "registered" }, { expiresIn: "1d" });
+		const token = request.jwt.sign({ userId: verifiedUserId }, { expiresIn: "1d" });
 		console.log("Login successful");
 		
 		const isProduction = process.env.NODE_ENV === 'production';
@@ -103,8 +103,17 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 			secure: isProduction,
 		});
 
-		// setAccountStatusOnline(verifiedUserId);
-		// TODO: set status to online in user service
+		// TODO: set last login in user service
+		const response = await fetch ('http://user_service:8080/users/status', {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				userId: verifiedUserId,
+				status: 'online'
+			})
+		})
 		
 		reply.status(200).send({ message: `user '${username}' logged in successfully` });
 
@@ -122,8 +131,16 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 export const logoutUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	reply.clearCookie('access_token'); // to clear cookie in browser
 
-	// setAccountStatusOffline(request.user.userId);
-	// TODO: set status to offline in user service
+	const response = await fetch ('http://user_service:8080/users/status', {
+		method: 'PUT',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({
+			userId: request.user.userId,
+			status: 'offline'
+		})
+	})
 
 	return reply.send({ message: "Logout successfull" });
 }
@@ -136,7 +153,7 @@ export const updateUsernameHandler = async (request: FastifyRequest, reply: Fast
 
 		reply.send({ success: true });
 	} catch (e) {
-		reply.status(500).send({
+		reply.send({
 			success: false,
 			error: 'An error occured inserting a new username into authentication database'
 		});
