@@ -29,7 +29,7 @@ selectView("home", false);
 
 document.querySelectorAll("button[page]").forEach(button => {
 	button.addEventListener("click", (event) => {
-		const target: HTMLElement = event.target as HTMLElement;
+		const target: HTMLElement = event.currentTarget as HTMLElement;
 		const page: string | null = target.getAttribute("page");
 		if (page) {
 			selectView(page, true);

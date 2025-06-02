@@ -23,7 +23,7 @@ body {
 	height: 4rem;
   }
 
-button[page] {
+button[page] .btn-inner {
 	padding: 1rem 2rem;
 	background-color: #413ca1;
 	color: pink;
@@ -31,17 +31,25 @@ button[page] {
 	border-radius: 8px;
 	font-size: 1rem;
 	cursor: pointer;
-	transition: background-color 0.2s ease-in-out, transform 0.1s;
+	transition: background-color 0.2s ease-in-out;
 	box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+	overflow: hidden;
+	position: relative;
 }
 
-button[page]:hover {
-background-color: #894ae2;
+button[page] .btn-inner {
+	display: inline-block;
+	transition: transform 0.1s;
 }
 
-button[page]:active {
-transform: scale(0.50);
+button[page]:hover .btn-inner {
+	background-color: #894ae2;
 }
+
+button[page]:active .btn-inner {
+	transform: scale(0.50);
+}
+
 
 .main {
 	display: flex;
