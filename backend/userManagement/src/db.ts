@@ -25,8 +25,7 @@ const sql = `
 		WHERE rowid = NEW.rowid;
 	END;
 `
-
-// datetime gets current time in UTC, we are now in CEST so +2, set to +1 for CET
+// datetime +2 hour because it return UTC, +2 hour -> CEST
 
 try {
 	console.log("[user-mgmt-db init] Initialising user management database:");

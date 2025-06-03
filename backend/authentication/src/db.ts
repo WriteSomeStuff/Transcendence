@@ -11,9 +11,10 @@ const sql = `
 		user_id			INTEGER	PRIMARY KEY,
 		username		TEXT	NOT NULL	UNIQUE,
 		password_hash	TEXT	NOT_NULL,
-		created_at		TEXT	DEFAULT (datetime('now', 'localtime'))
+		created_at		TEXT	DEFAULT (datetime('now', '+2 hour'))
 	);
 `
+// datetime +2 hour because it return UTC, +2 hour -> CEST
 
 try {
 	console.log("[auth-db init] Initialising authentication database:");
