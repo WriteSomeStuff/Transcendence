@@ -8,18 +8,18 @@
 		<script defer src="./frontend/js/selectView.js"></script>
 		<link rel="icon" type="image/png" sizes="16x16" href="./frontend/assets/favicon/favicon-16x16.png">
 	</head>
-	<body>
-		<div class="main">
+	<body class="m-0 p-0 font-comic overflow-y-hidden box-border">
+		<div class="flex flex-col h-screen w-screen relative bg-stars bg-20% text-pink-200">
 			
-			<div class="wrapper">
-				<div class="nav-buttons flex flex-row">
-					<button page="home">Home</button>
-					<button page="login">Log in</button>
+			<div class="gap-8 flex flex-col justify-center items-center h-screen w-full">
+				<div class="h-16 gap-4 flex flex-row">
+					<button class="px-8 py-4 rounded-md bg-purple-700 hover:bg-purple-300" page="home">Home</button>
+					<button class="px-8 py-4 rounded-md bg-purple-700 hover:bg-purple-300" page="login">Log in</button>
 				</div>
-				<div class="content">
+				<div class="w-1/2 h-3/4 bg-black p-5 text-center border-8 animate-rainbow">
 					<div id="spa"></div>
 				</div>
-				<div class="footer"></div>
+				<div class="h-16"></div>
 			</div>
 		</div>
 	</body>
@@ -30,8 +30,6 @@
 	to run tailwind cli build process: npx tailwindcss -i ./frontend/css/home.css -o ./frontend/css/output.css
 -->
 <!-- To do:
- change to tailwind
- fix page loading in script, sometimes wont load page
  add buttons
  if not logged in, show sign in button. if logged in, show all other buttons (game, profile, log out).
  redirect to log in page if not logged in.

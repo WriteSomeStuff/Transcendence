@@ -1,91 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap');
 
-body {
-	background: url("/frontend/assets/backgrounds/movingStars.gif") center center;
-	color: pink;
-	background-size: 10%;
-}
-
-* {
-	margin: 0;
-	padding: 0;
-	box-sizing: border-box;
-	font-family: "Comic Neue", cursive;
-	overflow-y: hidden;
-}
-
-.nav-buttons {
-	display: flex;
-	gap: 1rem;
-	height: 4rem;
-  }
-
-button[page] {
-	padding: 1rem 2rem;
-	background-color: #413ca1;
-	color: pink;
-	border: none;
-	border-radius: 8px;
-	font-size: 1rem;
-	cursor: pointer;
-	transition: background-color 0.2s ease-in-out, transform 0.1s;
-	box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-button[page]:hover {
-background-color: #894ae2;
-}
-
-button[page]:active {
-transform: scale(0.50);
-}
-
-.main {
-	display: flex;
-	flex-direction: column;
-	height: 100vh;
-	width: 100vw;
-	position: relative;
-}
-
-.wrapper {
-	gap: 2rem;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	height: 100vh;
-	width: 100%;
-}
-
-.footer {
-	height: 4rem;
-}
-
-@keyframes rainbow {
-	0%   { border-color: red; box-shadow: 0 0 20px red; }
-	10%  { border-color: orange; box-shadow: 0 0 20px orange; }
-	20%  { border-color: yellow; box-shadow: 0 0 20px yellow; }
-	30%  { border-color: lime; box-shadow: 0 0 20px lime; }
-	40%  { border-color: green; box-shadow: 0 0 20px green; }
-	50%  { border-color: cyan; box-shadow: 0 0 20px cyan; }
-	60%  { border-color: blue; box-shadow: 0 0 20px blue; }
-	70%  { border-color: indigo; box-shadow: 0 0 20px indigo; }
-	80%  { border-color: violet; box-shadow: 0 0 20px violet; }
-	90%  { border-color: pink; box-shadow: 0 0 20px pink; }
-	100% { border-color: red; box-shadow: 0 0 20px red; }
-}
-
-.content {
-	width: 800px;
-	height: 70vh;
-	background: rgba(0, 0, 0, 0.7);
-	color: pink;
-	padding: 20px;
-	text-align: center;
-	border: 5px solid red;
-	animation: rainbow 20s linear infinite;
+@font-face {
+  font-family: 'Comic';
+  src: url('../assets/comicsans.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
 }
