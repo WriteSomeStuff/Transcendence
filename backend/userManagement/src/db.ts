@@ -31,11 +31,6 @@ const sql = `
 try {
 	console.log("[user-mgmt-db init] Initialising user management database:");
 	db.exec(sql);
-	// // testing (
-	// db.prepare(
-	// 	`INSERT INTO user (username, avatar_path, account_status) VALUES (?, ?, ?)`
-	// ).run('testuser', '/avatars/testuser.png', 'online');
-	// // )
 	console.log("[user-mgmt-db init] Successfully initialised user management database");
 } catch (e) {
 	console.error('Error creating user table:', e);
