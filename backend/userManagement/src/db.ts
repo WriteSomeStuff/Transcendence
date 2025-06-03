@@ -10,12 +10,23 @@ const sql = `
 	CREATE TABLE IF NOT EXISTS user (
 		user_id			INTEGER PRIMARY KEY,
 		username		TEXT	NOT NULL	UNIQUE,
-		created_at		TEXT	DEFAULT (datetime('now', 'localtime')),
+		created_at		TEXT	DEFAULT (datetime('now', '+2 hour')),
 		last_login		TEXT,
 		avatar_path		TEXT,
 		account_status	TEXT	DEFAULT ('offline')	CHECK(account_status IN ('online', 'offline'))
 	);
+
+	CREATE TRIGGER update_last_login
+	AFTER UPDATE OF account_status ON user
+	WHEN NEW.account_status = 'online'
+	BEGIN
+		UPDATE user
+		SET last_login = (datetime('now', '+2 hour'))
+		WHERE rowid = NEW.rowid;
+	END;
 `
+
+// datetime gets current time in UTC, we are now in CEST so +2, set to +1 for CET
 
 try {
 	console.log("[user-mgmt-db init] Initialising user management database:");
