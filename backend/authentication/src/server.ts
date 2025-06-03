@@ -28,14 +28,12 @@ app.decorate(
 		if (!token) {
 			console.error("no token");
 			reply.code(401).send({ message: 'Unauthorized' });
-			// return;
 		}
 		try {
 			const decoded = request.jwt.verify<{ userId: number }>(token as string);
 			request.user = decoded;
 		} catch (err) {
 			reply.code(401).send({ message: 'Unauthorized' });
-			// return; //TODO necessary?
 		}
 	}
 );
