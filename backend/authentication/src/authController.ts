@@ -103,7 +103,6 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 			secure: isProduction,
 		});
 
-		// TODO: set last login in user service
 		const response = await fetch ('http://user_service:8080/users/status', {
 			method: 'PUT',
 			headers: {
