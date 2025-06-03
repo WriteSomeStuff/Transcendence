@@ -29,10 +29,8 @@ export const insertUserHandler = async (request: FastifyRequest, reply: FastifyR
 
 export const getUserDataHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const userId = (request.user as { userId: number } | undefined)?.userId ?? 1;
-
-		console.log('[User Controller] Fetching user data for:', userId);
-		const userData = await getUserDataFromDb(userId);
+		console.log('[User Controller] Fetching user data for:', request.user.userId);
+		const userData = await getUserDataFromDb(request.user.userId);
 		
 		console.log('[User Controller] User data:', userData);
 
@@ -51,10 +49,9 @@ export const getUserDataHandler = async (request: FastifyRequest, reply: Fastify
 
 export const updateUsernameHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const userId = (request.user as { userId: number } | undefined)?.userId ?? 1; //TODO get this from body or request
 		const { newUsername } = request.body as { newUsername: string };
 
-		await updateUsername(userId, newUsername);
+		await updateUsername(request.user.userId, newUsername);
 
 		const response = await fetch('http://auth_service:8080/auth/username', {
 			method: 'PUT',
@@ -63,7 +60,7 @@ export const updateUsernameHandler = async (request: FastifyRequest, reply: Fast
 			},
 			body: JSON.stringify({
 				newUsername,
-				userId
+				userId: request.user.userId
 			})
 		});
 
@@ -86,6 +83,7 @@ export const updateUsernameHandler = async (request: FastifyRequest, reply: Fast
 export const setStatusHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
 		const { userId, status } = request.body as { userId: number, status: string };
+
 
 		console.log('Setting status for user,', userId, 'to', status);
 
