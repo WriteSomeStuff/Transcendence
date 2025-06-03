@@ -1,7 +1,7 @@
 import argon2 from "argon2";
 import db from "./db";
 
-export const register = async (username: string, password: string): Promise<void> => {
+export const register = async (username: string, password: string) => {
 	try {
 		const hashedPassword = await argon2.hash(password);
 
@@ -41,7 +41,7 @@ export const login = async (username: string, password: string): Promise<number>
 		if (await argon2.verify(row.password_hash, password)) {
 			return (row.user_id);
 		} else {
-			return 0;
+			return 0; // Passwords don't match
 		}
 	
 	} catch (e) {
@@ -50,7 +50,7 @@ export const login = async (username: string, password: string): Promise<number>
 	}
 };
 
-export const updateUsername = async (newUsername: string, userId: number): Promise<void> => {
+export const updateUsername = async (newUsername: string, userId: number) => {
 	try {
 		const stmt = db.prepare(`
 			UPDATE user
