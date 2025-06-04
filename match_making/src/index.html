@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join Game Room</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to the Game Room!</h1>
+        <p>Ready to have some fun? Join a game room and let the adventure begin!</p>
+		<form action="/joinRoom" method="post">
+        	<button id="joinGameButton" type="submit">Join Room</button>
+    	</form>
+    </div>
+	<script src="js/joinRoom.js"></script>
+</body>
+
+<!-- TODO: try to understand why this was necessary according to gpt. ES modules vs commonJS modules in the browser. together with "module": "ESNExt in the tsconfig.client.json"-->
+<script type="module" src="js/joinRoom.js"></script>
+
+<script type="module" src="js/room.js"></script>
+</html>
