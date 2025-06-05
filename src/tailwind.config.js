@@ -1,10 +1,13 @@
+const { transform } = require('typescript');
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["index.html"],
   theme: {
     extend: {
       animation: {
-        rainbow: "rainbow 20s infinite"
+        rainbow: "rainbow 20s infinite",
+        scrollLeft: "scrollLeft 20s linear infinite",
       },
       keyframes: {
         rainbow: {
@@ -19,6 +22,10 @@ module.exports = {
           '80%':  { borderColor: 'violet', boxShadow: '0 0 20px violet' },
           '90%':  { borderColor: 'pink', boxShadow: '0 0 20px pink' },
           '100%': { borderColor: 'red', boxShadow: '0 0 20px red' },
+        },
+        scrollLeft: {
+          '0%': { transform: 'translateX(100%)' },
+          '100%': { transform: 'translateX(-100%)' },
         }
       },
       fontFamily: {
