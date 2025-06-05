@@ -9,28 +9,26 @@
 		<link rel="icon" type="image/png" sizes="16x16" href="./frontend/assets/favicon/favicon-16x16.png">
 	</head>
 	<body class="m-0 p-0 font-comic overflow-y-hidden box-border">
-		<div class="flex flex-col h-screen w-screen relative bg-stars bg-20% text-pink-200">
-			
-			<div class="gap-8 flex flex-col justify-center items-center h-screen w-full">
-				<div class="h-16 gap-4 flex flex-row">
-					<button class="px-8 py-4 rounded-md bg-purple-700 hover:bg-purple-300" page="home">Home</button>
-					<button class="px-8 py-4 rounded-md bg-purple-700 hover:bg-purple-300" page="login">Log in</button>
+		<div class="flex h-screen w-screen items-center justify-center bg-stars bg-10% text-pink-200">
+			<div class="flex flex-col w-1/2 h-full bg-black p-5 text-center border-8 animate-rainbow">
+				<div class="flex justify-center items-center p-16">
+					<img src="https://i.picasion.com/gl/92/kjzM.gif" width="750" height="80">
 				</div>
-				<div class="w-1/2 h-3/4 bg-black p-5 text-center border-8 animate-rainbow">
-					<div id="spa"></div>
+				<div class="gap-4 bg-purple-700">
+					<button class="px-6 py-4 rounded-md hover:bg-purple-950" page="home">Home</button>
+					<button class="px-6 py-4 rounded-md hover:bg-purple-950" page="login">Log in</button>
+					<button class="px-6 py-4 rounded-md hover:bg-purple-950" page="scoreboard">Scoreboard</button>
 				</div>
-				<div class="h-16"></div>
+				<div id="spa" class="flex-1 p-16 flex items-start justify-center"></div>
 			</div>
 		</div>
 	</body>
 </html>
 
-
 <!-- to run script and build js from ts: npm run build 
 	to run tailwind cli build process: npx tailwindcss -i ./frontend/css/home.css -o ./frontend/css/output.css
 -->
 <!-- To do:
- add buttons
- if not logged in, show sign in button. if logged in, show all other buttons (game, profile, log out).
- redirect to log in page if not logged in.
+ make pages for when logged in or when not logged in
+ if not logged in, show sign in button, and scoreboard. if logged in, show all other buttons.
 -->
