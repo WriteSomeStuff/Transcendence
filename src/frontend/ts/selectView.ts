@@ -1,3 +1,16 @@
+function	bindButtons()
+{
+	document.querySelectorAll("button[page]").forEach(button => {
+		button.addEventListener("click", (event) => {
+			const target: HTMLElement = event.currentTarget as HTMLElement;
+			const page: string | null = target.getAttribute("page");
+			if (page) {
+				selectView(page, true);
+			}
+		});
+	});
+}
+
 function selectView(page: string, push: boolean)
 {
 	fetch(`./frontend/js/views/${page}.html`)
@@ -14,6 +27,7 @@ function selectView(page: string, push: boolean)
 			if (push) {
 				window.history.pushState({}, "", `/${page}`);
 			}
+			bindButtons();
 		}
 		else {
 			console.error("Element spa not found.");
@@ -26,16 +40,6 @@ function selectView(page: string, push: boolean)
 }
 
 selectView("home", false);
-
-document.querySelectorAll("button[page]").forEach(button => {
-	button.addEventListener("click", (event) => {
-		const target: HTMLElement = event.currentTarget as HTMLElement;
-		const page: string | null = target.getAttribute("page");
-		if (page) {
-			selectView(page, true);
-		}
-	});
-});
 
 window.addEventListener("popstate", (event) => {
 	const page: string = location.pathname.slice(1) || "home";

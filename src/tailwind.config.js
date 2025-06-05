@@ -2,7 +2,7 @@ const { transform } = require('typescript');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["index.html"],
+  content: ["./frontend/js/views/*.html", "./index.html"],
   theme: {
     extend: {
       animation: {
