@@ -1,28 +1,57 @@
 
-import { Player, gameQueues, GameMode } from "./types";
+import { roomQueues, Room } from "./room";
+import { Player, GameMode } from "./types";
 
 
-export function joinRoom(userID: string) {
+//TODO: make leaveRoom function, remove long idle rooms, remove empty rooms
+
+export function joinRoom(userID: number, playersGameMode: string) {
 
 
-	//TODO //entry here. does the request header hold userID or session identifier?
-	//if session ID, get from db and confirm session here OR is it confirmed before getting it? in that case just get data from db
+	//get player data //TODO: get data needed for the game. dont know what it is yet lol
+	const gameModeEnumValue = playersGameMode as GameMode;
 	
-	//get player data
-
-	//check if a room exists
-	
-	//if room exists join
-
-	//else create a room and put player in it
-
 	let player: Player;
 	player = {
-		PlayerID: 2,
-		gameMode: GameMode.pong_2
+		PlayerID: userID,
+		gameMode: gameModeEnumValue
+	}
+	
+	console.log("roomqueue length: " + roomQueues[player.gameMode].length ); //DEBUG
+	
+	//check if a room exists
+	if (roomQueues[player.gameMode].length > 0)
+	{	//join first available room
+		roomQueues[player.gameMode][0].joinRoom(player.PlayerID); 
+	}
+	//create a room and put player in it
+	else{
+		console.log("no Room found so creating a new one"); //DEBUG
+		const maxPlayers = getMaxPlayerAmount(gameModeEnumValue);
+		const newRoom = new Room(player.PlayerID, maxPlayers, gameModeEnumValue); 
+
+		roomQueues[player.gameMode].push(newRoom);
 	}
 
-	console.log(player + " is trying to join a room");
+	//player will always join first available room so can try to start with [0];
+	roomQueues[player.gameMode][0].tryStartGame();
+		
+	//clean up rooms and send result to db? TODO: figure out how and when to send stuff to db. (probably make the game microservice send it to db when done?)
+	
+	console.log('"' + userID + '"' + " is trying to join a room in gameMode: " + playersGameMode); //DEBUG
+	console.log(roomQueues); //DEBUG
+}
 
-	console.log(gameQueues);
+function getMaxPlayerAmount(gameMode: string) : number{
+
+	switch(gameMode){
+		case "pong_2":
+			return 2;
+		case "pong_3":
+			return 3;
+		case "pong_4":
+			return 4;
+		default:
+			return 2;
+	}
 }

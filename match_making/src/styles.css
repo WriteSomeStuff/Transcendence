@@ -63,8 +63,7 @@ p {
     font-size: 1.2rem;
     margin-bottom: 2rem;
 }
-
-#joinGameButton {
+.joinGameButton {
     background-color: transparent;
     color: #00f0ff;
     border: 2px solid #00f0ff;
@@ -77,9 +76,11 @@ p {
     box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
     position: relative;
     overflow: hidden;
+    display: block;      /* stack vertically */
+    margin: 0.5rem 0;    /* spacing */
 }
 
-#joinGameButton::before {
+.joinGameButton::before {
     content: "";
     position: absolute;
     top: 0;
@@ -90,11 +91,11 @@ p {
     transition: 0.5s;
 }
 
-#joinGameButton:hover {
+.joinGameButton:hover {
     box-shadow: 0 0 20px rgba(0, 240, 255, 0.8);
     text-shadow: 0 0 10px rgba(0, 240, 255, 0.8);
 }
 
-#joinGameButton:hover::before {
+.joinGameButton:hover::before {
     left: 100%;
 }

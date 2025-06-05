@@ -20,8 +20,8 @@ fastify.register(fastifyFormbody);
 fastify.register(fastifyCookie);
 
 fastify.get('/', async (req, reply) => {
-	
-	reply.header('Set-Cookie', 'sessionId=abc123; userId=testUser Path=/; HttpOnly');
+	const uniqueId = generateUniqueId();
+	reply.header('Set-Cookie', ['sessionId=abc123; Path=/; HttpOnly', `userId=${uniqueId}; Path=/; HttpOnly`]);
 	console.log("set cookies")
 	return reply.sendFile('index.html');
 });
@@ -31,15 +31,17 @@ fastify.post('/joinRoom', async (req, reply) => {
   // handle the player joining logic here
 
 	const userId = req.cookies.userId;
-  	console.log(req);
+	const gameMode = (req.body as any).gameMode;
+	
 	if (userId)
-  		joinRoom(userId);
+	{
+		const idAsNumber: number = +userId;
+  		joinRoom(idAsNumber, gameMode);
+	}
 	else {
   // Handle the case where there's no userId cookie
   	reply.status(400).send({ error: 'No userId cookie found' });
 	}
-//   joinRoom(req.userId);
-  console.log("player attempting to join room")
 });
 
 fastify.listen({ port : 8080}, (err, address) =>{
@@ -50,3 +52,7 @@ fastify.listen({ port : 8080}, (err, address) =>{
 	}
 	console.log(`Matchmaking server up and running on ${address}`)
 });
+
+function generateUniqueId(): number { //TODO: check whether this is accepted solution by group lol :)
+    return Math.floor(Math.random() * 1000000);
+}
