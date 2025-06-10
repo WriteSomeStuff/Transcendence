@@ -43,7 +43,6 @@ export const login = async (username: string, password: string): Promise<AuthRes
 		} else {
 			return { success: false, error: "Incorrect password" };
 		}
-	
 	} catch (e) {
 		console.error('Error during login:', e);
 		return { success: false, error: "An error occured during login" };

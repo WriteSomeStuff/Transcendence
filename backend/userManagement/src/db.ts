@@ -25,7 +25,7 @@ const sql = `
 		WHERE rowid = NEW.rowid;
 	END;
 `
-// datetime +2 hour because it return UTC, +2 hour -> CEST
+// datetime +2 hour because it returns UTC, +2 hour -> CEST
 
 try {
 	console.log("[user-mgmt-db init] Initialising user management database:");
