@@ -6,7 +6,10 @@ import { Player, GameMode } from "./types";
 //TODO: make leaveRoom function, remove long idle rooms, remove empty rooms
 
 export function joinRoom(userID: number, playersGameMode: string) {
+	console.log('"' + userID + '"' + " is trying to join a room in gameMode: " + playersGameMode); //DEBUG
 
+	if (playerIsAlreadyInRoom(userID))
+		return ;
 
 	//get player data //TODO: get data needed for the game. dont know what it is yet lol
 	const gameModeEnumValue = playersGameMode as GameMode;
@@ -16,8 +19,6 @@ export function joinRoom(userID: number, playersGameMode: string) {
 		PlayerID: userID,
 		gameMode: gameModeEnumValue
 	}
-	
-	console.log("roomqueue length: " + roomQueues[player.gameMode].length ); //DEBUG
 	
 	//check if a room exists
 	if (roomQueues[player.gameMode].length > 0)
@@ -38,7 +39,6 @@ export function joinRoom(userID: number, playersGameMode: string) {
 		
 	//clean up rooms and send result to db? TODO: figure out how and when to send stuff to db. (probably make the game microservice send it to db when done?)
 	
-	console.log('"' + userID + '"' + " is trying to join a room in gameMode: " + playersGameMode); //DEBUG
 	console.log(roomQueues); //DEBUG
 }
 
@@ -54,4 +54,21 @@ function getMaxPlayerAmount(gameMode: string) : number{
 		default:
 			return 2;
 	}
+}
+
+function playerIsAlreadyInRoom(userID: number) : boolean{
+
+	for (const gameMode in roomQueues) {
+		const rooms = roomQueues[gameMode as GameMode];
+		
+		// Check each room in the current game mode
+		for (const room of rooms) {
+			if (room.playerList.includes(userID)) {
+				console.log("Error, player is already in a room")
+				return true;
+			}
+		}
+	}
+	
+	return false;
 }
