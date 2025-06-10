@@ -1,6 +1,8 @@
 import argon2 from "argon2";
 import db from "./db";
 
+import { AuthResultObj } from "./types/types";
+
 export const register = async (username: string, password: string) => {
 	try {
 		const hashedPassword = await argon2.hash(password);
@@ -19,7 +21,7 @@ export const register = async (username: string, password: string) => {
 	}
 };
 
-export const login = async (username: string, password: string): Promise<number> => {
+export const login = async (username: string, password: string): Promise<AuthResultObj> => {
 	try {
 		const stmt = db.prepare(`
 			SELECT 
@@ -31,22 +33,20 @@ export const login = async (username: string, password: string): Promise<number>
 				username = ?
 		`);
 		const row = stmt.get(username) as {	user_id: number, password_hash: string };
-		
-		console.log('userId:', row.user_id);
-		
+
 		if (!row) {
-			return 0; // User not found
+			return { success: false, error: "User not found" };
 		}
 
 		if (await argon2.verify(row.password_hash, password)) {
-			return (row.user_id);
+			return { success: true, userId: row.user_id };
 		} else {
-			return 0; // Passwords don't match
+			return { success: false, error: "Incorrect password" };
 		}
 	
 	} catch (e) {
 		console.error('Error during login:', e);
-		throw new Error("An error occured during login");
+		return { success: false, error: "An error occured during login" };
 	}
 };
 

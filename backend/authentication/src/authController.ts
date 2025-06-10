@@ -85,17 +85,24 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 		const parsedData = LOGIN_SCHEMA.parse(request.body);
 		const { username, password } = parsedData;
 
-		const verifiedUserId = await login(username, password);
+		const result = await login(username, password);
 
-		if (verifiedUserId === 0) {
-			reply.status(401).send({ error: 'Invalid username or password' });
+		if (!result.success) {
+			reply.status(401).send({ error: result.error });
+			return;
 		}
-		console.log('User %d verified', verifiedUserId);
-	
-		const token = request.jwt.sign({ userId: verifiedUserId }, { expiresIn: "1d" });
+
+		if (typeof result.userId !== 'number') {
+			reply.status(500).send({ error: 'Invalid userId returned from login' });
+			return;
+		}
+		console.log('User %d verified', result.userId);
+
+		const token = request.jwt.sign({ userId: result.userId }, { expiresIn: "1d" });
+		
 		console.log("Login successful");
 		
-		const isProduction = process.env.NODE_ENV === 'production';
+		const isProduction = process.env.NODE_ENV === 'production'; // because testing with http requests, can also be set to "auto" maybe?
 
 		reply.setCookie('access_token', token, {
 			path: '/',
@@ -109,7 +116,7 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify({
-				userId: verifiedUserId,
+				userId: result.userId,
 				status: 'online'
 			})
 		})
