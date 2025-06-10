@@ -12,7 +12,8 @@ import { z } from "zod";
 import {
 	register,
 	login,
-	updateUsername
+	updateUsername,
+	updatePassword
 } from "./authService";
 
 const REGISTER_SCHEMA = z.object({
@@ -163,5 +164,21 @@ export const updateUsernameHandler = async (request: FastifyRequest, reply: Fast
 			success: false,
 			error: 'An error occured inserting a new username into authentication database'
 		});
+	}
+}
+
+export const updatePasswordHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+	try {
+		const { newPassword, userId } = request.body as { newPassword: string, userId: number };
+
+		updatePassword(newPassword, userId);
+
+		reply.send({ success: true });
+
+	} catch (e) {
+		reply.send({
+			success: false,
+			error: 'An error occured inserting a new password into authentication database'
+		});	
 	}
 }

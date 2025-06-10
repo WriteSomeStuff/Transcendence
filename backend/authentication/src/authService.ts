@@ -64,3 +64,20 @@ export const updateUsername = async (newUsername: string, userId: number) => {
 		throw new Error("An error occured updating the authentication database");
 	}
 }
+
+export const updatePassword = async (newPassword: string, userId: number) => {
+	try {
+		const hashedPassword = await argon2.hash(newPassword);
+
+		const stmt = db.prepare(`
+			UPDATE user
+			SET password_hash = ?
+			WHERE
+				user_id = ?
+		`);
+
+		stmt.run(hashedPassword, userId);
+	} catch (e) {
+		throw new Error("An error occured updating the authentication database");
+	}
+}

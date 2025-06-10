@@ -80,6 +80,37 @@ export const updateUsernameHandler = async (request: FastifyRequest, reply: Fast
 	}
 };
 
+export const updatePasswordHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+	try {
+		const { newPassword } = request.body as { newPassword: string };
+
+		const response = await fetch('http://auth_service:8080/auth/password', {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				newPassword,
+				userId: request.user.userId
+			})
+		});
+
+		if (!response.ok) {
+			reply.status(500).send("Failed to update authentication database");
+		}
+
+		reply.status(200).send({
+			success: true,
+			message: 'Password successfully changed'
+		});
+	} catch (e) {
+		reply.status(500).send({
+			success: false,
+			error: 'An error occured updating the password:' + e
+		});
+	}
+}
+
 export const setStatusHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
 		const { userId, status } = request.body as { userId: number, status: string };
