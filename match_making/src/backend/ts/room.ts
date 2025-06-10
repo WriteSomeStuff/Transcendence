@@ -15,6 +15,7 @@ export class Room {
 	roomStatus: 			roomStatus;
 	roomGameMode:			GameMode;
 	createdAt:				Date;
+	lastActivity:			Date;
 
 
 	constructor(playerID: number, maxPlayerAmount: number, mode: GameMode){
@@ -32,17 +33,16 @@ export class Room {
 		this.roomGameMode = mode;
 
 		this.createdAt = new Date();
+		this.lastActivity = this.createdAt;
 	}
 
 	joinRoom(playerid: number){ //TODO: add mutex type thing here so no 2 users can join at the same time?
 		this.playerList.push(playerid);
 		this.amountPlayersInRoom++;
+		this.lastActivity = new Date();
 	}
 
 	tryStartGame(){
-
-		//TODO: dont allow the same player in multiple times
-
 		if (this.amountPlayersInRoom == this.maxPlayerAmount)
 		{
 			this.roomStatus = 'inProgress';
@@ -57,6 +57,7 @@ export class Room {
 			console.log("removing room from roomQueue");
 		}
 	}
+
 }
 
 function generateUniqueId(): number { //TODO: check whether this is accepted solution by group lol :)
@@ -69,3 +70,19 @@ export const roomQueues: Record<GameMode, Room[]> = { //TODO? make this dynamica
 	pong_4: [],
 	memory: []
 };
+
+
+//removes rooms that havent had any activity for over maxAgeMs milliseconds
+export function cleanUpOldRooms(maxAgeMs: number){
+	const now = Date.now();
+
+	for (const gameMode in roomQueues) {
+		//remove rooms that are over the limit
+		roomQueues[gameMode as GameMode] = roomQueues[gameMode as GameMode].filter(room => {
+			const age = now - room.lastActivity.getTime();
+			if (age > maxAgeMs)
+				console.log("room " + gameMode + " has been idle for " + age + "/" + maxAgeMs + "ms. Removing it now");
+			return age < maxAgeMs;
+		});
+	}
+}
