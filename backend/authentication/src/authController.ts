@@ -98,13 +98,15 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 			return;
 		}
 		console.log('User %d verified', result.userId);
+		
+		// 2FA if (result.twoFa) { do authentication }
 
 		const token = request.jwt.sign({ userId: result.userId }, { expiresIn: "1d" });
 		
 		console.log("Login successful");
 		
 		const isProduction = process.env.NODE_ENV === 'production'; // because testing with http requests, can also be set to "auto" maybe?
-
+		
 		reply.setCookie('access_token', token, {
 			path: '/',
 			httpOnly: true,

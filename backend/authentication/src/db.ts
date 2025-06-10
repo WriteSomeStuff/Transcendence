@@ -6,11 +6,12 @@ const db = new Database(DB_PATH, {
 	verbose: console.log,
 });
 
+// TODO add 2FA boolean
 const sql = `
 	CREATE TABLE IF NOT EXISTS user (
 		user_id			INTEGER	PRIMARY KEY,
 		username		TEXT	NOT NULL	UNIQUE,
-		password_hash	TEXT	NOT_NULL,
+		password_hash	TEXT	NOT NULL,
 		created_at		TEXT	DEFAULT (datetime('now', '+2 hour'))
 	);
 `
