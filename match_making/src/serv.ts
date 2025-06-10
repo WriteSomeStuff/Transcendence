@@ -6,11 +6,15 @@ import fastifyCookie from '@fastify/cookie';
 
 
 import { joinRoom } from './backend/ts/joinRoom';
+import { leaveRoom } from './backend/ts/leaveRoom'
+import { cleanUpOldRooms } from './backend/ts/room';
+
+const ONE_MINUTE = 60 * 1000;
+const FIVE_MINUTES = 5 * 60 * 1000;
 
 const fastify = Fastify({
 	
 });
-
 
 fastify.register(fastifyStatic, {
 	root: path.join(__dirname, ''),
@@ -35,6 +39,7 @@ fastify.post('/joinRoom', async (req, reply) => {
 	
 	if (userId)
 	{
+		//userId comes in as a 'string | undefined' and the '+' converts it to number 
 		const idAsNumber: number = +userId;
   		joinRoom(idAsNumber, gameMode);
 	}
@@ -42,7 +47,24 @@ fastify.post('/joinRoom', async (req, reply) => {
   // Handle the case where there's no userId cookie
   	reply.status(400).send({ error: 'No userId cookie found' });
 	}
+
+	//TODO:	make TS that receives the roomNumber and returns it to frontend?
 });
+
+fastify.post('/leaveRoom', async (request, reply) =>{
+	const userId = request.cookies.userId;
+	
+	if (userId)
+	{
+		//userId comes in as a 'string | undefined' and the '+' converts it to number 
+		const idAsNumber: number = +userId;
+  		leaveRoom(idAsNumber);
+	}
+	else {
+  // Handle the case where there's no userId cookie
+  	reply.status(400).send({ error: 'No userId cookie found' });
+	}
+})
 
 fastify.listen({ port : 8080}, (err, address) =>{
 	if (err)
@@ -53,6 +75,17 @@ fastify.listen({ port : 8080}, (err, address) =>{
 	console.log(`Matchmaking server up and running on ${address}`)
 });
 
-function generateUniqueId(): number { //TODO: check whether this is accepted solution by group lol :)
+function generateUniqueId(): number { //DEBUG just to generate userId cookies for test REMOVE
     return Math.floor(Math.random() * 1000000);
 }
+
+setInterval(() => {
+  cleanUpOldRooms(FIVE_MINUTES); // 5 minutes in ms
+}, ONE_MINUTE); // run once every minute
+
+
+
+// TODO: make src / dist folders
+// add /Health or /ping
+// add logging
+//
