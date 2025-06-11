@@ -148,7 +148,6 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 			return;
 		}
 
-		// If login is successful and 2FA is not enabled, handle the successful login
 		await handleSuccessfulLogin(request, reply, result.userId, username);
 
 	} catch (e) {
@@ -208,6 +207,8 @@ export const logoutUserHandler = async (request: FastifyRequest, reply: FastifyR
 			status: 'offline'
 		})
 	})
+
+	// TODO check response
 
 	return reply.status(200).send({ message: "Logout successfull" });
 }
