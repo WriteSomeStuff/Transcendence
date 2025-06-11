@@ -1,3 +1,5 @@
+import { bindRegisterForm } from "./formHandlers";
+
 function	bindButtons()
 {
 	document.querySelectorAll("button[page]").forEach(button => {
@@ -28,6 +30,9 @@ function selectView(page: string, push: boolean)
 				window.history.pushState({}, "", `/${page}`);
 			}
 			bindButtons();
+			// if (page === "register") {
+			// 	bindRegisterForm();
+			// }
 		}
 		else {
 			console.error("Element spa not found.");
