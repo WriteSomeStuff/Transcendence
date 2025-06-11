@@ -37,13 +37,17 @@ services:
     env_file:
       - .env
 
-  # nginx_service:
-  #   container_name: nginx
-  #   restart: always
-  #   build: ./frontend
-  #   # healthcheck:
-  #   ports:
-  #     - 8443:443
+  nginx_service:
+    container_name: nginx
+    restart: always
+    build: ./frontend
+    healthcheck:
+      test: ["CMD", "curl", "-fk", "https://localhost/index.html"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - 8443:443
 
 networks:
   internal:
