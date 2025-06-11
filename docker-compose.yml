@@ -48,6 +48,8 @@ services:
       retries: 10
     ports:
       - 8443:443
+    networks:
+      - internal
 
 networks:
   internal:
