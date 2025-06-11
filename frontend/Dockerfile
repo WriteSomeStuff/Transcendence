@@ -1,4 +1,6 @@
-FROM node AS frontend_build
+ARG NODE_VERSION=24.0.1
+
+FROM node:${NODE_VERSION}-slim AS frontend_build
 
 WORKDIR /app
 
