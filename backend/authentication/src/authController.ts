@@ -126,6 +126,8 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 			})
 		})
 		
+		// TODO check response
+
 		reply.status(200).send({ message: `user '${username}' logged in successfully` });
 
 	} catch (e) {
@@ -153,6 +155,8 @@ export const logoutUserHandler = async (request: FastifyRequest, reply: FastifyR
 			status: 'offline'
 		})
 	})
+
+	// TODO check response
 
 	return reply.send({ message: "Logout successfull" });
 }
