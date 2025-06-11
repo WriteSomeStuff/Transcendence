@@ -6,7 +6,7 @@ WORKDIR /app
 
 COPY src src
 
-RUN (cd src && npm i && npm run build && npx tailwindcss -i ./frontend/css/home.css -o ./frontend/css/output.css)
+RUN (cd src && npm i && npm run build && npx tailwindcss -i ./public/css/home.css -o ./public/css/output.css)
 
 FROM nginx:alpine
 
@@ -21,7 +21,7 @@ RUN openssl req -x509 -nodes \
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 
 COPY --from=frontend_build /app/src/index.html /etc/nginx/html/index.html
-COPY --from=frontend_build /app/src/frontend /etc/nginx/html/frontend
+COPY --from=frontend_build /app/src/public /etc/nginx/html/public
 
 WORKDIR	/etc/nginx/html
 

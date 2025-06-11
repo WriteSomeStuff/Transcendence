@@ -2,7 +2,7 @@ const { transform } = require('typescript');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./frontend/js/views/*.html", "./index.html"],
+  content: ["./public/js/views/*.html", "./index.html"],
   theme: {
     extend: {
       animation: {
@@ -32,7 +32,7 @@ module.exports = {
         comic: ['Comic', 'sans-serif'],
       },
       backgroundImage: {
-        'stars': "url('/frontend/assets/backgrounds/movingStars.gif')",
+        'stars': "url('/public/assets/backgrounds/movingStars.gif')",
       }
     },
     backgroundSize: {
