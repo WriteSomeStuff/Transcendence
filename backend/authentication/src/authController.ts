@@ -47,7 +47,8 @@ export const registerUserHandler = async (request: FastifyRequest, reply: Fastif
 		// call the service function to register user into database
 		await register(username, password);
 
-		const response = await fetch('http://user_service:8080/users/new-user', {
+		const url = process.env.USER_SERVICE_URL + '/new-user';
+		const response = await fetch(url, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -196,7 +197,8 @@ export const verify2FATokenHandler = async (request: FastifyRequest, reply: Fast
 export const logoutUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	reply.clearCookie('access_token'); // to clear cookie in browser
 
-	const response = await fetch ('http://user_service:8080/users/status', {
+	const url = process.env.USER_SERVICE_URL + '/status';
+	const response = await fetch(url, {
 		method: 'PUT',
 		headers: {
 			'Content-Type': 'application/json'

@@ -16,6 +16,7 @@ services:
       - internal
     environment:
       - NODE_ENV=development
+      - USER_SERVICE_URL=http://user_service:8080/users
     env_file:
       - .env
 
@@ -34,8 +35,29 @@ services:
       - user_data:/app/data
     networks:
       - internal
+    environment:
+      - AUTH_SERVICE_URL=http://auth_service:8080/auth
     env_file:
       - .env
+
+  nginx_service:
+    container_name: nginx
+    restart: always
+    build: ./frontend
+    healthcheck:
+      test: ["CMD", "curl", "-fk", "https://localhost/index.html"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - 8443:443
+    volumes:
+      - user_avatars:/etc/nginx/html/public/assets/avatars/user
+    networks:
+      - internal
+    environment:
+      - AUTH_SERVICE_URL=http://auth_service:8080/auth
+
 
 networks:
   internal:
@@ -54,3 +76,11 @@ volumes:
       type: none
       device: ./backend/userManagement/data
       o: bind
+  user_avatars:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./frontend/src/public/assets/avatars/user
+      o: bind
+
+    # Comment out to NOT have database and user uploads available on host TODO

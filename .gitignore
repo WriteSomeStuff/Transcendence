@@ -10,5 +10,11 @@ dist/
 # container data
 data/
 
+# user uploads
+user/
+
 # environment
 .env
+
+# vscode extensions
+.vscode/

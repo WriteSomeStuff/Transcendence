@@ -1,14 +1,14 @@
 import db from "./db";
 
-export const insertUser = async (username: string) => {
+export const insertUser = async (username: string, userId: number) => {
 	try {
 		const stmt = db.prepare(`
-			INSERT INTO user (username)
-			VALUES (?)
+			INSERT INTO user (user_id, username)
+			VALUES (?, ?)
 		`);
 		// TODO: set default avatar path
 
-		stmt.run(username);
+		stmt.run(userId, username);
 	} catch (e) {
 		throw new Error("Error inserting new user into user table");
 	}
