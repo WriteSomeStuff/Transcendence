@@ -16,6 +16,7 @@ services:
       - internal
     environment:
       - NODE_ENV=development
+      - USER_SERVICE_URL=http://user_service:8080/users
     env_file:
       - .env
 
@@ -34,6 +35,8 @@ services:
       - user_data:/app/data
     networks:
       - internal
+    environment:
+      - AUTH_SERVICE_URL=http://auth_service:8080/auth
     env_file:
       - .env
 
@@ -50,6 +53,9 @@ services:
       - 8443:443
     networks:
       - internal
+    environment:
+      - AUTH_SERVICE_URL=http://auth_service:8080/auth
+
 
 networks:
   internal:

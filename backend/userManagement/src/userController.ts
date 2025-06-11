@@ -53,7 +53,8 @@ export const updateUsernameHandler = async (request: FastifyRequest, reply: Fast
 
 		await updateUsername(request.user.userId, newUsername);
 
-		const response = await fetch('http://auth_service:8080/auth/username', {
+		const url = process.env.AUTH_SERVICE_URL + '/username';
+		const response = await fetch(url, {
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json'
@@ -84,7 +85,8 @@ export const updatePasswordHandler = async (request: FastifyRequest, reply: Fast
 	try {
 		const { newPassword } = request.body as { newPassword: string };
 
-		const response = await fetch('http://auth_service:8080/auth/password', {
+		const url = process.env.AUTH_SERVICE_URL + '/password';
+		const response = await fetch(url, {
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json'
