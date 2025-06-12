@@ -27,20 +27,21 @@ export const login = async (username: string, password: string): Promise<AuthRes
 		const stmt = db.prepare(`
 			SELECT 
 				user_id,
-				password_hash
+				password_hash,
+				two_fa_enabled
 			FROM
 				user
 			WHERE
 				username = ?
 		`);
-		const row = stmt.get(username) as {	user_id: number, password_hash: string };
+		const row = stmt.get(username) as {	user_id: number, password_hash: string, two_fa_enabled: boolean };
 
 		if (!row) {
 			return { success: false, error: "User not found" };
 		}
 
 		if (await argon2.verify(row.password_hash, password)) {
-			return { success: true, userId: row.user_id };
+			return { success: true, userId: row.user_id, twoFA: row.two_fa_enabled };
 		} else {
 			return { success: false, error: "Incorrect password" };
 		}
