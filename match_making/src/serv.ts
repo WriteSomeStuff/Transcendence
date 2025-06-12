@@ -27,7 +27,7 @@ fastify.get('/', async (req, reply) => {
 	const uniqueId = generateUniqueId();
 	reply.header('Set-Cookie', ['sessionId=abc123; Path=/; HttpOnly', `userId=${uniqueId}; Path=/; HttpOnly`]);
 	console.log("set cookies")
-	return reply.sendFile('index.html');
+	return reply.sendFile('public/index.html');
 });
 
 
@@ -66,7 +66,7 @@ fastify.post('/leaveRoom', async (request, reply) =>{
 	}
 })
 
-fastify.listen({ port : 8080}, (err, address) =>{
+fastify.listen({host: '0.0.0.0', port : 8080}, (err, address) =>{
 	if (err)
 	{
 		console.log('Error starting server: ', err);

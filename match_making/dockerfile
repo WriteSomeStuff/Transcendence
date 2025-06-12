@@ -1,0 +1,16 @@
+ #TODO: is this okay to use?
+FROM node:slim
+
+WORKDIR /app
+
+COPY package.json /app
+COPY tsconfig.backend.json /app
+COPY tsconfig.server.json /app
+
+RUN npm install 
+
+COPY dist /app/dist
+
+EXPOSE 8080
+
+CMD [ "npm", "run", "start" ]
