@@ -1,4 +1,5 @@
 import argon2 from "argon2";
+import * as OTPAuth from "otpauth";
 import db from "./db";
 
 import { AuthResultObj } from "./types/types";
@@ -48,6 +49,43 @@ export const login = async (username: string, password: string): Promise<AuthRes
 		return { success: false, error: "An error occured during login" };
 	}
 };
+
+export const verify2FA = async (username: string, token: string): Promise<AuthResultObj> => {
+	try {
+		const stmt = db.prepare(`
+			SELECT 
+				user_id,
+				two_fa_secret
+			FROM
+				user
+			WHERE
+				username = ?
+		`);
+		const row = stmt.get(username) as { user_id: number, two_fa_secret: string };
+
+		if (!row) {
+			return { success: false, error: "User not found" };
+		}
+
+		const totp = new OTPAuth.TOTP({
+			issuer: 'Transendence',
+			label: username,
+			algorithm: 'SHA1',
+			digits: 6,
+			period: 30,
+			secret: OTPAuth.Secret.fromBase32(row.two_fa_secret)
+		});
+
+		if (await totp.validate({ token })) {
+			return { success: true, userId: row.user_id };
+		} else {
+			return { success: false, error: "Invalid 2FA token" };
+		}
+	} catch (e) {
+		console.error('Error during 2FA verification:', e);
+		return { success: false, error: "An error occured during 2FA verification" };
+	}
+}
 
 export const updateUsername = async (newUsername: string, userId: number) => {
 	try {
