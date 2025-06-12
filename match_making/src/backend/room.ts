@@ -76,7 +76,7 @@ export function cleanUpOldRooms(maxAgeMs: number){
 		roomQueues[gameMode as GameMode] = roomQueues[gameMode as GameMode].filter(room => {
 			const age = now - room.lastActivity.getTime();
 			if (age > maxAgeMs)
-				console.log("room " + gameMode + " has been idle for " + age + "/" + maxAgeMs + "ms. Removing it now");
+				console.log("room " + gameMode + " has been idle for " + age / 1000 + "/" + maxAgeMs / 1000 + "seconds. Removing it now");
 			return age < maxAgeMs;
 		});
 	}
