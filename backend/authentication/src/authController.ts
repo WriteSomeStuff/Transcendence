@@ -99,8 +99,17 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 		}
 		console.log('User %d verified', result.userId);
 		
-		// 2FA if (result.twoFa) { do authentication }
+		if (result.twoFA) {
+			reply.status(200).send({
+				success: true,
+				twoFA: true,
+				message: "Two-factor authentication is enabled for this user. Please verify your token.",
+				next: "verify2FA"
+			});
+			return;
+		}
 
+		// TODO: put the JWT token handling in separate function
 		const token = request.jwt.sign({ userId: result.userId }, { expiresIn: "1d" });
 		
 		console.log("Login successful");

@@ -119,3 +119,5 @@ export const updatePassword = async (newPassword: string, userId: number) => {
 		throw new Error("An error occured updating the authentication database");
 	}
 }
+
+//TO DO: add update2FAenabled function
