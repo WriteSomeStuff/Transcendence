@@ -6,15 +6,17 @@ const db = new Database(DB_PATH, {
 	verbose: console.log,
 });
 
-// TODO add 2FA boolean
 const sql = `
 	CREATE TABLE IF NOT EXISTS user (
 		user_id			INTEGER	PRIMARY KEY,
 		username		TEXT	NOT NULL	UNIQUE,
 		password_hash	TEXT	NOT NULL,
+		two_fa_enabled	INTEGER	DEFAULT 0,
+		two_fa_secret	TEXT,
 		created_at		TEXT	DEFAULT (datetime('now', '+2 hour'))
 	);
 `
+// 0 = false, 1 = true
 // datetime +2 hour because it return UTC, +2 hour -> CEST
 
 try {
