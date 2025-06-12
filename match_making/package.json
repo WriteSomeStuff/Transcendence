@@ -4,9 +4,9 @@
   "scripts": {
     "build:server": "tsc -p tsconfig.server.json",
     "build:backend": "tsc -p tsconfig.backend.json",
-    "build": "npm run build:server && npm run build:backend",
+    "build": "npm run build:backend && npm run build:server",
     "test": "npm run build && npm run start",
-    "start": "ts-node  ./src/serv.js"
+    "start": "ts-node  ./dist/serv.js"
   },
   "author": "",
   "license": "ISC",

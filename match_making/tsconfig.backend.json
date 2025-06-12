@@ -109,9 +109,9 @@
     /* Completeness */
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true,                                 /* Skip type checking all .d.ts files. */
-	"outDir": "./src/backend/js",      // Output directory for JS files
-    "rootDir": "./src/backend/ts",
+	"outDir": "./dist/backend",      // Output directory for JS files
+    "rootDir": "./src/backend",
   },
-  "include": ["src/backend/ts/**/*.ts"],      // Only include client TS files
-  "exclude": ["src/serv.ts", "src/**/*.test.ts"] //exclude the serv.ts
+  "include": ["src/backend/*.ts"],      // Only include client TS files
+  "exclude": ["src/serv.ts"] //exclude the serv.ts
 }

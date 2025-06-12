@@ -5,9 +5,9 @@ import fastifyFormbody from '@fastify/formbody';
 import fastifyCookie from '@fastify/cookie';
 
 
-import { joinRoom } from './backend/ts/joinRoom';
-import { leaveRoom } from './backend/ts/leaveRoom'
-import { cleanUpOldRooms } from './backend/ts/room';
+import { joinRoom } from './backend/joinRoom.js';
+import { leaveRoom } from './backend/leaveRoom.js'
+import { cleanUpOldRooms } from './backend/room.js';
 
 const ONE_MINUTE = 60 * 1000;
 const FIVE_MINUTES = 5 * 60 * 1000;
