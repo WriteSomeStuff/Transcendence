@@ -81,6 +81,39 @@ export const registerUserHandler = async (request: FastifyRequest, reply: Fastif
 	}
 };
 
+// in controller or service?
+async function handleSuccessfulLogin(request: FastifyRequest, reply: FastifyReply, userId: number, username: string) {
+	const token = request.jwt.sign({ userId: userId }, { expiresIn: "1d" });
+	
+	console.log("Login successful");
+	
+	const isProduction = process.env.NODE_ENV === 'production'; // because testing with http requests, can also be set to "auto" maybe?
+	
+	reply.setCookie('access_token', token, {
+		path: '/',
+		httpOnly: true,
+		secure: isProduction,
+	});
+
+	const response = await fetch ('http://user_service:8080/users/status', {
+		method: 'PUT',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({
+			userId: userId,
+			status: 'online'
+		})
+	})
+	
+	if (!response.ok) {
+		reply.status(500).send("Failed to update user service database");
+		return;
+	}
+
+	reply.status(200).send({ message: `user '${username}' logged in successfully` });
+}
+
 export const loginUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
 		const parsedData = LOGIN_SCHEMA.parse(request.body);
@@ -99,6 +132,7 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 		}
 		console.log('User %d verified', result.userId);
 		
+		// If login is successful and 2FA is enabled, send a response indicating that 2FA verification is required
 		if (result.twoFA) {
 			reply.status(200).send({
 				success: true,
@@ -109,40 +143,17 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 			return;
 		}
 
-		// TODO: put the JWT token handling in separate function
-		const token = request.jwt.sign({ userId: result.userId }, { expiresIn: "1d" });
-		
-		console.log("Login successful");
-		
-		const isProduction = process.env.NODE_ENV === 'production'; // because testing with http requests, can also be set to "auto" maybe?
-		
-		reply.setCookie('access_token', token, {
-			path: '/',
-			httpOnly: true,
-			secure: isProduction,
-		});
-
-		const response = await fetch ('http://user_service:8080/users/status', {
-			method: 'PUT',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				userId: result.userId,
-				status: 'online'
-			})
-		})
-		
-		reply.status(200).send({ message: `user '${username}' logged in successfully` });
+		// If login is successful and 2FA is not enabled, handle the successful login
+		await handleSuccessfulLogin(request, reply, result.userId, username);
 
 	} catch (e) {
 		if (e instanceof z.ZodError) {
-      		reply.status(400).send({ error: e.errors });
-    	} else {
+			reply.status(400).send({ error: e.errors });
+		} else {
 			if (e instanceof Error) {
 				reply.status(500).send({ error: 'An error occurred during login:' + e.message });
 			}
-    	}
+		}
 	}
 };
 
