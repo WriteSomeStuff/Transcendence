@@ -51,6 +51,13 @@ export const login = async (username: string, password: string): Promise<AuthRes
 	}
 };
 
+/* * Verifies the 2FA token for a given user.
+ * @param username - The username of the user.
+ * @param token - The 2FA token to verify.
+ * @returns An object containing the verification result.
+ *          If successful, it returns { success: true, userId: <user_id> }.
+ *          If failed, it returns { success: false, error: <error_message> }.
+ */
 export const verify2FA = async (username: string, token: string): Promise<AuthResultObj> => {
 	try {
 		const stmt = db.prepare(`
