@@ -1,17 +1,32 @@
 {
   "name": "transcendence",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "lint": "pnpx @biomejs/biome lint .",
-    "format": "pnpx @biomejs/biome format ."
+  "description": "the pong game",
+  "keywords": [
+    "-"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "-"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@10.4.1",
+  "license": "MIT",
+  "author": "cat",
+  "type": "module",
+  "main": "-",
+  "scripts": {
+    "test": "-"
+  },
+  "workspaces": [
+    "frontend",
+    "shared/*",
+    "services/authentication",
+    "services/routing",
+    "services/matchmaking",
+    "services/game"
+  ],
   "devDependencies": {
-    "@biomejs/biome": "1.9.4"
+    "biome": "^0.3.3",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
   }
 }

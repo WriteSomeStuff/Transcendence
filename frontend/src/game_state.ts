@@ -1,12 +1,15 @@
 import { AppState } from "./app_state.ts";
-import { Court } from "./pong_game/court.ts";
+import { Court } from "pong";
 import type { App } from "./app.ts";
 
 export class GameState extends AppState {
-  private updater?: number;
-  private gameCanvas?: HTMLCanvasElement;
+  private updater: NodeJS.Timeout | undefined;
+  private gameCanvas: HTMLCanvasElement | undefined;
+  // @ts-ignore
   private action: "up" | "down" | null = null;
+  // @ts-ignore
   private upPressed = false;
+  // @ts-ignore
   private downPressed = false;
   private game: Court | null = null;
 

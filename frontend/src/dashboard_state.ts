@@ -15,7 +15,7 @@ interface GameRoom {
 
 export class DashboardState extends AppState {
   private room?: GameRoom;
-  private updater?: number;
+  private updater: NodeJS.Timeout | undefined;
 
   public render() {
     if (this.room === undefined) {

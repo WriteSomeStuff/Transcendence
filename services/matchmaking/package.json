@@ -1,26 +1,28 @@
 {
   "name": "matchmaking",
   "version": "1.0.0",
-  "description": "",
+  "description": "the matchmaking service",
+  "keywords": [
+    "matchmaking",
+    "microservice"
+  ],
+  "license": "MIT",
+  "author": "cat",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npm run test"
   },
-  "type": "module",
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@10.6.5+sha512.cdf928fca20832cd59ec53826492b7dc25dc524d4370b6b4adbf65803d32efaa6c1c88147c0ae4e8d579a6c9eec715757b50d4fa35eea179d868eada4ed043af",
   "dependencies": {
-    "@fastify/http-proxy": "^11.1.2",
-    "@types/node": "^22.13.13",
+    "@fastify/http-proxy": "^11.2.0",
     "@verrou/core": "^0.5.1",
-    "fastify": "^5.2.1",
-    "fastify-type-provider-zod": "^4.0.2",
-    "tsx": "^4.19.3",
-    "zod": "^3.24.2"
+    "fastify": "^5.4.0",
+    "fastify-type-provider-zod": "^5.0.1",
+    "zod": "^3.25.64"
   },
   "devDependencies": {
-    "typescript": "^5.8.2"
+    "@types/node": "^24.0.1",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
   }
 }

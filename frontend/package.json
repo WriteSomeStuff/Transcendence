@@ -1,17 +1,21 @@
 {
-  "name": "spa",
+  "name": "frontend",
   "version": "1.0.0",
-  "description": "",
+  "description": "the frontend part of transcendence",
+  "keywords": [
+    "frontend"
+  ],
+  "license": "MIT",
+  "author": "cat",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "pnpm exec tsc"
+    "build": "npm exec tsc"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@10.4.1",
   "devDependencies": {
-    "typescript": "^5.8.2"
+    "@types/node": "^24.0.1",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
   }
 }

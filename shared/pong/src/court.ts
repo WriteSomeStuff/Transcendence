@@ -42,9 +42,13 @@ export class Court {
 
   private addQuadrilateral(ctx: CanvasRenderingContext2D, points: Vector2[]) {
     ctx.beginPath();
+    // @ts-ignore
     ctx.moveTo(...this.translatePoint(ctx, points[0]).toTuple());
+    // @ts-ignore
     ctx.lineTo(...this.translatePoint(ctx, points[1]).toTuple());
+    // @ts-ignore
     ctx.lineTo(...this.translatePoint(ctx, points[2]).toTuple());
+    // @ts-ignore
     ctx.lineTo(...this.translatePoint(ctx, points[3]).toTuple());
     ctx.closePath();
     ctx.fillStyle = "black";
@@ -66,7 +70,9 @@ export class Court {
   public update(delta: number, paddleMovements: (-1 | 0 | 1)[]) {
     this.ballPosition = this.ballPosition.add(this.ballDirection.multiply(delta));
     for (let i = 0; i < this.playersCount; i++) {
+      // @ts-ignore
       this.paddleOffsets[i] += paddleMovements[i] * delta;
+      // @ts-ignore
       this.paddleOffsets[i] = Math.min(Math.max(this.paddleOffsets[i], -1), 1);
     }
     let bouncedPaddleIndex = -1;
@@ -80,6 +86,7 @@ export class Court {
         newDirection = this.ballDirection.reflect(this.values.getSidelineNormal(i));
         minDistance = sidelineDistance;
       }
+      // @ts-ignore
       const [paddleStart, paddleEnd] = this.values.getPaddleSurface(i, this.paddleOffsets[i], 0.4);
       const paddleDistance = this.doesBounce(paddleStart, paddleEnd, this.values.getBaselineNormal(i));
       if (paddleDistance < minDistance) {
@@ -100,6 +107,7 @@ export class Court {
     ctx.reset();
     for (let i = 0; i < this.playersCount; i++) {
       this.addQuadrilateral(ctx, this.values.getSidelineQuadrilateral(i));
+      // @ts-ignore
       this.addQuadrilateral(ctx, this.values.getBaselinePaddleQuadrilateral(i, this.paddleOffsets[i], 0.4));
     }
     const widthRatio = ctx.canvas.width / this.values.width;

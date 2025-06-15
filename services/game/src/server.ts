@@ -8,31 +8,32 @@ const app = Fastify();
 await app.register(fastifyWebsocket);
 
 app.get('/ws', { websocket: true }, (socket: WebSocket) => {
-    socket.on('message', (data, isBinary) => {
+    socket.on('message', (data) => {
+
         const message = data.toString();
         socket.send(`hello client from game, you sent us ${message}`);
     })
 })
 
 class Point {
-    x: number;
-    y: number;
+    x: number = 0;
+    y: number = 0;
 }
 
 class Game {
-    paddle1: Point;
-    paddle2: Point;
-    ball: Point;
-    ball_direction: Point;
-    user1: string;
-    user2: string;
+    paddle1: Point = new Point;
+    paddle2: Point = new Point;
+    ball: Point = new Point;
+    ball_direction: Point = new Point;
+    user1: string = '';
+    user2: string = '';
 }
 
 const games: {[id: string] : Game} = {};
 let lastId = 0;
 
 function random_direction(): Point {
-    let angle: number;
+    let angle: number = 0;
     switch (Math.floor(Math.random() * 4)) {
         case 0:
             angle = Math.PI / 18 + Math.random() * Math.PI / 3;
@@ -77,12 +78,14 @@ function update_game(game: Game) {
 
 setInterval(() => {
     for (let gameId in games) {
-        games[gameId] = update_game(games[gameId]);
+        games[gameId] = update_game(games[gameId]!);
     }
 }, 50);
 
 app.get('/start', (req, res) => {
+    // @ts-ignore
     let user1: string = req.query.user1;
+    // @ts-ignore
     let user2: string = req.query.user2;
     if (!user1 || !user2)
         return res.status(400).send('2 users required');
@@ -99,6 +102,7 @@ app.get('/start', (req, res) => {
 })
 
 app.get('/state', (req, res) => {
+    // @ts-ignore
     let gameId = +req.query.gameid;
     if (gameId === undefined || gameId < 0 || gameId >= lastId) {
         return res.status(400).send('invalid gameId');
@@ -113,7 +117,7 @@ function update_point(initial: Point, action: 'up' | 'down'): Point {
         else
             return {x: initial.x, y: initial.y};
     }
-    else if (action === 'down') {
+    else {
         if (initial.y < 90)
             return {x: initial.x, y: initial.y + 5};
         else
@@ -122,28 +126,30 @@ function update_point(initial: Point, action: 'up' | 'down'): Point {
 }
 
 app.get('/action', (req, res) => {
+    // @ts-ignore
     let gameId = +req.query.gameid;
     if (gameId === undefined || gameId < 0 || gameId >= lastId) {
         return res.status(400).send('invalid gameId');
     }
-    let user: string = req.headers.user_id as string;
-    if (!user || (user !== games[gameId].user1 && user !== games[gameId].user2)) {
+    let user: string = req.headers["user_id"] as string;
+    if (!user || (user !== games[gameId]!.user1 && user !== games[gameId]!.user2)) {
         return res.status(400).send('invalid user');
     }
+    // @ts-ignore
     let action: 'up' | 'down' = req.query.action;
     if (!action) {
         return res.status(400).send('invalid action');
     }
-    if (user === games[gameId].user1) {
-        games[gameId].paddle1 = update_point(games[gameId].paddle1, action);
+    if (user === games[gameId]!.user1) {
+        games[gameId]!.paddle1 = update_point(games[gameId]!.paddle1, action);
     }
-    else if (user === games[gameId].user2) {
-        games[gameId].paddle2 = update_point(games[gameId].paddle2, action);
+    else if (user === games[gameId]!.user2) {
+        games[gameId]!.paddle2 = update_point(games[gameId]!.paddle2, action);
     }
     return res.status(200).send(games[gameId]);
 })
 
-app.get('/', (req, res) => {
+app.get('/', (_, res) => {
     res.status(200).send("Success");
 })
 

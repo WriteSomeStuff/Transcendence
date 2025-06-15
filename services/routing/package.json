@@ -1,20 +1,25 @@
 {
   "name": "routing",
   "version": "1.0.0",
-  "description": "",
+  "description": "the routing service",
+  "keywords": [
+    "routing",
+    "microservice"
+  ],
+  "license": "MIT",
+  "author": "milana",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "type": "module",
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@10.6.5+sha512.cdf928fca20832cd59ec53826492b7dc25dc524d4370b6b4adbf65803d32efaa6c1c88147c0ae4e8d579a6c9eec715757b50d4fa35eea179d868eada4ed043af",
   "dependencies": {
-    "@fastify/http-proxy": "^11.1.2",
-    "@types/node": "^22.13.13",
-    "fastify": "^5.2.1",
-    "tsx": "^4.19.3"
+    "@fastify/http-proxy": "^11.2.0",
+    "fastify": "^5.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.1",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
   }
 }

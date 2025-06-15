@@ -1,15 +1,15 @@
 import { Vector2 } from "./vector2.ts";
 
 export class CourtValues {
-  public ballRadius: number;
-  public sidelineAngle: number; // 0 - parallel
-  public sidelineThickness: number;
-  public paddleThickness: number;
-  public width: number;
-  public height: number;
-  private edgeCount: number;
-  private vertices: Vector2[];
-  private normals: Vector2[];
+  public readonly ballRadius: number;
+  public readonly sidelineAngle: number; // 0 - parallel
+  public readonly sidelineThickness: number;
+  public readonly paddleThickness: number;
+  public readonly width: number;
+  public readonly height: number;
+  private readonly edgeCount: number;
+  private readonly vertices: Vector2[];
+  private readonly normals: Vector2[];
 
   constructor(playersCount: number, distanceToBaseline: number, distanceToSideline: number, paddleThickness: number, sidelineThickness: number, ballRadius: number) {
     this.edgeCount = playersCount * 2;
@@ -49,12 +49,12 @@ export class CourtValues {
       this.vertices = [];
       this.normals = [];
       for (let i = 0; i < playersCount; i++) {
-        const prev = innerPolygonVertices[(playersCount + i - 1) % playersCount];
-        const next = innerPolygonVertices[(playersCount + i + 1) % playersCount];
-        const curr = innerPolygonVertices[i];
+        const prev = innerPolygonVertices[(playersCount + i - 1) % playersCount]!;
+        const next = innerPolygonVertices[(playersCount + i + 1) % playersCount]!;
+        const curr = innerPolygonVertices[i]!;
         this.vertices.push(curr.add(prev.subtract(curr).normalize().multiply(distanceFromInnerPolygonVertex)));
         this.vertices.push(curr.add(next.subtract(curr).normalize().multiply(distanceFromInnerPolygonVertex)));
-        this.normals.push(this.vertices[i * 2].add(this.vertices[i * 2 + 1]).multiply(-1).normalize());
+        this.normals.push(this.vertices[i * 2]!.add(this.vertices[i * 2 + 1]!).multiply(-1).normalize());
         this.normals.push(curr.add(next).multiply(-1).normalize());
       }
       const outerPolygonSide = (distanceToBaseline + extraBaselineDistance) * 2 * Math.tan(Math.PI / playersCount);
@@ -65,13 +65,13 @@ export class CourtValues {
   }
 
   public getSidelineQuadrilateral(index: number): [Vector2, Vector2, Vector2, Vector2] {
-    const a = this.vertices[(index * 2) % this.edgeCount];
-    const b = this.vertices[(index * 2 + 1) % this.edgeCount];
+    const a = this.vertices[(index * 2) % this.edgeCount]!;
+    const b = this.vertices[(index * 2 + 1) % this.edgeCount]!;
     const shiftAtoB = b.subtract(a).normalize().multiply(Math.tan(this.sidelineAngle) * this.sidelineThickness);
     return [
       a, b,
-      b.add(this.normals[index * 2].multiply(-this.sidelineThickness)).add(shiftAtoB.multiply(-1)),
-      a.add(this.normals[index * 2].multiply(-this.sidelineThickness)).add(shiftAtoB),
+      b.add(this.normals[index * 2]!.multiply(-this.sidelineThickness)).add(shiftAtoB.multiply(-1)),
+      a.add(this.normals[index * 2]!.multiply(-this.sidelineThickness)).add(shiftAtoB),
     ];
   }
 
@@ -86,30 +86,30 @@ export class CourtValues {
   }
 
   public getSidelineNormal(index: number): Vector2 {
-    return this.normals[index * 2];
+    return this.normals[index * 2]!;
   }
 
   public getBaselineNormal(index: number): Vector2 {
-    return this.normals[(index * 2 + 1) % this.edgeCount];
+    return this.normals[(index * 2 + 1) % this.edgeCount]!;
   }
 
   public getBaselinePaddleQuadrilateral(index: number, offset: number, ratio: number): [Vector2, Vector2, Vector2, Vector2] {
     const [a, b] = this.getPaddleBaselinePoints(index, offset, ratio, true);
-    const normalShift = this.normals[index * 2 + 1].multiply(this.paddleThickness);
+    const normalShift = this.normals[index * 2 + 1]!.multiply(this.paddleThickness);
     return [a, b, b.add(normalShift), a.add(normalShift)];
   }
 
   public getSidelineSurface(index: number): [Vector2, Vector2] {
-    return [this.vertices[index * 2], this.vertices[(index * 2 + 1) % this.edgeCount]];
+    return [this.vertices[index * 2]!, this.vertices[(index * 2 + 1) % this.edgeCount]!];
   }
 
   public getBaselineSurface(index: number): [Vector2, Vector2] {
-    return [this.vertices[(index * 2 + 1) % this.edgeCount], this.vertices[(index * 2 + 2) % this.edgeCount]];
+    return [this.vertices[(index * 2 + 1) % this.edgeCount]!, this.vertices[(index * 2 + 2) % this.edgeCount]!];
   }
 
   public getPaddleSurface(index: number, offset: number, ratio: number): [Vector2, Vector2] {
     const [a, b] = this.getPaddleBaselinePoints(index, offset, ratio, false);
-    const normalShift = this.normals[index * 2 + 1].multiply(this.paddleThickness);
+    const normalShift = this.normals[index * 2 + 1]!.multiply(this.paddleThickness);
     return [a.add(normalShift), b.add(normalShift)];
   }
 }

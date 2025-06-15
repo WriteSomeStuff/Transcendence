@@ -1,32 +1,34 @@
 {
-  "name": "transcendence",
+  "name": "authentication",
   "version": "1.0.0",
-  "description": "",
+  "description": "the authentication service",
+  "keywords": [
+    "authentication",
+    "microservice"
+  ],
+  "license": "MIT",
+  "author": "milana",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npm run test"
   },
-  "type": "module",
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@10.4.1",
   "dependencies": {
-    "@fastify/http-proxy": "^11.1.2",
-    "@fastify/jwt": "^9.0.4",
-    "@types/bcrypt": "^5.0.2",
-    "@types/better-sqlite3": "^7.6.12",
-    "@types/node": "^22.13.5",
-    "bcrypt": "^5.1.1",
-    "better-sqlite3": "^11.8.1",
-    "fastify": "^5.2.1",
-    "fastify-type-provider-zod": "^4.0.2",
-    "tsx": "^4.19.3",
-    "typescript": "^5.7.3",
-    "uuid": "^11.1.0",
-    "zod": "^3.24.2"
+    "@fastify/http-proxy": "^11.2.0",
+    "@fastify/jwt": "^9.1.0",
+    "bcrypt": "^6.0.0",
+    "better-sqlite3": "^11.10.0",
+    "fastify": "^5.4.0",
+    "fastify-type-provider-zod": "^5.0.1",
+    "uuid": "^3.4.0",
+    "zod": "^3.25.64"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": ["better-sqlite3", "bcrypt"]
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^24.0.1",
+    "@types/uuid": "^10.0.0",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
   }
 }

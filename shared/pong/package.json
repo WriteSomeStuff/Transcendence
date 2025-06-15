@@ -1,0 +1,17 @@
+{
+  "name": "pong",
+  "version": "1.0.0",
+  "private": true,
+  "description": "the pong game itself",
+  "keywords": [
+    "pong"
+  ],
+  "license": "MIT",
+  "author": "cat",
+  "type": "module",
+  "main": "src/court.ts",
+  "scripts": {
+    "test": "npm run test"
+  },
+  "devDependencies": {}
+}

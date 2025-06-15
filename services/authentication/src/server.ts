@@ -29,7 +29,7 @@ const LOGIN_SCHEMA = z
   })
   .required();
 
-app.register(jwt, { secret: process.env.JWT_SECRET as string });
+app.register(jwt, { secret: process.env["JWT_SECRET"] as string });
 
 app.addHook("onError", async (_, res, err) => {
   console.error(err.stack);
@@ -37,6 +37,7 @@ app.addHook("onError", async (_, res, err) => {
 });
 
 app.post("/register", { schema: { body: LOGIN_SCHEMA } }, async (req, res) => {
+  // @ts-ignore
   const { username, password } = req.body;
 
   const hashedPassword = await bcrypt.hash(password, 10); // TODO possibly replace with own hash calculation
@@ -53,6 +54,7 @@ app.post("/register", { schema: { body: LOGIN_SCHEMA } }, async (req, res) => {
 });
 
 app.post("/login", { schema: { body: LOGIN_SCHEMA } }, async (req, res) => {
+  // @ts-ignore
   const { username, password } = req.body;
 
   const user = select.get(username) as {
@@ -93,8 +95,8 @@ app.addHook("onRequest", async (req, res) => {
     }
     await req.jwtVerify();
     const { id, type } = req.user as { id: string; type: string };
-    req.headers.user_id = id;
-    req.headers.user_type = type;
+    req.headers["user_id"] = id;
+    req.headers["user_type"] = type;
     req.headers.authorization = undefined;
   } catch (error) {
     res.status(401).send({ error: "Unauthorized" });

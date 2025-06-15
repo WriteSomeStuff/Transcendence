@@ -51,15 +51,17 @@ app.get(
   { schema: { querystring: ROOM_SCHEMA, headers: USER_HEADERS_SCHEMA } },
   async (req, res) => {
     const user: User = {
-      user_id: req.headers.user_id as string,
-      user_type: req.headers.user_type as string,
+      user_id: req.headers["user_id"] as string,
+      user_type: req.headers["user_type"] as string,
     };
-    return await verrou.createLock("room").run(async () => {
+    return verrou.createLock("room").run(async () => {
       if (roomsMap.has(user.user_id)) {
         return res.status(403).send("You're already in a room!");
       }
       const room: GameRoom = {
+        // @ts-ignore
         size: req.query.size,
+        // @ts-ignore
         game: req.query.game,
         creator: user,
         slots: [],
@@ -76,24 +78,24 @@ app.get(
   { schema: { headers: USER_HEADERS_SCHEMA } },
   async (req, res) => {
     const user: User = {
-      user_id: req.headers.user_id as string,
-      user_type: req.headers.user_type as string,
+      user_id: req.headers["user_id"] as string,
+      user_type: req.headers["user_type"] as string,
     };
-    return await verrou.createLock("room").run(async () => {
+    return verrou.createLock("room").run(async () => {
       if (roomsMap.has(user.user_id)) {
         return res.status(403).send("You're already in a room!");
       }
       if (availableRooms.length === 0) {
         return res.status(404).send("No available rooms!");
       }
-      const room = availableRooms[0];
+      const room = availableRooms[0]!;
       room.slots.push(user);
       roomsMap.set(user.user_id, room);
       if (room.slots.length + 1 === room.size) {
         availableRooms.splice(0, 1);
         room.game_id = await (
           await fetch(
-            `http://game/start?user1=${room.creator.user_id}&user2=${room.slots[0].user_id}`,
+            `http://game/start?user1=${room.creator.user_id}&user2=${room.slots[0]!.user_id}`,
           )
         ).text();
       }
@@ -107,10 +109,10 @@ app.get(
   { schema: { headers: USER_HEADERS_SCHEMA } },
   async (req, res) => {
     const user: User = {
-      user_id: req.headers.user_id as string,
-      user_type: req.headers.user_type as string,
+      user_id: req.headers["user_id"] as string,
+      user_type: req.headers["user_type"] as string,
     };
-    return await verrou.createLock("room").run(async () => {
+    return verrou.createLock("room").run(async () => {
       if (!roomsMap.has(user.user_id)) {
         return res.status(403).send("You're not in a room!");
       }

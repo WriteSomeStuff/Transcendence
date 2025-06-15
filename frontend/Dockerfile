@@ -1,21 +1,20 @@
-FROM node AS frontend_build
+FROM node:20-alpine AS builder
 
 WORKDIR /app
+COPY ../package.json ../tsconfig.base.json ./
+COPY ../shared/pong ./shared/pong
+COPY ./ ./frontend
 
-COPY src src
-COPY public public
-COPY package.json package.json
-COPY pnpm-lock.yaml pnpm-lock.yaml
-COPY tsconfig.json tsconfig.json
+WORKDIR /app/frontend
 
 RUN corepack enable && corepack prepare --activate
-RUN pnpm install
-RUN pnpm run build
+RUN npm install --production --omit=dev
+RUN npm run build
 
 
-FROM nginx
+FROM nginx:alpine
 
-COPY --from=frontend_build /app/public /usr/share/nginx/html
+COPY --from=builder /app/frontend/public /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 80

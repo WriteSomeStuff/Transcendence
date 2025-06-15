@@ -1,14 +1,13 @@
-import { UpdatableGameObject } from "./updatable_game_object.ts";
 import { Vector2 } from "./vector2.ts";
 
-export class Paddle extends UpdatableGameObject {
+export class Paddle {
   private offsetFromCenter = 0; // from -1 to 1, relative
   private edgePercentSize: number; // for bigger or smaller paddles
+  // @ts-ignore
   private direction: -1 | 0 | 1 = 0;
   private velocity = 0;
 
   public constructor(edgePercentSize: number = 10) {
-    super();
     this.edgePercentSize = edgePercentSize;
   }
 
