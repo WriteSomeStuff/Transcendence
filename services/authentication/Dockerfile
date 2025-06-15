@@ -1,15 +1,12 @@
-FROM node
-
-RUN corepack enable && corepack prepare pnpm@latest --activate
+FROM node:20-alpine3.22
 
 WORKDIR /app
-COPY tsconfig.json .
-COPY pnpm-lock.yaml .
-COPY package.json .
-RUN pnpm approve-builds --global
-RUN pnpm install --frozen-lockfile
+COPY package.json ./
+COPY package-lock.json ./
+COPY tsconfig.base.json ./
+COPY services/authentication ./services/authentication
 
-COPY src ./src
+RUN npm install --omit=dev -w authentication
 
 ENV JWT_SECRET="my_secret"
-CMD pnpm tsx src/server.ts
+CMD npm run up -w authentication

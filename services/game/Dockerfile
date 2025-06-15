@@ -1,13 +1,12 @@
-FROM node
-
-RUN corepack enable && corepack prepare pnpm@latest --activate
+FROM node:20-alpine3.22
 
 WORKDIR /app
-COPY pnpm-lock.yaml .
-COPY package.json .
-RUN pnpm approve-builds --global
-RUN pnpm install --frozen-lockfile
+COPY package.json ./
+COPY package-lock.json ./
+COPY tsconfig.base.json ./
+COPY shared/pong ./shared/pong
+COPY services/game ./services/game
 
-COPY src ./src
+RUN npm install --omit=dev -w game
 
-CMD pnpm tsx src/server.ts
+CMD npm run up -w game

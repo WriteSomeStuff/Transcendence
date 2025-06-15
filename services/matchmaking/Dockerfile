@@ -1,14 +1,11 @@
-FROM node
+FROM node:20-alpine3.22
 
 WORKDIR /app
-COPY tsconfig.json .
-COPY pnpm-lock.yaml .
-COPY package.json .
+COPY package.json ./
+COPY package-lock.json ./
+COPY tsconfig.base.json ./
+COPY services/matchmaking ./services/matchmaking
 
-RUN corepack enable && corepack prepare --activate
-RUN pnpm approve-builds --global
-RUN pnpm install --frozen-lockfile
+RUN npm install --omit=dev -w matchmaking
 
-COPY src ./src
-
-CMD pnpm tsx src/server.ts
+CMD npm run up -w matchmaking

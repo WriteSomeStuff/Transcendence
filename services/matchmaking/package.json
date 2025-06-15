@@ -11,18 +11,18 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "npm run test"
+    "up": "npm exec tsx src/server.ts"
   },
   "dependencies": {
     "@fastify/http-proxy": "^11.2.0",
     "@verrou/core": "^0.5.1",
     "fastify": "^5.4.0",
     "fastify-type-provider-zod": "^5.0.1",
+    "tsx": "^4.20.3",
     "zod": "^3.25.64"
   },
   "devDependencies": {
     "@types/node": "^24.0.1",
-    "tsx": "^4.20.3",
     "typescript": "^5.8.3"
   }
 }
