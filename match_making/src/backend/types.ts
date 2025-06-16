@@ -1,3 +1,4 @@
+import { Room } from "./room"
 
 /*Shows which game we are referencing */
 export enum GameMode {
@@ -7,8 +8,9 @@ export enum GameMode {
 	memory = "memory"
 };
 
-export interface Player{
-	PlayerID: number;
-	gameMode: GameMode;
-}
-
+export const roomQueues: Record<GameMode, Room[]> = {
+	pong_2: [],
+	pong_3: [],
+	pong_4: [],
+	memory: []
+};

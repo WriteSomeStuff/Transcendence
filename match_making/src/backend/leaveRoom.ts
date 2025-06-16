@@ -1,6 +1,6 @@
 
-import { roomQueues, Room } from "./room";
-import { GameMode } from "./types";
+import { Room } from "./room";
+import { roomQueues, GameMode } from "./types";
 
 export function leaveRoom(userID: number){
 	for (const gameMode in roomQueues)
@@ -26,5 +26,3 @@ export function leaveRoom(userID: number){
 	console.log(userID + " has chosen to leave the room");
 	console.log(roomQueues);
 }
-
-//TODO: make frontend button to test this!

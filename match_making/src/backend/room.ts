@@ -1,19 +1,10 @@
-import { GameMode } from "./types";
-
-/**
- * Represents the possible statuses of a room.
- * options are: Waiting, inProgress or Finished
- * 
- */
-export type roomStatus = 'Waiting' | 'inProgress' | 'Finished'
+import { roomQueues, GameMode } from "./types";
 
 export class Room {
 	playerList:				number[];
 	amountPlayersInRoom:	number;
 	maxPlayerAmount: 		number;
-	roomStatus: 			roomStatus;
 	roomGameMode:			GameMode;
-	createdAt:				Date;
 	lastActivity:			Date;
 
 
@@ -26,12 +17,9 @@ export class Room {
 
 		this.maxPlayerAmount = maxPlayerAmount;
 
-		this.roomStatus = 'Waiting';
-
 		this.roomGameMode = mode;
 
-		this.createdAt = new Date();
-		this.lastActivity = this.createdAt;
+		this.lastActivity = new Date();
 	}
 
 	joinRoom(playerid: number){ //TODO: add mutex type thing here so no 2 users can join at the same time?
@@ -43,8 +31,7 @@ export class Room {
 	tryStartGame(){
 		if (this.amountPlayersInRoom == this.maxPlayerAmount)
 		{
-			this.roomStatus = 'inProgress';
-			console.log("Room ready to start a game. add logic here pls"); //TODO: figure out how to start a game
+			console.log("Room ready to start a game. add logic here pls");
 			//add starting logic here //TODO!
 			//send the playerList to the game container
 			
@@ -59,20 +46,12 @@ export class Room {
 
 }
 
-export const roomQueues: Record<GameMode, Room[]> = { //TODO? make this dynamically define the queues depending ont the games in GameModes
-	pong_2: [],
-	pong_3: [],
-	pong_4: [],
-	memory: []
-};
-
-
 //removes rooms that havent had any activity for over maxAgeMs milliseconds
 export function cleanUpOldRooms(maxAgeMs: number){
 	const now = Date.now();
 
 	for (const gameMode in roomQueues) {
-		//remove rooms that are over the limit
+		//remove rooms that havent had any activity for longer than the time limit
 		roomQueues[gameMode as GameMode] = roomQueues[gameMode as GameMode].filter(room => {
 			const age = now - room.lastActivity.getTime();
 			if (age > maxAgeMs)

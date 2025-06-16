@@ -1,7 +1,10 @@
+
+# TODO
 all:
-	npm run build
-	docker build -t match_making .
-	docker run -p 8080:8080 match_making 
+	@echo "does NOT run yet because the service that provides the pages is not yet live. use testDocker or testLocal instead" 
+	# npm run build
+	# docker build -t match_making .
+	# docker run -p 8080:8080 match_making 
 
 testLocal :
 	@mkdir -p dist/

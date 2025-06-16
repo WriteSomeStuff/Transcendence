@@ -85,7 +85,6 @@ setInterval(() => {
 
 
 
-// TODO: make src / dist folders
-// add /Health or /ping
+// TODO: add /Health or /ping
 // add logging
 //
