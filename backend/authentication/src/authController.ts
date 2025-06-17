@@ -157,6 +157,40 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 	}
 };
 
+export const verify2FATokenHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+	try {
+		const { username, token } = request.body as { username: string, token: string };
+
+		if (!username || !token) {
+			reply.status(400).send({ error: 'Username and token are required' });
+			return;
+		}
+
+		const result = await verify2FA(username, token);
+
+		if (!result.success) {
+			reply.status(401).send({ error: result.error });
+			return;
+		}
+
+		if (typeof result.userId !== 'number') {
+			reply.status(500).send({ error: 'Invalid userId returned from 2FA verification' });
+			return;
+		}
+
+		console.log('User %d verified via 2FA', result.userId);
+
+		await handleSuccessfulLogin(request, reply, result.userId, username);
+
+		reply.status(200).send({ message: "2FA verification successful" });
+
+	} catch (e) {
+		if (e instanceof Error) {
+			reply.status(500).send({ error: 'An error occurred during 2FA verification:' + e.message });
+		}
+	}
+};
+
 export const logoutUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	reply.clearCookie('access_token'); // to clear cookie in browser
 
