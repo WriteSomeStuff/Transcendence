@@ -1,3 +1,5 @@
+#grab the matchmaking port from the .env file
+MATCH_MAKING_PORT := $(shell grep MATCH_MAKING_PORT ../.env | cut -d= -f2 | tr -d ' ' || echo 8080)
 
 # TODO
 all:
@@ -12,11 +14,12 @@ testLocal :
 	npm run test
 
 testDocker:
+	@echo "Using MATCH_MAKING_PORT: $(MATCH_MAKING_PORT)"
 	@mkdir -p dist/
 	@cp -r src/public dist/
 	npm run build
 	docker build -t match_making .
-	docker run -p 8080:8080 match_making
+	docker run -p $(MATCH_MAKING_PORT):$(MATCH_MAKING_PORT) --env-file ../.env match_making
 
 re: fclean test
 
