@@ -127,7 +127,9 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 			})
 		})
 		
-		// TODO check response
+		if (!response.ok) {
+			reply.status(500).send("Failed to update user service database");
+		}
 
 		reply.status(200).send({ message: `user '${username}' logged in successfully` });
 
@@ -157,7 +159,9 @@ export const logoutUserHandler = async (request: FastifyRequest, reply: FastifyR
 		})
 	})
 
-	// TODO check response
+	if (!response.ok) {
+		reply.status(500).send("Failed to update user service database");
+	}
 
 	return reply.send({ message: "Logout successfull" });
 }
