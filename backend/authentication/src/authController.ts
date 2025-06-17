@@ -209,7 +209,7 @@ export const logoutUserHandler = async (request: FastifyRequest, reply: FastifyR
 		})
 	})
 
-	return reply.send({ message: "Logout successfull" });
+	return reply.status(200).send({ message: "Logout successfull" });
 }
 
 export const updateUsernameHandler = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -218,9 +218,9 @@ export const updateUsernameHandler = async (request: FastifyRequest, reply: Fast
 
 		updateUsername(newUsername, userId);
 
-		reply.send({ success: true });
+		reply.status(200).send({ success: true });
 	} catch (e) {
-		reply.send({
+		reply.status(500).send({
 			success: false,
 			error: 'An error occured inserting a new username into authentication database'
 		});
@@ -233,10 +233,10 @@ export const updatePasswordHandler = async (request: FastifyRequest, reply: Fast
 
 		updatePassword(newPassword, userId);
 
-		reply.send({ success: true });
+		reply.status(200).send({ success: true });
 
 	} catch (e) {
-		reply.send({
+		reply.status(500).send({
 			success: false,
 			error: 'An error occured inserting a new password into authentication database'
 		});	
@@ -260,8 +260,9 @@ export const enable2FAHandler = async (request: FastifyRequest, reply: FastifyRe
 			qrCode: result.qrCode,
 			message: "Two-factor authentication enabled successfully"
 		});
+		
 	} catch (e) {
-		reply.send({
+		reply.status(500).send({
 			success: false,
 			error: 'An error occurred enabling 2FA' 
 		});
