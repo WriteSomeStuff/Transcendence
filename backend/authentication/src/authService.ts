@@ -173,3 +173,21 @@ export const enable2FA = async (userId: number): Promise<Enable2FAResultObj> => 
 		return { success: false, error: "An error occurred enabling 2FA" };
 	}
 };
+
+export const disable2FA = async (userId: number) => {
+	try {
+		const stmt = db.prepare(`
+			UPDATE user
+			SET 
+				two_fa_enabled = 0,
+				two_fa_secret = NULL
+			WHERE
+				user_id = ?
+		`);
+
+		stmt.run(userId);
+		
+	} catch (e) {
+		throw new Error("An error occured disabling 2FA in the authentication database");
+	}
+}
