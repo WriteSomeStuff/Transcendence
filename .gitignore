@@ -12,3 +12,6 @@ data/
 
 # environment
 .env
+
+# vscode extensions
+.vscode/
