@@ -128,6 +128,12 @@ export const updatePassword = async (newPassword: string, userId: number) => {
 	}
 }
 
+/**
+ * Enables 2FA for a user and returns the secret and QR code data URL.
+ * @param userId - The ID of the user for whom to enable 2FA.
+ * @returns An object containing the success status, 2FA secret, and QR code data URL.
+ *          If an error occurs, it returns { success: false, error: <error_message> }.
+ */
 export const enable2FA = async (userId: number): Promise<Enable2FAResultObj> => {
 	try {
 		const stmt = db.prepare(`
@@ -186,7 +192,7 @@ export const disable2FA = async (userId: number) => {
 		`);
 
 		stmt.run(userId);
-		
+
 	} catch (e) {
 		throw new Error("An error occured disabling 2FA in the authentication database");
 	}
