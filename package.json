@@ -25,7 +25,7 @@
     "services/game"
   ],
   "devDependencies": {
-    "biome": "^0.3.3",
+    "@biomejs/biome": "^1.9.4",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3"
   }

@@ -20,10 +20,10 @@ export class Vector2 {
   }
 
   public reflect(v: Vector2): Vector2 {
-    return this.subtract(v.multiply(this.dot(v) * 2));
+    return this.subtract(v.scale(this.dot(v) * 2));
   }
 
-  public multiply(scalar: number): Vector2 {
+  public scale(scalar: number): Vector2 {
     return new Vector2(this.x * scalar, this.y * scalar);
   }
 
@@ -39,10 +39,14 @@ export class Vector2 {
     if (this.length() < 0.000001) {
       return new Vector2(0, 0);
     }
-    return this.multiply(1 / this.length());
+    return this.scale(1 / this.length());
   }
 
   public toTuple(): [number, number] {
     return [this.x, this.y];
+  }
+
+  public static fromAngle(angle: number): Vector2 {
+    return new Vector2(Math.cos(angle), Math.sin(angle));
   }
 }
