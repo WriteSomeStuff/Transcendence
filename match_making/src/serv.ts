@@ -7,7 +7,9 @@ import fastifyCookie from '@fastify/cookie';
 
 import { joinRoom } from './backend/joinRoom.js';
 import { leaveRoom } from './backend/leaveRoom.js'
-import { cleanUpOldRooms } from './backend/room.js';
+import { tournamentJoinRoom } from './backend/tournamentjoinRoom.js';
+import { tournamentLeaveRoom } from './backend/tournamentLeaveRoom.js';
+import { cleanUpOldRooms } from './backend/helperFunctions.js';
 
 const ONE_MINUTE = 60 * 1000;
 const FIVE_MINUTES = 5 * 60 * 1000;
@@ -32,6 +34,7 @@ fastify.register(fastifyStatic, {
 fastify.register(fastifyFormbody);
 fastify.register(fastifyCookie);
 
+//DEBUG
 fastify.get('/', async (req, reply) => {
 	const uniqueId = generateUniqueId();
 	reply.header('Set-Cookie', ['sessionId=abc123; Path=/; HttpOnly', `userId=${uniqueId}; Path=/; HttpOnly`]);
@@ -39,9 +42,20 @@ fastify.get('/', async (req, reply) => {
 	return reply.sendFile('public/index.html');
 });
 
+fastify.get('/match.html', async (req, reply) => {
+
+	return reply.sendFile('public/match.html');
+});
+
+fastify.get('/tournament.html', async (req, reply) => {
+
+	return reply.sendFile('public/tournament.html');
+});
+
+//END DEBUG
+
 
 fastify.post('/joinRoom', async (req, reply) => {
-  // handle the player joining logic here
 
 	const userId = req.cookies.userId;
 	const gameMode = (req.body as any).gameMode;
@@ -53,8 +67,8 @@ fastify.post('/joinRoom', async (req, reply) => {
   		joinRoom(idAsNumber, gameMode);
 	}
 	else {
-  // Handle the case where there's no userId cookie
-  	reply.status(400).send({ error: 'No userId cookie found' });
+	// Handle the case where there's no userId cookie
+		reply.status(400).send({ error: 'No userId cookie found' });
 	}
 
 	//TODO:	make TS that receives the roomNumber and returns it to frontend?
@@ -73,7 +87,39 @@ fastify.post('/leaveRoom', async (request, reply) =>{
   // Handle the case where there's no userId cookie
   	reply.status(400).send({ error: 'No userId cookie found' });
 	}
-})
+});
+
+fastify.post('/joinTournament', async(req, reply) => {
+	const userId = req.cookies.userId;
+	const gameMode = (req.body as any).gameMode;
+	
+	if (userId)
+	{
+		//userId comes in as a 'string | undefined' and the '+' converts it to number 
+		const idAsNumber: number = +userId;
+  		tournamentJoinRoom(idAsNumber, gameMode);
+	}
+	else {
+	// Handle the case where there's no userId cookie
+		reply.status(400).send({ error: 'No userId cookie found' });
+	}
+	// return reply.sendFile('public/tournament.html');
+});
+
+fastify.post('/leaveTournament', async (request, reply) =>{
+	const userId = request.cookies.userId;
+	
+	if (userId)
+	{
+		//userId comes in as a 'string | undefined' and the '+' converts it to number 
+		const idAsNumber: number = +userId;
+  		tournamentLeaveRoom(idAsNumber);
+	}
+	else {
+  // Handle the case where there's no userId cookie
+  	reply.status(400).send({ error: 'No userId cookie found' });
+	}
+});
 
 fastify.listen({host: '0.0.0.0', port : port}, (err, address) =>{
 	if (err)
@@ -89,11 +135,11 @@ function generateUniqueId(): number { //DEBUG just to generate userId cookies fo
 }
 
 setInterval(() => {
-  cleanUpOldRooms(FIVE_MINUTES); // 5 minutes in ms
+  cleanUpOldRooms(FIVE_MINUTES); // 5 minutes in ms 
 }, ONE_MINUTE); // run once every minute
 
 
 
 // TODO: add /Health or /ping
 // add logging
-//
+// make it so that the host can start a tournament
