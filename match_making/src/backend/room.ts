@@ -8,10 +8,10 @@ export class Room {
 	lastActivity:			Date;
 
 
-	constructor(playerID: number, maxPlayerAmount: number, mode: GameMode){
+	constructor(userID: number, maxPlayerAmount: number, mode: GameMode){
 
 		this.playerList = [];
-		this.playerList.push(playerID);
+		this.playerList.push(userID);
 
 		this.amountPlayersInRoom = 1;
 
@@ -44,19 +44,4 @@ export class Room {
 		}
 	}
 
-}
-
-//removes rooms that havent had any activity for over maxAgeMs milliseconds
-export function cleanUpOldRooms(maxAgeMs: number){
-	const now = Date.now();
-
-	for (const gameMode in roomQueues) {
-		//remove rooms that havent had any activity for longer than the time limit
-		roomQueues[gameMode as GameMode] = roomQueues[gameMode as GameMode].filter(room => {
-			const age = now - room.lastActivity.getTime();
-			if (age > maxAgeMs)
-				console.log("room " + gameMode + " has been idle for " + age / 1000 + "/" + maxAgeMs / 1000 + "seconds. Removing it now");
-			return age < maxAgeMs;
-		});
-	}
 }
