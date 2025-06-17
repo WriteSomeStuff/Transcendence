@@ -44,6 +44,7 @@ export const registerUserHandler = async (request: FastifyRequest, reply: Fastif
 		// call the service function to register user into database
 		await register(username, password);
 
+		// TODO also fetch with user_id in body
 		const url = process.env.USER_SERVICE_URL + '/new-user';
 		const response = await fetch(url, {
 			method: 'POST',

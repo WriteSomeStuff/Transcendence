@@ -7,6 +7,7 @@ const db = new Database(DB_PATH, {
 });
 
 // TODO add 2FA boolean
+// TODO delete username from here
 const sql = `
 	CREATE TABLE IF NOT EXISTS user (
 		user_id			INTEGER	PRIMARY KEY,

@@ -1,5 +1,6 @@
 import db from "./db";
 
+// TODO insert with user_id from auth fetch
 export const insertUser = async (username: string) => {
 	try {
 		const stmt = db.prepare(`
