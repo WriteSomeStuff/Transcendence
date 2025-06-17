@@ -6,7 +6,8 @@ import {
 	logoutUserHandler,
 	updateUsernameHandler,
 	updatePasswordHandler,
-	// generate2FATokenHandler,
+	enable2FAHandler,
+	// disable2FAHandler,
 	verify2FATokenHandler
 } from "./authController";
 
@@ -16,8 +17,9 @@ const authRoutes = async (app: FastifyInstance) => {
 	app.delete('/logout', { preHandler: [app.authenticate] }, logoutUserHandler);
 	app.put('/username', updateUsernameHandler);
 	app.put('/password', updatePasswordHandler);
-	// app.post('/generate2FA', generate2FATokenHandler);
+	app.post('/enable2FA', enable2FAHandler);
 	app.post('/verify2FA', verify2FATokenHandler);
+	// app.post('/disable2FA', disable2FAHandler);
 };
 
 export default authRoutes;
