@@ -13,7 +13,8 @@ import {
 	register,
 	login,
 	updateUsername,
-	updatePassword
+	updatePassword,
+	verify2FA
 } from "./authService";
 
 const REGISTER_SCHEMA = z.object({
@@ -138,7 +139,8 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 				success: true,
 				twoFA: true,
 				message: "Two-factor authentication is enabled for this user. Please verify your token.",
-				next: "verify2FA"
+				next: "/verify2FA",
+				username: username
 			});
 			return;
 		}
