@@ -14,7 +14,8 @@ import {
 	login,
 	updateUsername,
 	updatePassword,
-	verify2FA
+	verify2FA,
+	enable2FA
 } from "./authService";
 
 const REGISTER_SCHEMA = z.object({
@@ -238,5 +239,30 @@ export const updatePasswordHandler = async (request: FastifyRequest, reply: Fast
 			success: false,
 			error: 'An error occured inserting a new password into authentication database'
 		});	
+	}
+}
+
+export const enable2FAHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+	try {
+		const { userId } = request.body as { userId: number };
+
+		const result = await enable2FA(userId);
+
+		if (!result.success) {
+			reply.status(400).send({ error: result.error });
+			return;
+		}
+
+		reply.status(200).send({
+			success: true,
+			twoFASecret: result.twoFASecret,
+			qrCode: result.qrCode,
+			message: "Two-factor authentication enabled successfully"
+		});
+	} catch (e) {
+		reply.send({
+			success: false,
+			error: 'An error occurred enabling 2FA' 
+		});
 	}
 }
