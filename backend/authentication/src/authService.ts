@@ -52,7 +52,8 @@ export const login = async (username: string, password: string): Promise<AuthRes
 	}
 };
 
-/* * Verifies the 2FA token for a given user.
+/**
+ * Verifies the 2FA token for a given user.
  * @param username - The username of the user.
  * @param token - The 2FA token to verify.
  * @returns An object containing the verification result.
