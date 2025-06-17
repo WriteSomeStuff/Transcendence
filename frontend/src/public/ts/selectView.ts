@@ -1,4 +1,4 @@
-import { bindRegisterForm } from "./formHandlers.js";
+import { bindForm, formBindings } from "./formHandlers.js";
 
 function	bindButtons()
 {
@@ -15,6 +15,7 @@ function	bindButtons()
 
 function selectView(page: string, push: boolean)
 {
+	const formBinding = formBindings[page];
 	fetch(`./public/js/views/${page}.html`)
 	.then(response => {
 		if (!response.ok) {
@@ -30,8 +31,8 @@ function selectView(page: string, push: boolean)
 				window.history.pushState({}, "", `/${page}`);
 			}
 			bindButtons();
-			if (page === "register") {
-				bindRegisterForm();
+			if (formBinding) {
+				bindForm(formBinding.formId, formBinding.url, formBinding.serviceName);
 			}
 		}
 		else {
