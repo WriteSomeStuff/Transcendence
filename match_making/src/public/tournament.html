@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TOURNAMENT</title>
+  <link rel="stylesheet" href="public/styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Welcome to the TOURNAMENT Room!</h1>
+    <p>Ready to have some fun? Join a TOURNAMENT room and let the adventure begin!</p>
+
+    <!-- Each form sets 'gameMode' to a different value -->
+    <form action="/joinTournament" method="post">
+      <button class="joinGameButton" name="gameMode" value="pong_2" type="submit">
+        Join Room Pong (2 players)
+      </button>
+    </form>
+
+    <form action="/joinTournament" method="post">
+      <button class="joinGameButton" name="gameMode" value="pong_3" type="submit">
+        Join Room Pong (3 players)
+      </button>
+    </form>
+
+    <form action="/joinTournament" method="post">
+      <button class="joinGameButton" name="gameMode" value="pong_4" type="submit">
+        Join Room Pong (4 players)
+      </button>
+    </form>
+
+    <form action="/joinTournament" method="post">
+      <button class="joinGameButton" name="gameMode" value="memory" type="submit">
+        Join Memory Game (2 players)
+      </button>
+    </form>
+      <form action="/leaveTournament" method="post">
+      <button class="joinGameButton">
+        leave game
+      </button>
+    </form>
+  </div>
+
+</body>
+</html>

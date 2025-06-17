@@ -1,46 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Join Game Room</title>
-  <link rel="stylesheet" href="public/styles.css">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Game Menu</title>
+	<link rel="stylesheet" href="style.css">
+	<style>
+		body {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 100vh;
+			margin: 0;
+			background-color: #f0f0f0;
+		}
+		.button-container {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 20px;
+		}
+		.big-button {
+			padding: 20px 40px;
+			font-size: 1.5rem;
+			text-decoration: none;
+			color: #fff;
+			background-color: #007bff;
+			border: none;
+			border-radius: 8px;
+			cursor: pointer;
+			transition: background-color 0.3s;
+		}
+		.big-button:hover {
+			background-color: #0056b3;
+		}
+	</style>
 </head>
 <body>
-  <div class="container">
-    <h1>Welcome to the Game Room!</h1>
-    <p>Ready to have some fun? Join a game room and let the adventure begin!</p>
-
-    <!-- Each form sets 'gameMode' to a different value -->
-    <form action="/joinRoom" method="post">
-      <button class="joinGameButton" name="gameMode" value="pong_2" type="submit">
-        Join Room Pong (2 players)
-      </button>
-    </form>
-
-    <form action="/joinRoom" method="post">
-      <button class="joinGameButton" name="gameMode" value="pong_3" type="submit">
-        Join Room Pong (3 players)
-      </button>
-    </form>
-
-    <form action="/joinRoom" method="post">
-      <button class="joinGameButton" name="gameMode" value="pong_4" type="submit">
-        Join Room Pong (4 players)
-      </button>
-    </form>
-
-    <form action="/joinRoom" method="post">
-      <button class="joinGameButton" name="gameMode" value="memory" type="submit">
-        Join Memory Game (2 players)
-      </button>
-    </form>
-      <form action="/leaveRoom" method="post">
-      <button class="joinGameButton">
-        leave game
-      </button>
-    </form>
-  </div>
-
+	<div class="button-container">
+		<a class="big-button" href="match.html">Standard Match</a>
+		<a class="big-button" href="tournament.html">Tournament</a>
+	</div>
 </body>
 </html>
