@@ -1,4 +1,4 @@
-import { bindRegisterForm } from "./formHandlers";
+import { bindRegisterForm } from "./formHandlers.js";
 
 function	bindButtons()
 {
@@ -30,9 +30,9 @@ function selectView(page: string, push: boolean)
 				window.history.pushState({}, "", `/${page}`);
 			}
 			bindButtons();
-			// if (page === "register") {
-			// 	bindRegisterForm();
-			// }
+			if (page === "register") {
+				bindRegisterForm();
+			}
 		}
 		else {
 			console.error("Element spa not found.");

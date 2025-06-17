@@ -3,13 +3,13 @@ const registerForm = document.getElementById('registerForm') as HTMLFormElement 
 	if (registerForm) {
 		registerForm.addEventListener('submit', async function(event: Event) {
 			event.preventDefault();
-			console.log("[FRONTEND] yo we are handling the registration")
+			console.log("[FRONTEND] Handling registration")
 			
 			const username = (document.getElementById('username') as HTMLInputElement).value;
 			const password = (document.getElementById('password') as HTMLInputElement).value;
 		
 			try {
-				const url = 'http://auth_service:8080/auth/register';
+				const url = '/auth/register';
 				const response = await fetch(url, {
 					method: 'POST',
 					headers: {
@@ -28,7 +28,7 @@ const registerForm = document.getElementById('registerForm') as HTMLFormElement 
 				// TODO further handling, redirect to login?
 			} catch (e) {
 				console.error('Registration failed:', e);
-				alert('Registration failed:');
+				alert('Registration failed:' + e);
 				// TODO further handling
 			}
 		});
