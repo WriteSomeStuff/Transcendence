@@ -54,24 +54,23 @@ export const login = async (username: string, password: string): Promise<AuthRes
 
 /**
  * Verifies the 2FA token for a given user.
- * @param username - The username of the user.
+ * @param userId - The ID of the user for whom to verify the 2FA token.
  * @param token - The 2FA token to verify.
- * @returns An object containing the verification result.
- *          If successful, it returns { success: true, userId: <user_id> }.
- *          If failed, it returns { success: false, error: <error_message> }.
- */
-export const verify2FA = async (username: string, token: string): Promise<AuthResultObj> => {
+ * @returns An object containing the success status and username if successful, or an error message if not.
+ *          If an error occurs, it returns { success: false, error: <error_message> }.
+ */	
+export const verify2FA = async (userId: number, token: string): Promise<AuthResultObj> => {
 	try {
 		const stmt = db.prepare(`
 			SELECT 
-				user_id,
+				username,
 				two_fa_secret
 			FROM
 				user
 			WHERE
-				username = ?
+				user_id = ?
 		`);
-		const row = stmt.get(username) as { user_id: number, two_fa_secret: string };
+		const row = stmt.get(userId) as { username: string, two_fa_secret: string };
 
 		if (!row) {
 			return { success: false, error: "User not found" };
@@ -79,7 +78,7 @@ export const verify2FA = async (username: string, token: string): Promise<AuthRe
 
 		const totp = new OTPAuth.TOTP({
 			issuer: 'Transendence',
-			label: username,
+			label: row.username,
 			algorithm: 'SHA1',
 			digits: 6,
 			period: 30,
@@ -87,7 +86,7 @@ export const verify2FA = async (username: string, token: string): Promise<AuthRe
 		});
 
 		if (await totp.validate({ token })) {
-			return { success: true, userId: row.user_id };
+			return { success: true, username: row.username };
 		} else {
 			return { success: false, error: "Invalid 2FA token" };
 		}

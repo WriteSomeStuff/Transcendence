@@ -163,28 +163,26 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 
 export const verify2FATokenHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const { username, token } = request.body as { username: string, token: string };
+		const { userId, token } = request.body as { userId: number, token: string };
 
-		if (!username || !token) {
-			reply.status(400).send({ error: 'Username and token are required' });
+		if (!userId || !token) {
+			reply.status(400).send({ error: 'UserId and token are required' });
 			return;
 		}
 
-		const result = await verify2FA(username, token);
+		const result = await verify2FA(userId, token);
 
 		if (!result.success) {
 			reply.status(401).send({ error: result.error });
 			return;
 		}
-
-		if (typeof result.userId !== 'number') {
-			reply.status(500).send({ error: 'Invalid userId returned from 2FA verification' });
-			return;
+		if (!result.username) {
+			throw new Error("Username is missing");
 		}
+		
+		console.log('User %d verified via 2FA', result.username);
 
-		console.log('User %d verified via 2FA', result.userId);
-
-		await handleSuccessfulLogin(request, reply, result.userId, username);
+		await handleSuccessfulLogin(request, reply, userId, result.username);
 
 		reply.status(200).send({ message: "2FA verification successful" });
 
