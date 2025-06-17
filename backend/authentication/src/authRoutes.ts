@@ -7,7 +7,7 @@ import {
 	updateUsernameHandler,
 	updatePasswordHandler,
 	// generate2FATokenHandler,
-	// verify2FATokenHandler
+	verify2FATokenHandler
 } from "./authController";
 
 const authRoutes = async (app: FastifyInstance) => {
@@ -17,7 +17,7 @@ const authRoutes = async (app: FastifyInstance) => {
 	app.put('/username', updateUsernameHandler);
 	app.put('/password', updatePasswordHandler);
 	// app.post('/generate2FA', generate2FATokenHandler);
-	// app.post('/verify2FA', verify2FATokenHandler);
+	app.post('/verify2FA', verify2FATokenHandler);
 };
 
 export default authRoutes;
