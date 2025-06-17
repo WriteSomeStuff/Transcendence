@@ -1,5 +1,5 @@
-import { Court } from "./court.js";
-import { Vector2 } from "./vector2.js";
+import { Court } from "./court.ts";
+import { Vector2 } from "./vector2.ts";
 
 function translatePoint(
   court: Court,

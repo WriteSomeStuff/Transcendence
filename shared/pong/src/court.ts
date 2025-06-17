@@ -1,5 +1,5 @@
 import { CourtGeometry } from "./court_geometry.ts";
-import { CourtState, initCourtState } from "./court_state.js";
+import { CourtState, initCourtState } from "./court_state.ts";
 
 export interface Court {
   readonly geometry: CourtGeometry;

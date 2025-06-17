@@ -7,7 +7,7 @@
   "license": "MIT",
   "author": "cat",
   "type": "module",
-  "main": "src/court.ts",
+  "main": "src/index.ts",
   "scripts": {
     "test": ""
   },

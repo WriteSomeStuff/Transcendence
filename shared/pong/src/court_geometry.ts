@@ -1,5 +1,5 @@
 import { Vector2 } from "./vector2.ts";
-import { PaddleState } from "./paddle_state.js";
+import { PaddleState } from "./paddle_state.ts";
 
 export class CourtGeometry {
   public readonly size: number;

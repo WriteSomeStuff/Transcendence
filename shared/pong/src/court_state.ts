@@ -1,6 +1,6 @@
 import { Vector2 } from "./vector2.ts";
-import { PaddleState, initPaddle, updatePaddle } from "./paddle_state.js";
-import { CourtGeometry } from "./court_geometry.js";
+import { PaddleState, initPaddle, updatePaddle } from "./paddle_state.ts";
+import { CourtGeometry } from "./court_geometry.ts";
 
 export interface CourtState {
   ballPosition: Vector2;
@@ -113,7 +113,7 @@ export function updateCourtState(
         state.ballVelocity.length(),
         state.paddles.map((paddle) => paddle.edgeRatio),
       );
-      return [-1, state];
+      return [i, state];
     }
   }
   state.ballVelocity = newDirection;
