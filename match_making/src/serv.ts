@@ -12,6 +12,15 @@ import { cleanUpOldRooms } from './backend/room.js';
 const ONE_MINUTE = 60 * 1000;
 const FIVE_MINUTES = 5 * 60 * 1000;
 
+// Parse the port from environment variable or use default 8080
+const port = process.env.MATCH_MAKING_PORT ? 
+  parseInt(process.env.MATCH_MAKING_PORT, 10) : 8080;
+
+// Log warning if using default port
+if (!process.env.MATCH_MAKING_PORT) {
+  console.log("CAUTION: No MATCH_MAKING_PORT environment variable found. Using default port 8080.");
+}
+
 const fastify = Fastify({
 	
 });
@@ -66,7 +75,7 @@ fastify.post('/leaveRoom', async (request, reply) =>{
 	}
 })
 
-fastify.listen({host: '0.0.0.0', port : 8080}, (err, address) =>{
+fastify.listen({host: '0.0.0.0', port : port}, (err, address) =>{
 	if (err)
 	{
 		console.log('Error starting server: ', err);
