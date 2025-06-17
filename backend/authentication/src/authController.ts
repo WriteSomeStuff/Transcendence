@@ -15,7 +15,8 @@ import {
 	updateUsername,
 	updatePassword,
 	verify2FA,
-	enable2FA
+	enable2FA,
+	disable2FA
 } from "./authService";
 
 const REGISTER_SCHEMA = z.object({
@@ -263,6 +264,22 @@ export const enable2FAHandler = async (request: FastifyRequest, reply: FastifyRe
 		reply.send({
 			success: false,
 			error: 'An error occurred enabling 2FA' 
+		});
+	}
+}
+
+export const disable2FAHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+	try {
+		const { userId } = request.body as { userId: number };
+
+		disable2FA(userId);
+
+		reply.status(200).send({ success: true, message: "Two-factor authentication disabled successfully" });
+
+	} catch (e) {
+		reply.status(500).send({
+			success: false,
+			error: 'An error occurred disabling 2FA' 
 		});
 	}
 }
