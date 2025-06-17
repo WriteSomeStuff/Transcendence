@@ -1,8 +1,9 @@
 import argon2 from "argon2";
 import * as OTPAuth from "otpauth";
+import QRCode from "qrcode";
 import db from "./db";
 
-import { AuthResultObj } from "./types/types";
+import { AuthResultObj, Enable2FAResultObj } from "./types/types";
 
 export const register = async (username: string, password: string) => {
 	try {
@@ -127,4 +128,48 @@ export const updatePassword = async (newPassword: string, userId: number) => {
 	}
 }
 
-//TO DO: add update2FAenabled function
+export const enable2FA = async (userId: number): Promise<Enable2FAResultObj> => {
+	try {
+		const stmt = db.prepare(`
+			SELECT 
+				username
+			FROM
+				user
+			WHERE
+				user_id = ?
+		`);
+
+		const row = stmt.get(userId) as { username: string};
+		if (!row) {
+			return { success: false, error: "User not found" };
+		}
+
+		const totp = new OTPAuth.TOTP({
+			issuer: 'Transendence',
+			label: row.username,
+			algorithm: 'SHA1',
+			digits: 6,
+			period: 30
+		});
+
+		const secret = totp.secret.base32;
+		const otpAuthUrl = totp.toString();
+		const qrCodeDataUrl = await QRCode.toDataURL(otpAuthUrl);
+
+		const updateStmt = db.prepare(`
+			UPDATE user
+			SET 
+				two_fa_enabled = 1,
+				two_fa_secret = ?
+			WHERE
+				user_id = ?
+		`);
+
+		updateStmt.run(secret, userId);
+
+		return { success: true, twoFASecret: secret, qrCode: qrCodeDataUrl };
+	} catch (e) {
+		console.error('Error enabling 2FA:', e);
+		return { success: false, error: "An error occurred enabling 2FA" };
+	}
+};
