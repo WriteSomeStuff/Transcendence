@@ -2,11 +2,11 @@ import { tournamentRoom } from "./tournamentRoom";
 import { tournamentQueues, GameMode } from "./types";
 import { playerIsAlreadyInRoom, getMaxPlayerAmount } from "./helperFunctions";
 
-export function tournamentJoinRoom(userID: number, playersGameMode: string) {
+export function tournamentJoinRoom(userID: number, playersGameMode: string) : tournamentRoom{
 	console.log('"' + userID + '"' + " is trying to join a room in gameMode: " + playersGameMode); //DEBUG
 
-	if (playerIsAlreadyInRoom(userID))
-		return ;
+	// if (playerIsAlreadyInRoom(userID)) //TODO remove when switching pages == leave room is in place
+	// 	return ;
 
 	const gameMode = playersGameMode as GameMode;
 	
@@ -27,4 +27,5 @@ export function tournamentJoinRoom(userID: number, playersGameMode: string) {
 	tournamentQueues[gameMode][0].tryStartGame();
 	
 	console.log(tournamentQueues); //DEBUG
+	return (tournamentQueues[gameMode][0]);
 }

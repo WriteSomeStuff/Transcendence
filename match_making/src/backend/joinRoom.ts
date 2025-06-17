@@ -3,11 +3,11 @@ import { Room } from "./room";
 import { roomQueues, GameMode } from "./types";
 import { playerIsAlreadyInRoom, getMaxPlayerAmount } from "./helperFunctions";
 
-export function joinRoom(userID: number, playersGameMode: string) {
+export function joinRoom(userID: number, playersGameMode: string) : Room {
 	console.log('"' + userID + '"' + " is trying to join a room in gameMode: " + playersGameMode); //DEBUG
 
-	if (playerIsAlreadyInRoom(userID))
-		return ;
+	// if (playerIsAlreadyInRoom(userID)) //TODO delete after i implement that switching pages == leaving a room
+	// 	return null;
 
 	const gameMode = playersGameMode as GameMode;
 	
@@ -28,4 +28,5 @@ export function joinRoom(userID: number, playersGameMode: string) {
 	roomQueues[gameMode][0].tryStartGame();
 	
 	console.log(roomQueues); //DEBUG
+	return (roomQueues[gameMode][0]);
 }

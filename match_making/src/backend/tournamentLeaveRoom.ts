@@ -14,18 +14,16 @@ export function tournamentLeaveRoom(userID: number){
 				//if the host has left, set new host
 				if (userID == room.host)
 				{
-					console.log("new tournament room host set: " + room.playerList[0]);
 					room.host = room.playerList[0];
 				}
 				if (room.amountPlayersInRoom == 0)
 				{
 					//remove room if its empty
 					tournamentQueues[gameMode as GameMode] = tournamentQueues[gameMode as GameMode].filter((remove) => remove !== room);
+					console.log(userID + " has left the tournament room");
 				}
 			}
 		}
 	}
-
-	console.log(userID + " has chosen to leave the tournament room");
 	console.log(tournamentQueues);
 }

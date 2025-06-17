@@ -23,6 +23,11 @@ export class Room {
 	}
 
 	joinRoom(playerid: number){ //TODO: add mutex type thing here so no 2 users can join at the same time?
+		if (this.amountPlayersInRoom == this.maxPlayerAmount)
+		{
+			//TODO send error here
+			return ;
+		}
 		this.playerList.push(playerid);
 		this.amountPlayersInRoom++;
 		this.lastActivity = new Date();

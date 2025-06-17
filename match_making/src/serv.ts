@@ -4,16 +4,17 @@ import path from 'path';
 import fastifyFormbody from '@fastify/formbody';
 import fastifyCookie from '@fastify/cookie';
 
-
 import { joinRoom } from './backend/joinRoom.js';
 import { leaveRoom } from './backend/leaveRoom.js'
 import { tournamentJoinRoom } from './backend/tournamentjoinRoom.js';
 import { tournamentLeaveRoom } from './backend/tournamentLeaveRoom.js';
 import { cleanUpOldRooms } from './backend/helperFunctions.js';
+import { updateLastPing, cleanupInactiveUsers } from './backend/userActivitytracker.js'
 
 const ONE_MINUTE = 60 * 1000;
 const FIVE_MINUTES = 5 * 60 * 1000;
-
+const FIVE_SECONDS = 5 * 1000;
+const FIFTEEN_SECONDS = 15 * 1000;
 // Parse the port from environment variable or use default 8080
 const port = process.env.MATCH_MAKING_PORT ? 
   parseInt(process.env.MATCH_MAKING_PORT, 10) : 8080;
@@ -64,7 +65,18 @@ fastify.post('/joinRoom', async (req, reply) => {
 	{
 		//userId comes in as a 'string | undefined' and the '+' converts it to number 
 		const idAsNumber: number = +userId;
-  		joinRoom(idAsNumber, gameMode);
+  		const roomInfo = joinRoom(idAsNumber, gameMode);
+		
+		return reply.send({
+		success: true,
+		room: {
+			gameMode: gameMode,
+			playerCount: roomInfo.amountPlayersInRoom,
+			maxPlayers: roomInfo.maxPlayerAmount,
+			players: roomInfo.playerList,
+			lastActivity: roomInfo.lastActivity
+			}
+		});
 	}
 	else {
 	// Handle the case where there's no userId cookie
@@ -97,7 +109,18 @@ fastify.post('/joinTournament', async(req, reply) => {
 	{
 		//userId comes in as a 'string | undefined' and the '+' converts it to number 
 		const idAsNumber: number = +userId;
-  		tournamentJoinRoom(idAsNumber, gameMode);
+  		const roomInfo = tournamentJoinRoom(idAsNumber, gameMode);
+
+		return reply.send({
+            success: true,
+            room: {
+                gameMode: gameMode,
+                playerCount: roomInfo.amountPlayersInRoom,
+                maxPlayers: roomInfo.maxPlayerAmount,
+                players: roomInfo.playerList,
+				host: roomInfo.host
+            }
+        });
 	}
 	else {
 	// Handle the case where there's no userId cookie
@@ -121,6 +144,19 @@ fastify.post('/leaveTournament', async (request, reply) =>{
 	}
 });
 
+fastify.post('/keepAlive', async (req, reply) => {
+	const userId = req.cookies.userId;
+	if (!userId){
+		return reply.status(400).send({ error: 'No userId cookie found' });
+	}
+
+	// Track the last ping time for a user
+	const idAsNumber: number = +userId;
+	updateLastPing(idAsNumber);
+
+	return reply.send({ success: true });
+})
+
 fastify.listen({host: '0.0.0.0', port : port}, (err, address) =>{
 	if (err)
 	{
@@ -138,8 +174,9 @@ setInterval(() => {
   cleanUpOldRooms(FIVE_MINUTES); // 5 minutes in ms 
 }, ONE_MINUTE); // run once every minute
 
+setInterval(() => {
+	cleanupInactiveUsers(FIFTEEN_SECONDS)
+}, FIVE_SECONDS);
 
-
-// TODO: add /Health or /ping
 // add logging
 // make it so that the host can start a tournament

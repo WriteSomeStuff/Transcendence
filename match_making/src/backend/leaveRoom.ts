@@ -18,10 +18,10 @@ export function leaveRoom(userID: number){
 					//remove room if its empty
 					roomQueues[gameMode as GameMode] = roomQueues[gameMode as GameMode].filter((remove: Room) => remove !== room);
 				}
+				console.log(userID + " has left the room");
 			}
 		}
 	}
 
-	console.log(userID + " has chosen to leave the room");
 	console.log(roomQueues);
 }
