@@ -258,7 +258,7 @@ export const enable2FAHandler = async (request: FastifyRequest, reply: FastifyRe
 			qrCode: result.qrCode,
 			message: "Two-factor authentication enabled successfully"
 		});
-		
+
 	} catch (e) {
 		reply.status(500).send({
 			success: false,
