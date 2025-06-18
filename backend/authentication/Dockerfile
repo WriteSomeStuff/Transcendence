@@ -3,7 +3,7 @@ ARG NODE_VERSION=24.0.1
 FROM node:${NODE_VERSION}-slim
 
 RUN apt-get update && \
-	apt-get install -y python3 make g++ && \
+	apt-get install -y curl python3 make g++ && \
 	ln -s /usr/bin/python3 /usr/bin/python && \
 	npm install -g typescript
 
