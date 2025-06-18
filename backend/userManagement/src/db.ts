@@ -16,7 +16,7 @@ const sql = `
 		account_status	TEXT	DEFAULT ('offline')	CHECK(account_status IN ('online', 'offline'))
 	);
 
-	CREATE TRIGGER update_last_login
+	CREATE TRIGGER IF NOT EXISTS update_last_login
 	AFTER UPDATE OF account_status ON user
 	WHEN NEW.account_status = 'online'
 	BEGIN
