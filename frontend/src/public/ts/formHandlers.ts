@@ -3,8 +3,10 @@ export const formBindings: Record<string, { formId: string; url: string; service
     login:		{ formId: 'loginForm',		url: '/auth/login',    serviceName: 'Login' }
 };
 
-export function bindForm(formId: string, url: string, serviceName: string) {
-	const form = document.getElementById(formId) as HTMLFormElement | null;
+type formBinding = { formId: string; url: string; serviceName: string };
+
+export function bindForm(formBinding: formBinding) {
+	const form = document.getElementById(formBinding.formId) as HTMLFormElement | null;
 	if (!form) {
 		return;
 	}
@@ -17,7 +19,7 @@ export function bindForm(formId: string, url: string, serviceName: string) {
 			const password = (document.getElementById('password') as HTMLInputElement).value;
 
 			try {
-				const response = await fetch(url, {
+				const response = await fetch(formBinding.url, {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json'
@@ -31,13 +33,13 @@ export function bindForm(formId: string, url: string, serviceName: string) {
 				
 				const data = await response.json();
 
-				console.log(`${serviceName} successful: ${data}`);
-				alert(`${serviceName} successful!`);
+				console.log(`${formBinding.serviceName} successful: ${data}`);
+				alert(`${formBinding.serviceName} successful!`);
 
 				// TODO further handling, for registration to login page? for login to homepage?
 			} catch (e) {
-				console.error(`${serviceName} failed: ${e}`);
-				alert(`${serviceName} failed: ${e}`);
+				console.error(`${formBinding.serviceName} failed: ${e}`);
+				alert(`${formBinding.serviceName} failed: ${e}`);
 				// TODO further handling
 			}
 		});

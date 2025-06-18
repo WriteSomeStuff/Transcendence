@@ -15,7 +15,6 @@ function	bindButtons()
 
 function selectView(page: string, push: boolean)
 {
-	const formBinding = formBindings[page];
 	fetch(`./public/js/views/${page}.html`)
 	.then(response => {
 		if (!response.ok) {
@@ -31,8 +30,8 @@ function selectView(page: string, push: boolean)
 				window.history.pushState({}, "", `/${page}`);
 			}
 			bindButtons();
-			if (formBinding) {
-				bindForm(formBinding.formId, formBinding.url, formBinding.serviceName);
+			if (formBindings[page]) {
+				bindForm(formBindings[page]);
 			}
 		}
 		else {
