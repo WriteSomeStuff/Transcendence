@@ -51,6 +51,8 @@ services:
       retries: 10
     ports:
       - 8443:443
+    volumes:
+      - user_avatars:/etc/nginx/html/public/assets/avatars/user
     networks:
       - internal
     environment:
@@ -73,4 +75,10 @@ volumes:
     driver_opts:
       type: none
       device: ./backend/userManagement/data
+      o: bind
+  user_avatars:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./frontend/src/public/assets/avatars/user_data
       o: bind
