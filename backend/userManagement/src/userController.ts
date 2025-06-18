@@ -9,11 +9,11 @@ import {
 
 export const insertUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const { username } = request.body as { username: string };
+		const { username, userId } = request.body as { username: string, userId: number };
 
 		console.log(`[User controller] Inserting user with username '${username}' into db`);
 
-		insertUser(username);
+		insertUser(username, userId);
 
 		console.log(`[User controller] Successfully inserted user '${username}' into db`);
 

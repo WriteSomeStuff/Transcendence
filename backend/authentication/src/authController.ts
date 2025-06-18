@@ -42,16 +42,15 @@ export const registerUserHandler = async (request: FastifyRequest, reply: Fastif
 		const { username, password } = parsedData;
 
 		// call the service function to register user into database
-		await register(username, password);
+		const userId = await register(username, password);
 
-		// TODO also fetch with user_id in body
 		const url = process.env.USER_SERVICE_URL + '/new-user';
 		const response = await fetch(url, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
 			},
-			body: JSON.stringify({ username: username })
+			body: JSON.stringify({ username: username, userId: userId })
 		});
 
 		if (!response.ok) {

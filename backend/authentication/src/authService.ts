@@ -3,7 +3,7 @@ import db from "./db";
 
 import { AuthResultObj } from "./types/types";
 
-export const register = async (username: string, password: string) => {
+export const register = async (username: string, password: string): Promise<number> => {
 	try {
 		const hashedPassword = await argon2.hash(password);
 
@@ -15,6 +15,8 @@ export const register = async (username: string, password: string) => {
 		const result = stmt.run(username, hashedPassword);
 		
 		console.log(`Inserted row with ID: ${result.lastInsertRowid}`);
+		
+		return Number(result.lastInsertRowid);
 	} catch (e) {
 		console.error('Error during registration:', e);
 		throw new Error("An error occured during registration");
