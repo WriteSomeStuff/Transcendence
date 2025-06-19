@@ -80,5 +80,7 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: ./frontend/src/public/assets/avatars/user_data
+      device: ./frontend/src/public/assets/avatars/user
       o: bind
+
+    # Comment out to NOT have database and user uploads available on host TODO

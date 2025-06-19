@@ -10,6 +10,9 @@ dist/
 # container data
 data/
 
+# user uploads
+user/
+
 # environment
 .env
 
