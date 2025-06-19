@@ -4,7 +4,6 @@ import {
 	registerUserHandler,
 	loginUserHandler,
 	logoutUserHandler,
-	updateUsernameHandler,
 	updatePasswordHandler,
 	verify2FATokenHandler,
 	enable2FAHandler,
@@ -15,7 +14,6 @@ const authRoutes = async (app: FastifyInstance) => {
 	app.post('/register', registerUserHandler);
 	app.post('/login', loginUserHandler);
 	app.delete('/logout', { preHandler: [app.authenticate] }, logoutUserHandler);
-	app.put('/username', updateUsernameHandler);
 	app.put('/password', updatePasswordHandler);
 	app.post('/verify2FA', verify2FATokenHandler);
 	app.post('/enable2FA', enable2FAHandler);

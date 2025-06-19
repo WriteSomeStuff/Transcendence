@@ -5,7 +5,8 @@ import {
 	getUserDataHandler,
 	updateUsernameHandler,
 	setStatusHandler,
-	updatePasswordHandler
+	updatePasswordHandler,
+	getUsernameByUserId
 } from "./userController";
 
 const userRoutes = async (app: FastifyInstance) => {
@@ -14,6 +15,7 @@ const userRoutes = async (app: FastifyInstance) => {
 	app.put('/password', { preHandler: [app.authenticate] }, updatePasswordHandler);
 	app.post('/new-user', insertUserHandler);
 	app.put('/status', setStatusHandler);
+	app.get('/get-username', getUsernameByUserId); // 3.
 };
 
 export default userRoutes;

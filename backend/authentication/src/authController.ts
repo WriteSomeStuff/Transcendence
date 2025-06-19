@@ -12,7 +12,6 @@ import { z } from "zod";
 import {
 	register,
 	login,
-	updateUsername,
 	updatePassword,
 	verify2FA,
 	enable2FA,
@@ -47,6 +46,7 @@ export const registerUserHandler = async (request: FastifyRequest, reply: Fastif
 		// call the service function to register user into database
 		const userId = await register(username, password);
 
+		// TODO make lines 51-72 its own function? ----
 		const url = process.env.USER_SERVICE_URL + '/new-user';
 		const response = await fetch(url, {
 			method: 'POST',
@@ -56,25 +56,31 @@ export const registerUserHandler = async (request: FastifyRequest, reply: Fastif
 			body: JSON.stringify({ username: username, userId: userId })
 		});
 
-		if (!response.ok) { // check this response specifically on unique constraint for username
-			reply.status(500).send("Failed to update user service database");
+		if (response.status === 409) {
+			reply.status(409).send({
+				success: false,
+				error: "Username already exists"
+			});
 		}
+
+		if (!response.ok) {
+			reply.status(500).send({
+				success: false,
+				error: "Failed to update user service database"
+			});
+		}
+		// ------
 
 		reply.status(201).send({
 			success: true,
 			message: "User registered successfully"
 		});
 	
-	} catch (e) { // TODO cleanup these exceptions
+	} catch (e) {
 		if (e instanceof z.ZodError) { // Schema error (e.g. password too short)
 			reply.status(400).send({
 				success: false,
 				error: e.errors.map((err) => err.message).join(", ")
-			});
-		} else if (e instanceof Error) { // Failed stmt (e.g. username exists)
-			reply.status(400).send({
-				success: false,
-				error: e.message + ': username already exists'
 			});
 		} else {
 			reply.status(400).send({
@@ -212,21 +218,6 @@ export const logoutUserHandler = async (request: FastifyRequest, reply: FastifyR
 	}
 
 	return reply.status(200).send({ message: "Logout successfull" });
-}
-
-export const updateUsernameHandler = async (request: FastifyRequest, reply: FastifyReply) => {
-	try {
-		const { newUsername, userId } = request.body as { newUsername: string, userId: number };
-
-		updateUsername(newUsername, userId);
-
-		reply.status(200).send({ success: true });
-	} catch (e) {
-		reply.status(500).send({
-			success: false,
-			error: 'An error occured inserting a new username into authentication database'
-		});
-	}
 }
 
 export const updatePasswordHandler = async (request: FastifyRequest, reply: FastifyReply) => {

@@ -6,11 +6,9 @@ const db = new Database(DB_PATH, {
 	verbose: console.log,
 });
 
-// TODO delete username from this db
 const sql = `
 	CREATE TABLE IF NOT EXISTS user (
 		user_id			INTEGER	PRIMARY KEY,
-		username		TEXT	NOT NULL	UNIQUE,
 		password_hash	TEXT	NOT NULL,
 		two_fa_enabled	INTEGER	DEFAULT 0,
 		two_fa_secret	TEXT,

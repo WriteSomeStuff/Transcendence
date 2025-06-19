@@ -10,7 +10,7 @@ export const insertUser = async (username: string, userId: number) => {
 
 		stmt.run(userId, username);
 	} catch (e) {
-		throw new Error("Error inserting new user into user table");
+		throw e;
 	}
 };
 
@@ -57,5 +57,24 @@ export const updateStatus = async (userId: number, status: string) => {
 		stmt.run(status, userId);
 	} catch (e) {
 		throw new Error("An error occured updating account status");
+	}
+}
+
+export const getUserId = async (username: string) => {
+	try {
+		const stmt = db.prepare(`
+			SELECT 
+				user_id
+			FROM
+				user
+			WHERE
+				username = ?	
+		`)
+
+		stmt.get(username);
+
+		// return the userId 6.
+	} catch (e) {
+
 	}
 }

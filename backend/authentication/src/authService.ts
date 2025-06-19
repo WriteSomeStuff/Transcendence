@@ -10,8 +10,8 @@ export const register = async (username: string, password: string): Promise<numb
 		const hashedPassword = await argon2.hash(password);
 
 		const stmt = db.prepare(`
-			INSERT INTO user (username, password_hash) 
-			VALUES (?, ?)
+			INSERT INTO user (password_hash) 
+			VALUES (?)
 		`);
 
 		const result = stmt.run(hashedPassword);
@@ -21,39 +21,67 @@ export const register = async (username: string, password: string): Promise<numb
 		return Number(result.lastInsertRowid);
 	} catch (e) {
 		console.error('Error during registration:', e);
-		throw new Error("An error occured during registration");
+		throw e;
 	}
 };
 
-// TODO update to fetch username from user service db
+const fetchUserIdByUsername = async (username: string): Promise<number> => {
+	// 1. fetch call
+
+	const url = process.env.USER_SERVICE_URL + '/get-username';
+	const response = await fetch(url, {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({
+			username
+		})
+	});
+
+	// 8. get userid from reply somehow and return it
+
+	return 0;
+}
+
 export const login = async (username: string, password: string): Promise<AuthResultObj> => {
 	try {
+		const userId = await fetchUserIdByUsername(username);
+
 		const stmt = db.prepare(`
-			SELECT 
-				user_id,
+			SELECT
 				password_hash,
 				two_fa_enabled
 			FROM
 				user
 			WHERE
-				username = ?
+				user_id = ?
 		`);
-		const row = stmt.get(username) as {	user_id: number, password_hash: string, two_fa_enabled: boolean };
+		const row = stmt.get(userId) as {password_hash: string, two_fa_enabled: boolean };
 
 		if (!row) {
+			console.log("User not found in auth service db.");
 			return { success: false, error: "User not found" };
 		}
 
 		if (await argon2.verify(row.password_hash, password)) {
-			return { success: true, userId: row.user_id, twoFA: row.two_fa_enabled };
+			return { success: true, userId: userId, twoFA: row.two_fa_enabled };
 		} else {
 			return { success: false, error: "Incorrect password" };
 		}
-	} catch (e) {
+	} catch (e: any) {
 		console.error('Error during login:', e);
-		return { success: false, error: "An error occured during login" };
+		return { success: false, error: e.message };
 	}
 };
+
+const fetchUsernameByUserId = async (userId: number): Promise<string> => {
+	// fetch call
+	// return username
+	// only used for label, we can use differnet label maybe
+
+	return "Placeholder";
+}
 
 /**
  * Verifies the 2FA token for a given user.
@@ -82,7 +110,7 @@ export const verify2FA = async (userId: number, token: string): Promise<AuthResu
 
 		const totp = new OTPAuth.TOTP({
 			issuer: 'Transendence',
-			label: row.username,
+			label: row.username, // change this label or fetch username
 			algorithm: 'SHA1',
 			digits: 6,
 			period: 30,
@@ -97,22 +125,6 @@ export const verify2FA = async (userId: number, token: string): Promise<AuthResu
 	} catch (e) {
 		console.error('Error during 2FA verification:', e);
 		return { success: false, error: "An error occured during 2FA verification" };
-	}
-}
-
-// TODO delete
-export const updateUsername = async (newUsername: string, userId: number) => {
-	try {
-		const stmt = db.prepare(`
-			UPDATE user
-			SET username = ?
-			WHERE
-				user_id = ?
-		`);
-
-		stmt.run(newUsername, userId);
-	} catch (e) {
-		throw new Error("An error occured updating the authentication database");
 	}
 }
 
@@ -158,7 +170,7 @@ export const enable2FA = async (userId: number): Promise<Enable2FAResultObj> => 
 
 		const totp = new OTPAuth.TOTP({
 			issuer: 'Transendence',
-			label: row.username,
+			label: row.username, // change this label or fetch username
 			algorithm: 'SHA1',
 			digits: 6,
 			period: 30

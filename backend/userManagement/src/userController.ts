@@ -19,11 +19,18 @@ export const insertUserHandler = async (request: FastifyRequest, reply: FastifyR
 
 		reply.send({ success: true });
 
-	} catch (e) {
-		reply.status(500).send({
-			success: false,
-			error: 'An error occured inserting a new user into user_service database'
-		});
+	} catch (e: any) {
+		if (e && e.code === "SQLITE_CONSTRAINT_UNIQUE") {
+			reply.status(409).send({
+				success: false,
+				error: "Username already exists."
+			});
+		} else {
+			reply.status(500).send({
+				success: false,
+				error: "An error occured inserting a new user into user_service database."
+			});
+		}
 	}
 }
 
@@ -53,27 +60,11 @@ export const updateUsernameHandler = async (request: FastifyRequest, reply: Fast
 
 		await updateUsername(request.user.userId, newUsername);
 
-		const url = process.env.AUTH_SERVICE_URL + '/username';
-		const response = await fetch(url, {
-			method: 'PUT',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				newUsername,
-				userId: request.user.userId
-			})
-		});
-
-		if (!response.ok) {
-			reply.status(500).send("Failed to update authentication database");
-		}
-
 		reply.status(200).send({
 			success: true,
 			message: 'Username successfully changed'
 		});
-	} catch (e) {
+	} catch (e) { // TODO better handling to send if username already exists for example
 		reply.status(500).send({
 			success: false,
 			error: 'An error occured updating the username:' + e
@@ -129,4 +120,11 @@ export const setStatusHandler = async (request: FastifyRequest, reply: FastifyRe
 			error: e
 		});
 	}
+}
+
+export const getUsernameByUserId = async (request: FastifyRequest, reply: FastifyReply) => {
+	// get username from request body 4.
+	// to userService selectUserIdByUsername(username) 5.
+
+	// reply with userId in repsonse 7.
 }
