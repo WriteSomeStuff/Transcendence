@@ -14,7 +14,7 @@ export const register = async (username: string, password: string): Promise<numb
 			VALUES (?, ?)
 		`);
 
-		const result = stmt.run(username, hashedPassword);
+		const result = stmt.run(hashedPassword);
 		
 		console.log(`Inserted row with ID: ${result.lastInsertRowid}`);
 		
@@ -25,6 +25,7 @@ export const register = async (username: string, password: string): Promise<numb
 	}
 };
 
+// TODO update to fetch username from user service db
 export const login = async (username: string, password: string): Promise<AuthResultObj> => {
 	try {
 		const stmt = db.prepare(`
@@ -61,6 +62,7 @@ export const login = async (username: string, password: string): Promise<AuthRes
  * @returns An object containing the success status and username if successful, or an error message if not.
  *          If an error occurs, it returns { success: false, error: <error_message> }.
  */	
+// TODO get username in a different way
 export const verify2FA = async (userId: number, token: string): Promise<AuthResultObj> => {
 	try {
 		const stmt = db.prepare(`
@@ -98,6 +100,7 @@ export const verify2FA = async (userId: number, token: string): Promise<AuthResu
 	}
 }
 
+// TODO delete
 export const updateUsername = async (newUsername: string, userId: number) => {
 	try {
 		const stmt = db.prepare(`
@@ -136,6 +139,7 @@ export const updatePassword = async (newPassword: string, userId: number) => {
  * @returns An object containing the success status, 2FA secret, and QR code data URL.
  *          If an error occurs, it returns { success: false, error: <error_message> }.
  */
+// TODO dont use username
 export const enable2FA = async (userId: number): Promise<Enable2FAResultObj> => {
 	try {
 		const stmt = db.prepare(`

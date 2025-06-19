@@ -56,7 +56,7 @@ export const registerUserHandler = async (request: FastifyRequest, reply: Fastif
 			body: JSON.stringify({ username: username, userId: userId })
 		});
 
-		if (!response.ok) {
+		if (!response.ok) { // check this response specifically on unique constraint for username
 			reply.status(500).send("Failed to update user service database");
 		}
 
@@ -65,7 +65,7 @@ export const registerUserHandler = async (request: FastifyRequest, reply: Fastif
 			message: "User registered successfully"
 		});
 	
-	} catch (e) {
+	} catch (e) { // TODO cleanup these exceptions
 		if (e instanceof z.ZodError) { // Schema error (e.g. password too short)
 			reply.status(400).send({
 				success: false,
