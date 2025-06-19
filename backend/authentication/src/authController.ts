@@ -112,7 +112,6 @@ async function handleSuccessfulLogin(request: FastifyRequest, reply: FastifyRepl
 	
 	if (!response.ok) {
 		reply.status(500).send("Failed to update user service database");
-		return;
 	}
 
 	reply.status(200).send({ message: `user '${username}' with userid: ${userId} logged in successfully` });
@@ -209,6 +208,9 @@ export const logoutUserHandler = async (request: FastifyRequest, reply: FastifyR
 	})
 
 	// TODO check response
+	if (!response.ok) {
+		reply.status(500).send("Failed to update user service database");
+	}
 
 	return reply.status(200).send({ message: "Logout successfull" });
 }
