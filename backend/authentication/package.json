@@ -16,9 +16,13 @@
 		"argon2": "^0.43.0",
 		"better-sqlite3": "^11.10.0",
 		"fastify": "^5.3.3",
+		"hi-base32": "^0.5.1",
+		"otpauth": "^9.4.0",
+		"qrcode": "^1.5.4",
 		"zod": "^3.25.32"
 	},
 	"devDependencies": {
-		"@types/better-sqlite3": "^7.6.13"
+		"@types/better-sqlite3": "^7.6.13",
+		"@types/qrcode": "^1.5.5"
 	}
 }

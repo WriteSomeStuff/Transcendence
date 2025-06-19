@@ -13,7 +13,10 @@ import {
 	register,
 	login,
 	updateUsername,
-	updatePassword
+	updatePassword,
+	verify2FA,
+	enable2FA,
+	disable2FA
 } from "./authService";
 
 const REGISTER_SCHEMA = z.object({
@@ -82,6 +85,38 @@ export const registerUserHandler = async (request: FastifyRequest, reply: Fastif
 	}
 };
 
+// in controller or service?
+async function handleSuccessfulLogin(request: FastifyRequest, reply: FastifyReply, userId: number, username: string) {
+	const token = request.jwt.sign({ userId: userId }, { expiresIn: "1d" });
+	
+	console.log("Login successful");
+	
+	const isProduction = process.env.NODE_ENV === 'production'; // because testing with http requests, can also be set to "auto" maybe?
+	
+	reply.setCookie('access_token', token, {
+		path: '/',
+		httpOnly: true,
+		secure: isProduction,
+	});
+
+	const response = await fetch ('http://user_service:8080/users/status', {
+		method: 'PUT',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({
+			userId: userId,
+			status: 'online'
+		})
+	})
+	
+	if (!response.ok) {
+		reply.status(500).send("Failed to update user service database");
+	}
+
+	reply.status(200).send({ message: `user '${username}' with userid: ${userId} logged in successfully` });
+}
+
 export const loginUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
 		const parsedData = LOGIN_SCHEMA.parse(request.body);
@@ -100,46 +135,60 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 		}
 		console.log('User %d verified', result.userId);
 		
-		// 2FA if (result.twoFa) { do authentication }
-
-		const token = request.jwt.sign({ userId: result.userId }, { expiresIn: "1d" });
-		
-		console.log("Login successful");
-		
-		const isProduction = process.env.NODE_ENV === 'production'; // because testing with http requests, can also be set to "auto" maybe?
-		
-		reply.setCookie('access_token', token, {
-			path: '/',
-			httpOnly: true,
-			secure: isProduction,
-		});
-
-		const url = process.env.USER_SERVICE_URL + '/status';
-		const response = await fetch(url, {
-			method: 'PUT',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				userId: result.userId,
-				status: 'online'
-			})
-		})
-		
-		if (!response.ok) {
-			reply.status(500).send("Failed to update user service database");
+		// If login is successful and 2FA is enabled, send a response indicating that 2FA verification is required
+		if (result.twoFA) {
+			reply.status(200).send({
+				success: true,
+				twoFA: true,
+				message: "Two-factor authentication is enabled for this user. Please verify your token.",
+				next: "/verify2FA",
+				username: username
+			});
+			return;
 		}
 
-		reply.status(200).send({ message: `user '${username}' logged in successfully` });
+		await handleSuccessfulLogin(request, reply, result.userId, username);
 
 	} catch (e) {
 		if (e instanceof z.ZodError) {
-      		reply.status(400).send({ error: e.errors });
-    	} else {
+			reply.status(400).send({ error: e.errors });
+		} else {
 			if (e instanceof Error) {
 				reply.status(500).send({ error: 'An error occurred during login:' + e.message });
 			}
-    	}
+		}
+	}
+};
+
+export const verify2FATokenHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+	try {
+		const { userId, token } = request.body as { userId: number, token: string };
+
+		if (!userId || !token) {
+			reply.status(400).send({ error: 'UserId and token are required' });
+			return;
+		}
+
+		const result = await verify2FA(userId, token);
+
+		if (!result.success) {
+			reply.status(401).send({ error: result.error });
+			return;
+		}
+		if (!result.username) {
+			throw new Error("Username is missing");
+		}
+		
+		console.log('User %d verified via 2FA', result.username);
+
+		await handleSuccessfulLogin(request, reply, userId, result.username);
+
+		reply.status(200).send({ message: "2FA verification successful" });
+
+	} catch (e) {
+		if (e instanceof Error) {
+			reply.status(500).send({ error: 'An error occurred during 2FA verification:' + e.message });
+		}
 	}
 };
 
@@ -162,7 +211,7 @@ export const logoutUserHandler = async (request: FastifyRequest, reply: FastifyR
 		reply.status(500).send("Failed to update user service database");
 	}
 
-	return reply.send({ message: "Logout successfull" });
+	return reply.status(200).send({ message: "Logout successfull" });
 }
 
 export const updateUsernameHandler = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -171,9 +220,9 @@ export const updateUsernameHandler = async (request: FastifyRequest, reply: Fast
 
 		updateUsername(newUsername, userId);
 
-		reply.send({ success: true });
+		reply.status(200).send({ success: true });
 	} catch (e) {
-		reply.send({
+		reply.status(500).send({
 			success: false,
 			error: 'An error occured inserting a new username into authentication database'
 		});
@@ -186,12 +235,54 @@ export const updatePasswordHandler = async (request: FastifyRequest, reply: Fast
 
 		updatePassword(newPassword, userId);
 
-		reply.send({ success: true });
+		reply.status(200).send({ success: true });
 
 	} catch (e) {
-		reply.send({
+		reply.status(500).send({
 			success: false,
 			error: 'An error occured inserting a new password into authentication database'
 		});	
+	}
+}
+
+export const enable2FAHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+	try {
+		const { userId } = request.body as { userId: number };
+
+		const result = await enable2FA(userId);
+
+		if (!result.success) {
+			reply.status(400).send({ error: result.error });
+			return;
+		}
+
+		reply.status(200).send({
+			success: true,
+			twoFASecret: result.twoFASecret,
+			qrCode: result.qrCode,
+			message: "Two-factor authentication enabled successfully"
+		});
+
+	} catch (e) {
+		reply.status(500).send({
+			success: false,
+			error: 'An error occurred enabling 2FA' 
+		});
+	}
+}
+
+export const disable2FAHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+	try {
+		const { userId } = request.body as { userId: number };
+
+		disable2FA(userId);
+
+		reply.status(200).send({ success: true, message: "Two-factor authentication disabled successfully" });
+
+	} catch (e) {
+		reply.status(500).send({
+			success: false,
+			error: 'An error occurred disabling 2FA' 
+		});
 	}
 }

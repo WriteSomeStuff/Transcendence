@@ -1,5 +1,5 @@
 export const formBindings: Record<string, { formId: string; url: string; serviceName: string }> = {
-    register:	{ formId: 'registerForm',	url: '/auth/register', serviceName: 'Registration' },
+    register:	{ formId: 'registrationForm',	url: '/auth/register', serviceName: 'Registration' },
     login:		{ formId: 'loginForm',		url: '/auth/login',    serviceName: 'Login' }
 };
 
