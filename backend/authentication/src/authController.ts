@@ -114,7 +114,7 @@ async function handleSuccessfulLogin(request: FastifyRequest, reply: FastifyRepl
 		return;
 	}
 
-	reply.status(200).send({ message: `user '${username}' logged in successfully` });
+	reply.status(200).send({ message: `user '${username}' with userid: ${userId} logged in successfully` });
 }
 
 export const loginUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
