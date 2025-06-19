@@ -85,7 +85,7 @@ export const verify2FA = async (userId: number, token: string): Promise<AuthResu
 			secret: OTPAuth.Secret.fromBase32(row.two_fa_secret)
 		});
 
-		if (await totp.validate({ token })) {
+		if (await totp.validate({ token, window: 1 })) {
 			return { success: true, username: row.username };
 		} else {
 			return { success: false, error: "Invalid 2FA token" };
