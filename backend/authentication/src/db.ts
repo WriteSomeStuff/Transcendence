@@ -6,6 +6,7 @@ const db = new Database(DB_PATH, {
 	verbose: console.log,
 });
 
+// TODO delete username from this db
 const sql = `
 	CREATE TABLE IF NOT EXISTS user (
 		user_id			INTEGER	PRIMARY KEY,
