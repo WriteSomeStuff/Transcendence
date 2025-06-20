@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { setStatusInUserService, removeUser } from "./authService";
+import { setStatusInUserService, removeUser } from "../authService";
 
 
 export const handleUserDbError = async (response: Response, userId: number, reply: FastifyReply) => {

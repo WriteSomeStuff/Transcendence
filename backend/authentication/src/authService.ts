@@ -4,7 +4,7 @@ import QRCode from "qrcode";
 import db from "./db";
 
 import { AuthResultObj, Enable2FAResultObj } from "./types/types";
-import { fetchUserIdByUsername } from "./authServiceHelpers";
+import { fetchUserIdByUsername } from "./helpers/authServiceHelpers";
 
 export const register = async (username: string, password: string): Promise<number> => {
 	try {

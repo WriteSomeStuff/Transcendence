@@ -10,7 +10,7 @@ import { FastifyRequest, FastifyReply } from "fastify";
 import { z } from "zod";
 
 import { registerSchema, loginSchema } from "./schemas/authSchemas";
-import { handleUserDbError, handleSuccessfulLogin } from "./authControllerHelpers";
+import { handleUserDbError, handleSuccessfulLogin } from "./helpers/authControllerHelpers";
 
 import {
 	register,
