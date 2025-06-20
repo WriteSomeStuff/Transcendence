@@ -4,6 +4,7 @@ import {
 	insertUser,
 	getUserDataFromDb,
 	updateUsername,
+	updatePassword,
 	updateStatus,
 	getUserId
 } from "./userService";
@@ -13,14 +14,13 @@ export const insertUserHandler = async (request: FastifyRequest, reply: FastifyR
 		const { username, userId } = request.body as { username: string, userId: number };
 
 		console.log(`[User controller] Inserting user with username '${username}' into db`);
-
 		await insertUser(username, userId);
+		console.log(`[User controller] Inserting user '${username}' into db successful`);
 
-		console.log(`[User controller] Successfully inserted user '${username}' into db`);
-
-		reply.send({ success: true });
+		reply.status(200).send({ success: true });
 
 	} catch (e: any) {
+		console.error('Error inserting new user:', e);
 		if (e && e.code === "SQLITE_CONSTRAINT_UNIQUE") {
 			reply.status(409).send({
 				success: false,
@@ -37,18 +37,17 @@ export const insertUserHandler = async (request: FastifyRequest, reply: FastifyR
 
 export const getUserDataHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		console.log('[User Controller] Fetching user data for:', request.user.userId);
-		
+		console.log('[User Controller] Getting user data from user db for:', request.user.userId);
 		const userData = await getUserDataFromDb(request.user.userId);
-		
-		console.log('[User Controller] User data:', userData);
+		console.log('[User Controller] Getting user data successful:', userData);
 
-		reply.send({
+		reply.status(200).send({
 			success: true,
 			data: userData
 		});
 
 	} catch (e) {
+		console.error('Error ugetting user data:', e);
 		reply.status(500).send({
 			success: false,
 			error: 'An error occured getting the user data: '+ e
@@ -60,17 +59,28 @@ export const updateUsernameHandler = async (request: FastifyRequest, reply: Fast
 	try {
 		const { newUsername } = request.body as { newUsername: string };
 
+		console.log(`[User Controller] Updating username in db for user ${request.user.userId} to '${newUsername}`);
 		await updateUsername(request.user.userId, newUsername);
+		console.log(`[User Controller] Updating username for user ${request.user.userId} successful`);
 
 		reply.status(200).send({
 			success: true,
-			message: 'Username successfully changed'
+			message: "Username successfully changed"
 		});
-	} catch (e) { // TODO better handling to send if username already exists for example
-		reply.status(500).send({
-			success: false,
-			error: 'An error occured updating the username:' + e
-		});
+
+	} catch (e: any) {
+		console.error('Error updating username:', e);
+		if (e && e.code === "SQLITE_CONSTRAINT_UNIQUE") {
+			reply.status(409).send({
+				success: false,
+				error: "Username already exists"
+			})
+		} else {
+			reply.status(500).send({
+				success: false,
+				error: 'An error occured updating the username:' + e
+			});
+		}		
 	}
 };
 
@@ -78,27 +88,16 @@ export const updatePasswordHandler = async (request: FastifyRequest, reply: Fast
 	try {
 		const { newPassword } = request.body as { newPassword: string };
 
-		const url = process.env.AUTH_SERVICE_URL + '/password';
-		const response = await fetch(url, {
-			method: 'PUT',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				newPassword,
-				userId: request.user.userId
-			})
-		});
-
-		if (!response.ok) {
-			reply.status(500).send("Failed to update authentication database");
-		}
+		console.log(`[User Controller] Updating password in auth db for user ${request.user.userId}`);
+		await updatePassword(request.user.userId, newPassword);
+		console.log(`[User Controller] Updating password for user ${request.user.userId} successful`);
 
 		reply.status(200).send({
 			success: true,
-			message: 'Password successfully changed'
+			message: "Password successfully changed"
 		});
 	} catch (e) {
+		console.error('Error updating password:', e);
 		reply.status(500).send({
 			success: false,
 			error: 'An error occured updating the password:' + e
@@ -110,15 +109,16 @@ export const setStatusHandler = async (request: FastifyRequest, reply: FastifyRe
 	try {
 		const { userId, status } = request.body as { userId: number, status: string };
 
-		console.log('Setting status for user,', userId, 'to', status);
-
+		console.log(`[User Controller] Setting status for user ${userId} to ${status}`);
 		await updateStatus(userId, status);
+		console.log(`[User Controller] Setting status for user ${userId} to ${status} Successful`);
 
 		reply.send({ success: true });
 	} catch (e) {
+		console.error('Error setting status:', e);
 		reply.send({
 			success: false,
-			error: e
+			error: 'An error occured setting the status' + e
 		});
 	}
 }
@@ -127,23 +127,25 @@ export const getUserIdByUsernameHandler = async (request: FastifyRequest, reply:
 	try {
 		const { username } = request.query as { username: string };
 
-		const user_id = await getUserId(username);
-		
-		if (!user_id) {
-			return reply.status(404).send({
+		console.log(`[User Controller] Getting corresponding user id for user '${username}'`);
+		const userId = await getUserId(username);
+		console.log(`[User Controller] Getting corresponding user id for user '${username}' successful: ${userId}`)
+
+		reply.status(200).send({
+			success: true,
+			user_id: userId
+		});
+	} catch (e: any) {
+		if (e.message === "User not found") {
+			reply.status(404).send({
 				success: false,
-				error: "User not found"
+				error: e.message
+			});
+		} else {
+			reply.status(500).send({
+				success: false,
+				error: e
 			});
 		}
-
-		reply.send({
-			success: true,
-			user_id: user_id
-		});
-	} catch (e) {
-		reply.send({
-			success: false,
-			error: e
-		});
 	}
 }

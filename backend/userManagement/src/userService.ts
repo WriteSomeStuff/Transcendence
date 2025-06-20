@@ -45,12 +45,32 @@ export const updateUsername = async (userId: number, newUsername: string) => {
 
 		stmt.run(newUsername, userId);
 	} catch (e: any) {
-		if (e && e.code === "SQLITE_CONSTRAINT_UNIQUE") {
-			throw new Error("Username already exists.");
-		}
-		throw new Error(`${e.message || e}`);
+		throw e;
 	}
 };
+
+export const updatePassword = async (userId: number, newPassword: string) => {
+	try {
+		const url = process.env.AUTH_SERVICE_URL + '/password';
+		const response = await fetch(url, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				newPassword,
+				userId
+			})
+		});
+	
+		if (!response.ok) {
+			throw new Error(`${response.status} ${response.statusText}`);
+		}
+	} catch (e) {
+		throw e;
+	}
+	
+}
 
 export const updateStatus = async (userId: number, status: string) => {
 	try {
@@ -63,7 +83,7 @@ export const updateStatus = async (userId: number, status: string) => {
 
 		stmt.run(status, userId);
 	} catch (e) {
-		throw new Error("An error occured updating account status");
+		throw e;
 	}
 }
 
@@ -80,10 +100,10 @@ export const getUserId = async (username: string): Promise<number> => {
 
 		const row = stmt.get(username) as { user_id: number } | undefined;
 		if (!row) { // user not found
-			return 0;
+			throw new Error("User not found");
 		}
 		return row.user_id;
 	} catch (e) {
-		return 0;
+		throw e;
 	}
 }
