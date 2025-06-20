@@ -1,20 +1,19 @@
-NAME= inception
-
 all:
-# mkdir -p ${HOME}/Documents/Transcendence/wp
-	docker compose -f docker-compose.yml up
-
-# prep:
-# 	echo "127.0.0.1 cschabra.42.fr" | sudo tee -a /etc/hosts > /dev/null
+	mkdir -p ./backend/authentication/data
+	mkdir -p ./backend/userManagement/data
+	mkdir -p ./frontend/src/public/assets/user
+	docker compose up --build
 
 down:
-	docker compose -f docker-compose.yml down
+	docker compose down
 
 prune:
-	docker builder prune -f && docker system prune -a -f
-# rm -rf ${HOME}/Documents/Transcendence/wp
+	docker builder prune -f && docker system prune -af
 
 status:
-	docker compose -f docker-compose.yml ps
+	docker compose ps
 
-.PHONY: all prep down prune status
+db_clean:
+	find ./backend -type f -name "*.sqlite3" -delete
+
+.PHONY: all down prune status db_clean
