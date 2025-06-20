@@ -9,71 +9,37 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { z } from "zod";
 
+import { registerSchema, loginSchema } from "./schemas/authSchemas";
+import { handleUserDbError, handleSuccessfulLogin } from "./authControllerHelpers";
+
 import {
 	register,
+	registerUserInUserService,
 	login,
+	setStatusInUserService,
 	updatePassword,
 	verify2FA,
 	enable2FA,
-	disable2FA,
-	removeUser
+	disable2FA
 } from "./authService";
-
-const REGISTER_SCHEMA = z.object({
-	username: z.string()
-		.min(3, "Username is required")
-		.max(32, "Username too long"),
-	password: z.string()
-		.min(6, "Password too short")
-		.max(64, "Password too long"),
-})
-.required();
-
-const LOGIN_SCHEMA = z.object({
-	username: z.string()
-		.min(3, "Username too short")
-		.max(32, "Username too long"),
-	password: z.string()
-		.min(6, "Password too short")
-		.max(64, "Password too long"),
-})
-.required();
 
 export const registerUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const parsedData = REGISTER_SCHEMA.parse(request.body);
+		const parsedData = registerSchema.parse(request.body);
 		const { username, password } = parsedData;
 
+		console.log(`[Auth Controller] Registering user '${username}'`);
 		const userId = await register(username, password);
-
-		// TODO make lines 51-95 its own function? ----
-		const url = process.env.USER_SERVICE_URL + '/new-user';
-		const response = await fetch(url, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({ username: username, userId: userId })
-		});
-
-		if (response.status === 409) {
-			await removeUser(userId);
-			reply.status(409).send({
-				success: false,
-				error: "Username already exists"
-			});
-			return;	
-		}
+		console.log(`[Auth Controller] Registering user '${username}' successful: ${userId}`);
+		
+		console.log(`[Auth Controller] Registering user '${username}' to user db`);
+		const response = await registerUserInUserService(username, userId);
+		console.log(`[Auth Controller] Registering user '${username}' to user db successful`);
 
 		if (!response.ok) {
-			await removeUser(userId);
-			reply.status(500).send({
-				success: false,
-				error: "Failed to update user service database"
-			});
-			return;
+			handleUserDbError(response, userId, reply);
+			return;	
 		}
-		// ------
 
 		reply.status(201).send({
 			success: true,
@@ -81,6 +47,7 @@ export const registerUserHandler = async (request: FastifyRequest, reply: Fastif
 		});
 	
 	} catch (e) {
+		console.error('Error registering the user:', e);
 		if (e instanceof z.ZodError) { // Schema error (e.g. password too short)
 			reply.status(400).send({
 				success: false,
@@ -89,61 +56,28 @@ export const registerUserHandler = async (request: FastifyRequest, reply: Fastif
 		} else {
 			reply.status(500).send({
 				success: false,
-				error: 'An error occured registrating the user:' + e
+				error: 'An error occured registering the user: ' + e
 			});
 		}
+		
 	}
 };
 
-// in controller or service?
-async function handleSuccessfulLogin(request: FastifyRequest, reply: FastifyReply, userId: number, username: string) {
-	const token = request.jwt.sign({ userId: userId }, { expiresIn: "1d" });
-	
-	console.log("Login successful");
-	
-	const isProduction = process.env.NODE_ENV === 'production'; // because testing with http requests, can also be set to "auto" maybe?
-	
-	reply.setCookie('access_token', token, {
-		path: '/',
-		httpOnly: true,
-		secure: isProduction,
-	});
-
-	const response = await fetch ('http://user_service:8080/users/status', {
-		method: 'PUT',
-		headers: {
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify({
-			userId: userId,
-			status: 'online'
-		})
-	})
-	
-	if (!response.ok) {
-		reply.status(500).send("Failed to update user service database");
-	}
-
-	reply.status(200).send({ message: `user '${username}' with userid: ${userId} logged in successfully` });
-}
-
 export const loginUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const parsedData = LOGIN_SCHEMA.parse(request.body);
+		const parsedData = loginSchema.parse(request.body);
 		const { username, password } = parsedData;
 
+		console.log(`[Auth Controller] Logging in user '${username}'`);
 		const result = await login(username, password);
+		console.log(`[Auth Controller] Logging in user '${username}' successful`);
 
 		if (!result.success) {
-			reply.status(401).send({ error: result.error });
-			return;
+			reply.status(401).send({
+				success: false,
+				error: result.error
+			});
 		}
-
-		if (typeof result.userId !== 'number') {
-			reply.status(500).send({ error: 'Invalid userId returned from login' });
-			return;
-		}
-		console.log('User %d verified', result.userId);
 		
 		// If login is successful and 2FA is enabled, send a response indicating that 2FA verification is required
 		if (result.twoFA) {
@@ -154,18 +88,29 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 				next: "/verify2FA",
 				username: username
 			});
-			return;
 		}
 
-		await handleSuccessfulLogin(request, reply, result.userId, username);
+		console.log(`[Auth Controller] Handling successful login for user ${result.userId} ${username}`);
+		await handleSuccessfulLogin(request, reply, Number(result.userId), username);
+		console.log(`[Auth Controller] User ${result.userId} ${username} logged in successfully`);
+
+		reply.status(200).send({ 
+			success: true,
+			message: "User logged in successfully"
+		});
 
 	} catch (e) {
+		console.error('Error logging in the user:', e);
 		if (e instanceof z.ZodError) {
-			reply.status(400).send({ error: e.errors });
+			reply.status(400).send({ 
+				success: false,
+				error: e.errors.map((err) => err.message).join(", ")
+			});
 		} else {
-			if (e instanceof Error) {
-				reply.status(500).send({ error: 'An error occurred during login:' + e.message });
-			}
+			reply.status(500).send({
+				success: false,
+				error: 'An error occurred during login: ' + e
+			});
 		}
 	}
 };
@@ -198,46 +143,60 @@ export const verify2FATokenHandler = async (request: FastifyRequest, reply: Fast
 		reply.status(200).send({ message: "2FA verification successful" });
 
 	} catch (e) {
+		console.error('Error verifying 2FA token:', e);
 		if (e instanceof Error) {
-			reply.status(500).send({ error: 'An error occurred during 2FA verification:' + e.message });
+			reply.status(500).send({ 
+				success: false,
+				error: 'An error occurred during 2FA verification: ' + e.message
+			});
 		}
 	}
 };
 
 export const logoutUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
-	reply.clearCookie('access_token'); // to clear cookie in browser
+	try {
+		reply.clearCookie('access_token'); // to clear cookie in browser
+		console.log(`[Auth Controller] Cleared cookie for user ${request.user.userId}`);
 
-	const url = process.env.USER_SERVICE_URL + '/status';
-	const response = await fetch(url, {
-		method: 'PUT',
-		headers: {
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify({
-			userId: request.user.userId,
-			status: 'offline'
-		})
-	})
-
-	if (!response.ok) {
-		reply.status(500).send("Failed to update user service database");
+		console.log(`[Auth Controller] Setting status to 'offline' for user ${request.user.userId}`);
+		const response = await setStatusInUserService(request.user.userId, 'offline');
+		
+		if (!response.ok) {
+			console.error('Failed to update user service database:', response.statusText);
+			reply.status(response.status).send("Failed to update user service database");
+			return;
+		}
+		console.log(`[Auth Controller] Set status to 'offline' for user ${request.user.userId}`);
+	
+		return reply.status(200).send({
+			success: true,
+			message: "Logout successfull"
+		});
+		
+	} catch (e) {
+		console.error('Error clearing cookie:', e);
+		reply.status(500).send({
+			success: false,
+			error: 'An error occurred during logout: ' + e
+		});
 	}
-
-	return reply.status(200).send({ message: "Logout successfull" });
 }
 
 export const updatePasswordHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
 		const { newPassword, userId } = request.body as { newPassword: string, userId: number };
 
-		updatePassword(newPassword, userId);
+		console.log(`[Auth Controller] Updating password for user ${userId}`);
+		await updatePassword(newPassword, userId);
+		console.log(`[Auth Controller] Updating password for user ${userId} successful`);
 
 		reply.status(200).send({ success: true });
 
 	} catch (e) {
+		console.error('Error updating the password:', e);
 		reply.status(500).send({
 			success: false,
-			error: 'An error occured inserting a new password into authentication database'
+			error: 'An error occurred updating the password: ' + e
 		});	
 	}
 }

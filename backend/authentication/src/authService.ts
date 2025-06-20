@@ -4,6 +4,7 @@ import QRCode from "qrcode";
 import db from "./db";
 
 import { AuthResultObj, Enable2FAResultObj } from "./types/types";
+import { fetchUserIdByUsername } from "./authServiceHelpers";
 
 export const register = async (username: string, password: string): Promise<number> => {
 	try {
@@ -16,36 +17,34 @@ export const register = async (username: string, password: string): Promise<numb
 
 		const result = stmt.run(hashedPassword);
 		
-		console.log(`Inserted row with ID: ${result.lastInsertRowid}`);
-		
 		return Number(result.lastInsertRowid);
 	} catch (e) {
-		console.error('Error during registration:', e);
 		throw e;
 	}
 };
 
-const fetchUserIdByUsername = async (username: string): Promise<number> => {
-	const url = process.env.USER_SERVICE_URL + '/get-username?username=' + encodeURIComponent(username);
-	const response = await fetch(url, {
-		method: 'GET',
-		headers: {
-			'Content-Type': 'application/json'
-		}
-	});
+export const registerUserInUserService = async (username: string, userId: number): Promise<Response> => {
+	try {
+		const url = process.env.USER_SERVICE_URL + '/new-user';
+		const response = await fetch(url, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ username, userId })
+		});
 
-	const data = await response.json() as { success: boolean, user_id?: number, error?: string };
-
-	if (data.success && typeof data.user_id === "number") {
-		return data.user_id;
-	} else {
-		throw new Error("User not found");
+		return response;
+	} catch (e) {
+		throw e;
 	}
 }
 
 export const login = async (username: string, password: string): Promise<AuthResultObj> => {
 	try {
+		console.log(`[Auth Service] Fetching to get corresponding user id for '${username}'`);
 		const userId = await fetchUserIdByUsername(username);
+		console.log(`[Auth Service] Fetching to get corresponding user id for '${username}' successful: ${userId}`);
 
 		const stmt = db.prepare(`
 			SELECT
@@ -59,20 +58,54 @@ export const login = async (username: string, password: string): Promise<AuthRes
 		const row = stmt.get(userId) as {password_hash: string, two_fa_enabled: boolean };
 
 		if (!row) {
-			console.log("User not found in auth service db.");
-			return { success: false, error: "User not found" };
+			console.log(`[Auth Service] User '${username}' not found in auth service db`);
+			return {
+				success: false, 
+				error: "User not found"
+			};
 		}
 
-		if (await argon2.verify(row.password_hash, password)) {
-			return { success: true, userId: userId, twoFA: row.two_fa_enabled };
+		const verified = await argon2.verify(row.password_hash, password);
+		if (!verified) {
+			console.log(`[Auth Service] Incorrect password for user '${username}'`);
+			return {
+				success: false,
+				error: "Incorrect password"
+			};
 		} else {
-			return { success: false, error: "Incorrect password" };
+			console.log(`[Auth Service] User '${username}' verified`);
+			return {
+				success: true,
+				userId: userId,
+				twoFA: row.two_fa_enabled
+			};
 		}
+
 	} catch (e: any) {
-		console.error('Error during login:', e);
+		console.error('Error during login:', e.message);
 		return { success: false, error: e.message };
 	}
 };
+
+export const setStatusInUserService = async (userId: number, status: string): Promise<Response> => {
+	try {
+		const url = process.env.USER_SERVICE_URL + '/status';
+		const response = await fetch(url, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				userId: userId,
+				status: status
+			})
+		});
+
+		return response;
+	} catch (e) {
+		throw e;
+	}
+}
 
 const fetchUsernameByUserId = async (userId: number): Promise<string> => {
 	// fetch call
@@ -140,7 +173,7 @@ export const updatePassword = async (newPassword: string, userId: number) => {
 
 		stmt.run(hashedPassword, userId);
 	} catch (e) {
-		throw new Error("An error occured updating the authentication database");
+		throw e;
 	}
 }
 

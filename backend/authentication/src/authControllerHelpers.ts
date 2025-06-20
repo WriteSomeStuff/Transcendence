@@ -1,0 +1,53 @@
+import { FastifyRequest, FastifyReply } from "fastify";
+import { setStatusInUserService, removeUser } from "./authService";
+
+
+export const handleUserDbError = async (response: Response, userId: number, reply: FastifyReply) => {
+    console.error('Error registering the user:', response.statusText);
+    
+	console.log(`[Auth Controller] Removing user ${userId} from db`);
+    await removeUser(userId);
+    console.log(`[Auth Controller] Removing user ${userId} from db successful`);
+    
+	const errorMsg = response.status === 409
+        ? "Username already exists"
+        : 'Failed to update user service database:' + response.statusText;
+    
+	reply.status(response.status).send({
+        success: false,
+        error: errorMsg
+    });
+};
+
+export const handleSuccessfulLogin = async (request: FastifyRequest, reply: FastifyReply, userId: number, username: string) => {
+	try {
+		const token = request.jwt.sign({ userId: userId }, { expiresIn: "1d" });
+		console.log(`[Auth Controller] JWT signed for '${userId}'`);
+		
+		const isProduction = process.env.NODE_ENV === 'production'; // TODO because testing with http requests, can also be set to "auto" maybe?
+		reply.setCookie('access_token', token, {
+			path: '/',
+			httpOnly: true,
+			secure: isProduction,
+		});
+		console.log(`[Auth Controller] Cookie set for user '${userId}'`);
+
+		console.log(`[Auth Controller] Setting status to 'online' for user '${userId}'`);
+		const response = await setStatusInUserService(userId, 'online');
+		
+		if (!response.ok) {
+			reply.status(response.status).send({
+				success: false,
+				error: response.statusText
+			});
+		}
+		console.log(`[Auth Controller] Set status to 'online' for user '${userId}'`);
+
+	} catch (e) {
+		console.error();
+		reply.status(500).send({
+			success: false,
+			error: 'An error occured handling the login: ' + e
+		});
+	}
+}
