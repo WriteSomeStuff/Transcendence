@@ -1,4 +1,5 @@
 import db from "./db";
+import { UserObj } from "./types/types";
 
 export const insertUser = async (username: string, userId: number) => {
 	try {
@@ -14,16 +15,22 @@ export const insertUser = async (username: string, userId: number) => {
 	}
 };
 
-export const getUserDataFromDb = async (userId: number) => {
+export const getUserDataFromDb = async (userId: number): Promise<UserObj> => {
 	try {
 		const stmt = db.prepare(`
 			SELECT * FROM user
 			WHERE user_id = ?
 		`);
 
-		return stmt.get(userId);
+		const row = stmt.get(userId) as UserObj;
+		
+		if (!row) {
+			throw new Error("User not found");
+		}
+
+		return row;
 	} catch (e) {
-		throw new Error("An error occured getting the profile information");
+		throw e;
 	}
 };
 

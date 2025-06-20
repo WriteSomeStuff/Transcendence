@@ -38,6 +38,7 @@ export const insertUserHandler = async (request: FastifyRequest, reply: FastifyR
 export const getUserDataHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
 		console.log('[User Controller] Fetching user data for:', request.user.userId);
+		
 		const userData = await getUserDataFromDb(request.user.userId);
 		
 		console.log('[User Controller] User data:', userData);
@@ -108,7 +109,6 @@ export const updatePasswordHandler = async (request: FastifyRequest, reply: Fast
 export const setStatusHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
 		const { userId, status } = request.body as { userId: number, status: string };
-
 
 		console.log('Setting status for user,', userId, 'to', status);
 
