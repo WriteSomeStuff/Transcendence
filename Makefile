@@ -13,4 +13,7 @@ prune:
 status:
 	docker compose ps
 
-.PHONY: all down prune status
+db_clean:
+	find ./backend -type f -name "*.sqlite3" -delete
+
+.PHONY: all down prune status db_clean
