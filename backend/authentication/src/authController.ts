@@ -15,7 +15,8 @@ import {
 	updatePassword,
 	verify2FA,
 	enable2FA,
-	disable2FA
+	disable2FA,
+	removeUser
 } from "./authService";
 
 const REGISTER_SCHEMA = z.object({
@@ -43,10 +44,9 @@ export const registerUserHandler = async (request: FastifyRequest, reply: Fastif
 		const parsedData = REGISTER_SCHEMA.parse(request.body);
 		const { username, password } = parsedData;
 
-		// call the service function to register user into database
 		const userId = await register(username, password);
 
-		// TODO make lines 51-72 its own function? ----
+		// TODO make lines 51-95 its own function? ----
 		const url = process.env.USER_SERVICE_URL + '/new-user';
 		const response = await fetch(url, {
 			method: 'POST',
@@ -57,17 +57,21 @@ export const registerUserHandler = async (request: FastifyRequest, reply: Fastif
 		});
 
 		if (response.status === 409) {
+			await removeUser(userId);
 			reply.status(409).send({
 				success: false,
 				error: "Username already exists"
 			});
+			return;	
 		}
 
 		if (!response.ok) {
+			await removeUser(userId);
 			reply.status(500).send({
 				success: false,
 				error: "Failed to update user service database"
 			});
+			return;
 		}
 		// ------
 
@@ -83,7 +87,7 @@ export const registerUserHandler = async (request: FastifyRequest, reply: Fastif
 				error: e.errors.map((err) => err.message).join(", ")
 			});
 		} else {
-			reply.status(400).send({
+			reply.status(500).send({
 				success: false,
 				error: 'An error occured registrating the user:' + e
 			});

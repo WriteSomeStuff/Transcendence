@@ -26,22 +26,21 @@ export const register = async (username: string, password: string): Promise<numb
 };
 
 const fetchUserIdByUsername = async (username: string): Promise<number> => {
-	// 1. fetch call
-
-	const url = process.env.USER_SERVICE_URL + '/get-username';
+	const url = process.env.USER_SERVICE_URL + '/get-username?username=' + encodeURIComponent(username);
 	const response = await fetch(url, {
 		method: 'GET',
 		headers: {
 			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify({
-			username
-		})
+		}
 	});
 
-	// 8. get userid from reply somehow and return it
+	const data = await response.json() as { success: boolean, user_id?: number, error?: string };
 
-	return 0;
+	if (data.success && typeof data.user_id === "number") {
+		return data.user_id;
+	} else {
+		throw new Error("User not found");
+	}
 }
 
 export const login = async (username: string, password: string): Promise<AuthResultObj> => {
@@ -213,5 +212,19 @@ export const disable2FA = async (userId: number) => {
 
 	} catch (e) {
 		throw new Error("An error occured disabling 2FA in the authentication database");
+	}
+}
+
+export const removeUser = async (userId: number) => {
+	try {
+		const stmt = db.prepare(`
+			DELETE FROM user
+			WHERE 
+				user_id = ?
+		`);
+
+		stmt.run(userId);
+	} catch (e) {
+		throw e;
 	}
 }

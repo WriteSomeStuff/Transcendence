@@ -21,7 +21,7 @@ export const getUserDataFromDb = async (userId: number) => {
 			WHERE user_id = ?
 		`);
 
-		return stmt.all(userId);
+		return stmt.get(userId);
 	} catch (e) {
 		throw new Error("An error occured getting the profile information");
 	}
@@ -60,7 +60,7 @@ export const updateStatus = async (userId: number, status: string) => {
 	}
 }
 
-export const getUserId = async (username: string) => {
+export const getUserId = async (username: string): Promise<number> => {
 	try {
 		const stmt = db.prepare(`
 			SELECT 
@@ -71,10 +71,12 @@ export const getUserId = async (username: string) => {
 				username = ?	
 		`)
 
-		stmt.get(username);
-
-		// return the userId 6.
+		const row = stmt.get(username) as { user_id: number } | undefined;
+		if (!row) { // user not found
+			return 0;
+		}
+		return row.user_id;
 	} catch (e) {
-
+		return 0;
 	}
 }

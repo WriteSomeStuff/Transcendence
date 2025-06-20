@@ -27,11 +27,11 @@ export function bindForm(formBinding: formBinding) {
 					body: JSON.stringify({ username, password })
 				});
 
-				if (!response.ok) {
-					throw new Error(`HTTP error; status: ${response.status}`);
+				const data = await response.json() as { success: boolean, error?: string};
+
+				if (!response.ok || data.success === false) {
+					throw new Error(data.error || `HTTP error; status: ${response.status}`);
 				}
-				
-				const data = await response.json();
 
 				console.log(`${formBinding.serviceName} successful: ${data}`);
 				alert(`${formBinding.serviceName} successful!`);

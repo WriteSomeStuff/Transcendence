@@ -4,7 +4,8 @@ import {
 	insertUser,
 	getUserDataFromDb,
 	updateUsername,
-	updateStatus
+	updateStatus,
+	getUserId
 } from "./userService";
 
 export const insertUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -13,7 +14,7 @@ export const insertUserHandler = async (request: FastifyRequest, reply: FastifyR
 
 		console.log(`[User controller] Inserting user with username '${username}' into db`);
 
-		insertUser(username, userId);
+		await insertUser(username, userId);
 
 		console.log(`[User controller] Successfully inserted user '${username}' into db`);
 
@@ -122,9 +123,27 @@ export const setStatusHandler = async (request: FastifyRequest, reply: FastifyRe
 	}
 }
 
-export const getUsernameByUserId = async (request: FastifyRequest, reply: FastifyReply) => {
-	// get username from request body 4.
-	// to userService selectUserIdByUsername(username) 5.
+export const getUserIdByUsernameHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+	try {
+		const { username } = request.query as { username: string };
 
-	// reply with userId in repsonse 7.
+		const user_id = await getUserId(username);
+		
+		if (!user_id) {
+			return reply.status(404).send({
+				success: false,
+				error: "User not found"
+			});
+		}
+
+		reply.send({
+			success: true,
+			user_id: user_id
+		});
+	} catch (e) {
+		reply.send({
+			success: false,
+			error: e
+		});
+	}
 }
