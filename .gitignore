@@ -1,1 +1,20 @@
-selectView.js
+# modules
+node_modules/
+
+# database
+*.sqlite3
+
+# folders
+dist/
+
+# container data
+data/
+
+# user uploads
+user/
+
+# environment
+.env
+
+# vscode extensions
+.vscode/
