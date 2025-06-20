@@ -168,6 +168,8 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 
 export const verify2FATokenHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
+		// TODO make sure this request is sent with the correct context in body
+		// also needs to include username
 		const { userId, token } = request.body as { userId: number, token: string };
 
 		if (!userId || !token) {

@@ -90,7 +90,7 @@ const fetchUsernameByUserId = async (userId: number): Promise<string> => {
  * @returns An object containing the success status and username if successful, or an error message if not.
  *          If an error occurs, it returns { success: false, error: <error_message> }.
  */	
-// TODO get username in a different way
+// TODO get username from request
 export const verify2FA = async (userId: number, token: string): Promise<AuthResultObj> => {
 	try {
 		const stmt = db.prepare(`
