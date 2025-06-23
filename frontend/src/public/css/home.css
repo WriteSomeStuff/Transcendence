@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Comic';
+  src: url('../assets/font/comicsans.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
