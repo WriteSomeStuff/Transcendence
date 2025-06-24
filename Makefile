@@ -1,7 +1,7 @@
 all:
-	mkdir -p ./backend/authentication/data
-	mkdir -p ./backend/userManagement/data
-	mkdir -p ./frontend/src/public/assets/avatars/user
+	mkdir -p ./backend/authentication/data/database
+	mkdir -p ./backend/userManagement/data/database
+	mkdir -p ./frontend/src/public/assets/avatars/user_uploads
 	docker compose up --build
 
 down:

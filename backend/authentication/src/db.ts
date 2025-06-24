@@ -1,6 +1,6 @@
 import Database from "better-sqlite3";
 
-const DB_PATH: string = "/app/data/auth_db.sqlite3";
+const DB_PATH: string = "/app/data/database/auth_db.sqlite3";
 
 const db = new Database(DB_PATH, {
 	verbose: console.log,
