@@ -1,8 +1,17 @@
-all:
+BUILD_CMD = docker compose up --build
+
+ifdef BG
+BUILD_CMD += -d
+endif
+
+all: 
 	mkdir -p ./backend/authentication/data
 	mkdir -p ./backend/userManagement/data
 	mkdir -p ./frontend/src/public/assets/avatars/user
-	docker compose up --build
+	${BUILD_CMD}
+
+bg: 
+	$(MAKE) BG=1
 
 down:
 	docker compose down
