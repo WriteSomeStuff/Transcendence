@@ -32,7 +32,7 @@ module.exports = {
         comic: ['Comic', 'sans-serif'],
       },
       backgroundImage: {
-        'stars': "url('/public/assets/backgrounds/movingStars.gif')",
+        'stars': "url('../assets/backgrounds/movingStars.gif')",
       }
     },
     backgroundSize: {
