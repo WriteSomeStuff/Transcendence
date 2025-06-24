@@ -1,6 +1,9 @@
 import Database from "better-sqlite3";
 
-const DB_PATH: string = "/app/data/database/auth_db.sqlite3";
+const DB_PATH: string = process.env.AUTH_DB_PATH as string;
+if (!DB_PATH) {
+	throw new Error("AUTH_DB_PATH environment variable is not set");
+}
 
 const db = new Database(DB_PATH, {
 	verbose: console.log,
@@ -23,7 +26,8 @@ try {
 	db.exec(sql);
 	console.log("[auth-db init] Successfully initialised authentication database");
 } catch (e) {
-	console.error('Error creating auth-db:', e);
+	console.error('Error creating authentication database:', e);
+	process.exit(1);
 }
 
 export default db;
