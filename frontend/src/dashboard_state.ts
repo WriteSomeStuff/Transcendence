@@ -1,4 +1,5 @@
 import { AppState } from "./app_state.ts";
+import { getAuthorized } from "./utils/authorized_requests.js";
 
 interface User {
   user_id: string;
@@ -62,27 +63,17 @@ export class DashboardState extends AppState {
   }
 
   private handleLogout() {
-    localStorage.removeItem("token");
+    localStorage.removeItem("jwt");
     this.app.updateState();
   }
 
   private async handleCreateRoom() {
-    this.room = await fetch("/matchmaking/create_room?size=2&game=pong", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    }).then((res) => res.json());
+    this.room = await getAuthorized("/matchmaking/create_room", { size: "2", game: "pong" }).then(res => res.json());
     this.renderRoom();
   }
 
   private async handleJoinRoom() {
-    this.room = await fetch("/matchmaking/join_room", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    }).then((res) => res.json());
+    this.room = await getAuthorized("/matchmaking/join_room", {}).then(res => res.json());
     this.renderRoom();
   }
 
@@ -90,12 +81,7 @@ export class DashboardState extends AppState {
     if (this.room === undefined) {
       return;
     }
-    const room: GameRoom = await fetch("/matchmaking/get_room", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    }).then((res) => res.json());
+    const room: GameRoom = await getAuthorized("/matchmaking/get_room", {}).then(res => res.json());
     if (room !== this.room) {
       this.room = room;
       this.renderRoom();

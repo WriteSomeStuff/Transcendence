@@ -44,13 +44,17 @@ app.post("/register", { schema: { body: LOGIN_SCHEMA } }, async (req, res) => {
 
   const checkedInsert = db.transaction((username: string, password: string) => {
     if (select.get(username) !== undefined) {
-      return res.status(400).send({ error: "Username must be unique" });
+      throw new Error("User already exists");
     }
     const id = uuidv6();
     insert.run({ id, username, password });
-    return res.status(201).send("User created!");
   });
-  return checkedInsert(username, hashedPassword);
+  try {
+    checkedInsert(username, hashedPassword);
+    return res.status(201).send("User created");
+  } catch (error) {
+    return res.status(500).send("Internal Server Error");
+  }
 });
 
 app.post("/login", { schema: { body: LOGIN_SCHEMA } }, async (req, res) => {
@@ -69,7 +73,7 @@ app.post("/login", { schema: { body: LOGIN_SCHEMA } }, async (req, res) => {
     return res.status(401).send({ error: "Password is incorrect" });
   }
   const token = app.jwt.sign({ id: user.id, type: "registered" });
-  return res.status(200).send({ token: token });
+  return res.status(200).send({ token: token, id: user.id });
 });
 
 app.post("/guest", async (req, res) => {
@@ -86,18 +90,24 @@ app.get("/health", (_, res) => {
   res.send({ message: "Success" });
 });
 
-app.addHook("onRequest", async (req, res) => {
+app.addHook("preHandler", async (req, res) => {
   if (["/health", "/login", "/register", "/guest"].includes(req.url)) return;
   try {
     if (req.headers["sec-websocket-protocol"] !== undefined) {
-      req.headers.authorization = `Bearer ${req.headers["sec-websocket-protocol"]}`;
-      req.headers["sec-websocket-protocol"] = undefined;
+      req.headers.authorization = `Bearer ${req.headers["sec-websocket-protocol"].split(", ")[1]}`;
     }
+    console.log(req.headers.authorization);
     await req.jwtVerify();
     const { id, type } = req.user as { id: string; type: string };
     req.headers["user_id"] = id;
     req.headers["user_type"] = type;
     req.headers.authorization = undefined;
+    if (req.headers["sec-websocket-protocol"] !== undefined) {
+      // console.log(req.headers["user_id"], req.headers["sec-websocket-protocol"].split(", ")[1]);
+      if (req.headers["user_id"] !== req.headers["sec-websocket-protocol"].split(", ")[0]) {
+        return res.status(401).send({ error: "Wrong user id" });
+      }
+    }
   } catch (error) {
     res.status(401).send({ error: "Unauthorized" });
   }

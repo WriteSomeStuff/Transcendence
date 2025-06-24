@@ -43,7 +43,7 @@ interface GameRoom {
   game_id?: string;
 }
 
-const availableRooms: GameRoom[] = [];
+let availableRooms: GameRoom[] = [];
 const roomsMap = new Map<string, GameRoom>();
 
 app.get(
@@ -92,12 +92,25 @@ app.get(
       room.slots.push(user);
       roomsMap.set(user.user_id, room);
       if (room.slots.length + 1 === room.size) {
-        availableRooms.splice(0, 1);
-        room.game_id = await (
+        console.log("the room is full");
+        availableRooms = availableRooms.splice(0, 1);
+        const userIds = [room.creator.user_id];
+        console.log(userIds);
+        for (const slot of room.slots) {
+          userIds.push(slot.user_id);
+          console.log(slot, userIds);
+        }
+        const response = await (
           await fetch(
-            `http://game/start?user1=${room.creator.user_id}&user2=${room.slots[0]!.user_id}`,
+            "http://game/create",
+            {
+              method: "POST",
+              body: JSON.stringify({ userIds: userIds }),
+            }
           )
-        ).text();
+        ).json();
+        console.log(response);
+        room.game_id = response.gameId;
       }
       return res.status(200).send(room);
     });

@@ -1,5 +1,6 @@
 {
   "name": "pong",
+  "sideEffects": ["./src/vector2.ts"],
   "version": "1.0.0",
   "private": true,
   "description": "the pong game itself",

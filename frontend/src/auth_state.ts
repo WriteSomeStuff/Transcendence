@@ -2,7 +2,7 @@ import { AppState } from "./app_state.ts";
 
 export class AuthState extends AppState {
   public isLoggedIn(): boolean {
-    return !!localStorage.getItem("token"); // TODO add additional check with endpoint call
+    return !!localStorage.getItem("jwt") && !!localStorage.getItem("userId"); // TODO add additional check with endpoint call
   }
 
   private renderLoginForm() {
@@ -63,7 +63,8 @@ export class AuthState extends AppState {
       }
 
       const data = await response.json();
-      localStorage.setItem("token", data.token);
+      localStorage.setItem("jwt", data.token);
+      localStorage.setItem("userId", data.id);
       this.app.updateState();
     } catch (error) {
       alert("Login failed, try again.");

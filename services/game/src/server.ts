@@ -1,157 +1,143 @@
 import Fastify from "fastify";
 import fastifyWebsocket from "@fastify/websocket";
 
+import { GameController } from "./game_controllers/game_controller.js";
+import { PongController } from "./game_controllers/pong_controller.js";
+
 import { WebSocket } from "ws";
 
 const app = Fastify();
 
 await app.register(fastifyWebsocket);
 
-app.get('/ws', { websocket: true }, (socket: WebSocket) => {
-    socket.on('message', (data) => {
+class GameUser {
+    public userId: string;
+    public socket: WebSocket | null;
 
-        const message = data.toString();
-        socket.send(`hello client from game, you sent us ${message}`);
-    })
-})
+    public constructor(userId: string) {
+        this.userId = userId;
+        this.socket = null;
+    }
 
-class Point {
-    x: number = 0;
-    y: number = 0;
+    public setSocket(socket: WebSocket) {
+        console.log("setSocket called");
+        if (this.socket) {
+            this.socket.close(); // TODO send message
+        }
+        this.socket = socket;
+    }
+
+    public unsetSocket() {
+        console.log("unset socket called");
+        if (this.socket) {
+            this.socket.close();
+        }
+        this.socket = null;
+    }
+
+    public sendMessages(messages: object[]): void {
+        for (const message of messages) {
+            this.socket!.send(JSON.stringify(message));
+        }
+    }
 }
 
 class Game {
-    paddle1: Point = new Point;
-    paddle2: Point = new Point;
-    ball: Point = new Point;
-    ball_direction: Point = new Point;
-    user1: string = '';
-    user2: string = '';
+    public gameId: string;
+    public users: GameUser[];
+    public controller: GameController;
+
+    public constructor(gameId: string, userIds: string[], controller: GameController) {
+        this.gameId = gameId;
+        this.users = userIds.map(id => new GameUser(id));
+        this.controller = controller;
+    };
+
+    public isReady(): boolean {
+        return this.users.every(user => !!user.socket);
+    }
+
+    public update(delta: number): void {
+        this.controller.update(delta);
+        const broadcastMessages = this.controller.getBroadcastMessages();
+        for (let i = 0; i < this.users.length; i++) {
+            this.users[i]!.sendMessages(broadcastMessages);
+            this.users[i]!.sendMessages(this.controller.getPlayerMessages(i));
+        }
+    }
+
+    private getUserIndex(userId: string): number {
+        return this.users.findIndex(user => user.userId === userId);
+    }
+
+    public register(userId: string, socket: WebSocket) {
+        console.log("register", userId);
+        const user = this.users.find(user => user.userId === userId);
+        if (!user) {
+            socket.close(); // TODO also send some error message
+            return;
+        }
+        const index = this.getUserIndex(userId);
+        const controller = this.controller;
+        user.setSocket(socket);
+        controller.onPlayerJoin(index);
+        socket.on("disconnect", () => {
+            user.unsetSocket();
+            controller.onPlayerLeave(index);
+        });
+        socket.on("message", (data: WebSocket.RawData) => {
+            controller.onPlayerAction(index, data.valueOf());
+        });
+    }
 }
 
-const games: {[id: string] : Game} = {};
-let lastId = 0;
+const usersToGames: {[userId: string]: string} = {};
+const games: {[gameId: string]: Game} = {};
 
-function random_direction(): Point {
-    let angle: number = 0;
-    switch (Math.floor(Math.random() * 4)) {
-        case 0:
-            angle = Math.PI / 18 + Math.random() * Math.PI / 3;
-            break
-        case 1:
-            angle = Math.PI - Math.random() * Math.PI / 3 - Math.PI / 18;
-            break
-        case 2:
-            angle = Math.PI + Math.random() * Math.PI / 3 + Math.PI / 18;
-            break
-        case 3:
-            angle = - Math.PI / 18 - Math.random() * Math.PI / 3;
-            break
+app.get('/pong/ws', { websocket: true }, (socket: WebSocket, req) => {
+    console.log("Processing ws request", req, req.headers);
+    const userId = req.headers["sec-websocket-protocol"]!.toString();
+    console.log("userId", userId);
+    const gameId = usersToGames[userId];
+    console.log("gameId", gameId);
+    if (gameId === undefined) {
+        socket.close();
+        return;
     }
-    return {x: Math.cos(angle) * 5, y: Math.sin(angle) * 5};
-}
+    const game: Game = games[gameId]!;
+    game.register(userId, socket);
+});
 
-function update_game(game: Game) {
-    game.ball = {x: game.ball.x + game.ball_direction.x, y: game.ball.y + game.ball_direction.y};
-    if (game.ball.y < 5 || game.ball.y > 95)
-        game.ball_direction.y = -game.ball_direction.y;
-    if (game.ball.x < 5) {
-        if (Math.abs(game.ball.y - game.paddle1.y) < 15)
-            game.ball_direction.x = -game.ball_direction.x;
-    }
-    if (game.ball.x > 195)
-    {
-        if (Math.abs(game.ball.y - game.paddle2.y) < 15)
-            game.ball_direction.x = -game.ball_direction.x;
-    }
-    if (game.ball.x < 1 || game.ball.x > 199)
-        game = {
-            paddle1: {x: 0, y: 50},
-            paddle2: {x: 200, y: 50},
-            ball: {x: 100, y: 50},
-            ball_direction: random_direction(),
-            user1: game.user1,
-            user2: game.user2,
-        };
-    return game;
-}
+let lastUpdate = new Date().getTime();
+let lastGameId: number = 0;
 
 setInterval(() => {
+    const delta = new Date().getTime() - lastUpdate;
     for (let gameId in games) {
-        games[gameId] = update_game(games[gameId]!);
+        const game = games[gameId]!;
+        if (game.isReady())
+            game.update(delta);
     }
+    lastUpdate += delta;
 }, 50);
 
-app.get('/start', (req, res) => {
+app.post('/create', (req, res) => {
+    const gameId = lastGameId.toString();
+    lastGameId++;
     // @ts-ignore
-    let user1: string = req.query.user1;
-    // @ts-ignore
-    let user2: string = req.query.user2;
-    if (!user1 || !user2)
-        return res.status(400).send('2 users required');
-    games[lastId.toString()] = {
-        paddle1: {x: 0, y: 50},
-        paddle2: {x: 200, y: 50},
-        ball: {x: 100, y: 50},
-        ball_direction: random_direction(),
-        user1: user1,
-        user2: user2,
-    };
-    lastId++;
-    return res.status(200).send((lastId - 1).toString());
-})
+    const { userIds }: { userIds: string[] } = JSON.parse(req.body);
+    const controller = new PongController();
+    games[gameId] = new Game(gameId, userIds, controller);
+    for (const userId of userIds) {
+        console.log("adding user", userId);
+        usersToGames[userId] = gameId;
+    }
+    res.status(201).send(JSON.stringify({gameId, userIds}));
+});
 
-app.get('/state', (req, res) => {
-    // @ts-ignore
-    let gameId = +req.query.gameid;
-    if (gameId === undefined || gameId < 0 || gameId >= lastId) {
-        return res.status(400).send('invalid gameId');
-    }
-    return res.status(200).send(games[gameId]);
-})
-
-function update_point(initial: Point, action: 'up' | 'down'): Point {
-    if (action === 'up') {
-        if (initial.y > 10)
-            return {x: initial.x, y: initial.y - 5};
-        else
-            return {x: initial.x, y: initial.y};
-    }
-    else {
-        if (initial.y < 90)
-            return {x: initial.x, y: initial.y + 5};
-        else
-            return {x: initial.x, y: initial.y};
-    }
-}
-
-app.get('/action', (req, res) => {
-    // @ts-ignore
-    let gameId = +req.query.gameid;
-    if (gameId === undefined || gameId < 0 || gameId >= lastId) {
-        return res.status(400).send('invalid gameId');
-    }
-    let user: string = req.headers["user_id"] as string;
-    if (!user || (user !== games[gameId]!.user1 && user !== games[gameId]!.user2)) {
-        return res.status(400).send('invalid user');
-    }
-    // @ts-ignore
-    let action: 'up' | 'down' = req.query.action;
-    if (!action) {
-        return res.status(400).send('invalid action');
-    }
-    if (user === games[gameId]!.user1) {
-        games[gameId]!.paddle1 = update_point(games[gameId]!.paddle1, action);
-    }
-    else if (user === games[gameId]!.user2) {
-        games[gameId]!.paddle2 = update_point(games[gameId]!.paddle2, action);
-    }
-    return res.status(200).send(games[gameId]);
-})
-
-app.get('/', (_, res) => {
+app.get('/health', (_, res) => {
     res.status(200).send("Success");
-})
+});
 
 app.listen({port: 80, host: '0.0.0.0'}, (err, address) => {
     if (err) {
@@ -159,4 +145,4 @@ app.listen({port: 80, host: '0.0.0.0'}, (err, address) => {
         return;
     }
     console.log('Listening on ' + address);
-})
+});

@@ -7,6 +7,7 @@ COPY tsconfig.base.json ./
 COPY shared/pong ./shared/pong
 COPY services/game ./services/game
 
-RUN npm install --omit=dev -w game
+RUN npm install --omit=dev
+RUN npm install -w game
 
 CMD npm run up -w game
