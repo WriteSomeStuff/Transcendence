@@ -17,6 +17,7 @@ services:
     environment:
       - NODE_ENV=development
       - USER_SERVICE_URL=http://user_service:8080/users
+      - AUTH_DB_PATH=/app/data/database/auth_db.sqlite3
     env_file:
       - .env
 
@@ -33,11 +34,13 @@ services:
       - 8082:8080
     volumes:
       - user_db:/app/data/database
-      - user_avatars:/app/data/avatars
+      - avatars:/app/data/avatars
     networks:
       - internal
     environment:
       - AUTH_SERVICE_URL=http://auth_service:8080/auth
+      - USER_DB_PATH=/app/data/database/user_db.sqlite3
+      - DEFAULT_AVATAR_PATH=/app/data/avatars/default/default_avatar.png
     env_file:
       - .env
 
@@ -75,7 +78,7 @@ volumes:
       type: none
       device: ./backend/userManagement/data/database
       o: bind
-  user_avatars:
+  avatars:
     driver: local
     driver_opts:
       type: none
