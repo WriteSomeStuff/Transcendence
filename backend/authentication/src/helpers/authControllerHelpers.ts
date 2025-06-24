@@ -24,7 +24,7 @@ export const handleSuccessfulLogin = async (request: FastifyRequest, reply: Fast
 		const token = request.jwt.sign({ userId: userId }, { expiresIn: "1d" });
 		console.log(`[Auth Controller] JWT signed for '${userId}'`);
 		
-		const isProduction = process.env.NODE_ENV === 'production'; // TODO because testing with http requests, can also be set to "auto" maybe?
+		const isProduction = process.env.NODE_ENV === 'production'; // TODO because testing with http requests, set in docker-compose.yml
 		reply.setCookie('access_token', token, {
 			path: '/',
 			httpOnly: true,
