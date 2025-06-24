@@ -44,9 +44,9 @@ function selectView(page: string, push: boolean)
 	});
 }
 
-selectView("home", false);
+selectView("homeDEV", false);
 
 window.addEventListener("popstate", (event) => {
-	const page: string = location.pathname.slice(1) || "home";
+	const page: string = location.pathname.slice(1) || "homeDEV";
 	selectView(page, false);
 })
