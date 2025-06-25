@@ -5,6 +5,7 @@ import db from "./db";
 
 import { AuthResultObj, Enable2FAResultObj } from "./types/types";
 import { fetchUserIdByUsername } from "./helpers/authServiceHelpers";
+import { fetchUsernameByUserId } from "./helpers/authServiceHelpers";
 
 export const register = async (username: string, password: string): Promise<number> => {
 	try {
@@ -107,14 +108,6 @@ export const setStatusInUserService = async (userId: number, status: string): Pr
 	}
 }
 
-const fetchUsernameByUserId = async (userId: number): Promise<string> => {
-	// fetch call
-	// return username
-	// only used for label, we can use differnet label maybe
-
-	return "Placeholder";
-}
-
 /**
  * Verifies the 2FA token for a given user.
  * @param userId - The ID of the user for whom to verify the 2FA token.
@@ -196,20 +189,15 @@ export const updatePassword = async (newPassword: string, userId: number) => {
 // TODO dont use username
 export const enable2FA = async (userId: number): Promise<Enable2FAResultObj> => {
 	try {
-		const stmt = db.prepare(`
-			SELECT 
-				username
-			FROM
-				user
-			WHERE
-				user_id = ?
-		`);
-
-		const row = stmt.get(userId) as { username: string};
-		if (!row) {
-			return { success: false, error: "User not found" };
+		console.log(`[Auth Service] Enabling 2FA for user ID ${userId}`);
+		const username = await fetchUsernameByUserId(userId);
+		if (!username) {
+			console.error(`[Auth Service] Username not found for user ID ${userId}`);
+			return { success: false, error: "Username not found" };
 		}
+		console.log(`[Auth Service] Fetched username for user ID ${userId}: ${username}`);
 
+		console.log(`[Auth Service] Creating TOTP instance for user ${username}`);
 		const totp = new OTPAuth.TOTP({
 			issuer: 'Transendence',
 			label: username,
@@ -222,6 +210,7 @@ export const enable2FA = async (userId: number): Promise<Enable2FAResultObj> => 
 		const otpAuthUrl = totp.toString();
 		const qrCodeDataUrl = await QRCode.toDataURL(otpAuthUrl);
 
+		console.log(`[Auth Service] 2FA enabled for user ${username} with secret ${secret}`);
 		const updateStmt = db.prepare(`
 			UPDATE user
 			SET 
@@ -231,6 +220,7 @@ export const enable2FA = async (userId: number): Promise<Enable2FAResultObj> => 
 				user_id = ?
 		`);
 
+		console.log(`[Auth Service] Updating user entry ${userId} to enable 2FA`);
 		updateStmt.run(secret, userId);
 
 		return { success: true, twoFASecret: secret, qrCode: qrCodeDataUrl };

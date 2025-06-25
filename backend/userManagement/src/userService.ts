@@ -107,3 +107,24 @@ export const getUserId = async (username: string): Promise<number> => {
 		throw e;
 	}
 }
+
+export const getUsername = async (userId: number): Promise<string> => {
+	try {
+		const stmt = db.prepare(`
+			SELECT 
+				username
+			FROM
+				user
+			WHERE
+				user_id = ?	
+		`)
+
+		const row = stmt.get(userId) as { username: string } | undefined;
+		if (!row) { // user not found
+			throw new Error("User not found");
+		}
+		return row.username;
+	} catch (e) {
+		throw e;
+	}
+}
