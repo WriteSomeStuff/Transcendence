@@ -1,3 +1,12 @@
+import { z } from "zod";
+
+export const Vector2DTO = z.object({
+  x: z.number(),
+  y: z.number(),
+});
+
+export type Vector2DTO = z.infer<typeof Vector2DTO>;
+
 export class Vector2 {
   public readonly x: number;
   public readonly y: number;

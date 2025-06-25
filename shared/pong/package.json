@@ -1,10 +1,14 @@
 {
   "name": "pong",
-  "sideEffects": ["./src/vector2.ts"],
+  "sideEffects": [
+    "./src/vector2.ts"
+  ],
   "version": "1.0.0",
   "private": true,
   "description": "the pong game itself",
-  "keywords": ["pong"],
+  "keywords": [
+    "pong"
+  ],
   "license": "MIT",
   "author": "cat",
   "type": "module",
@@ -12,5 +16,7 @@
   "scripts": {
     "test": ""
   },
-  "devDependencies": {}
+  "dependencies": {
+    "zod": "^3.25.67"
+  }
 }
