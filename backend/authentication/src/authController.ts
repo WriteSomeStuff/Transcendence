@@ -120,30 +120,27 @@ export const verify2FATokenHandler = async (request: FastifyRequest, reply: Fast
 	try {
 		// TODO make sure this request is sent with the correct context in body
 		// also needs to include username
-		const { userId, token } = request.body as { userId: number, token: string };
+		const { userId, token, username } = request.body as { userId: number, token: string, username: string };
 
-		if (!userId || !token) {
+		if (!userId || !token || !username) {
+			console.error(`[Auth Controller] Missing userId, token or username in request body`);
 			reply.status(400).send({ error: 'UserId and token are required' });
 			return;
 		}
 
-		console.log(`[Auth Controller] Verifying 2FA token for user ${userId}`);
-		const result = await verify2FA(userId, token);
+		console.log(`[Auth Controller] Verifying 2FA token for user ${userId} ${username}`);
+		const result = await verify2FA(userId, token, username);
 		
 		if (!result.success) {
 			reply.status(401).send({ error: result.error });
 			return;
 		}
-		if (!result.username) {
-			throw new Error("Username is missing");
-		}
 		
-		console.log(`[Auth Controller] User ${userId} ${result.username} verified 2FA token successfully`);
-		
+		console.log(`[Auth Controller] User ${userId} ${username} verified 2FA token successfully`);
 
-		console.log(`[Auth Controller] Handling successful login for user ${userId} ${result.username}`);
-		await handleSuccessfulLogin(request, reply, userId, result.username);
-		console.log(`[Auth Controller] User ${userId} ${result.username} logged in successfully after 2FA verification`);
+		console.log(`[Auth Controller] Handling successful login for user ${userId} ${username}`);
+		await handleSuccessfulLogin(request, reply, userId, username);
+		console.log(`[Auth Controller] User ${userId} ${username} logged in successfully after 2FA verification`);
 
 		reply.status(200).send({ 
 			success: true,

@@ -123,11 +123,10 @@ const fetchUsernameByUserId = async (userId: number): Promise<string> => {
  *          If an error occurs, it returns { success: false, error: <error_message> }.
  */	
 // TODO get username from request
-export const verify2FA = async (userId: number, token: string): Promise<AuthResultObj> => {
+export const verify2FA = async (userId: number, token: string, username: string): Promise<AuthResultObj> => {
 	try {
 		const stmt = db.prepare(`
 			SELECT 
-				username,
 				two_fa_secret
 				two_fa_enabled
 			FROM
@@ -135,7 +134,7 @@ export const verify2FA = async (userId: number, token: string): Promise<AuthResu
 			WHERE
 				user_id = ?
 		`);
-		const row = stmt.get(userId) as { username: string, two_fa_secret: string, two_fa_enabled: number };
+		const row = stmt.get(userId) as {two_fa_secret: string, two_fa_enabled: number };
 
 		if (!row) {
 			console.error(`[Auth Service] User with ID ${userId} not found for 2FA verification`);
@@ -147,22 +146,22 @@ export const verify2FA = async (userId: number, token: string): Promise<AuthResu
 			return { success: false, error: "2FA is not enabled for this user" };
 		}
 
-		console.log(`[Auth Service] Verifying 2FA token for user ${row.username} (ID: ${userId})`);
+		console.log(`[Auth Service] Verifying 2FA token for user ${username} (ID: ${userId})`);
 		const totp = new OTPAuth.TOTP({
 			issuer: 'Transendence',
-			label: row.username, // change this label or fetch username
+			label: username, // change this label or fetch username
 			algorithm: 'SHA1',
 			digits: 6,
 			period: 30,
 			secret: OTPAuth.Secret.fromBase32(row.two_fa_secret)
 		});
 
-		console.log(`[Auth Service] TOTP instance created for user ${row.username} with secret ${row.two_fa_secret}`);
+		console.log(`[Auth Service] TOTP instance created for user ${username} with secret ${row.two_fa_secret}`);
 		if (await totp.validate({ token, window: 1 })) {
-			console.log(`[Auth Service] 2FA token for user ${row.username} is valid`);
-			return { success: true, username: row.username };
+			console.log(`[Auth Service] 2FA token for user ${username} is valid`);
+			return { success: true, username: username };
 		} else {
-			console.error(`[Auth Service] Invalid 2FA token for user ${row.username}`);
+			console.error(`[Auth Service] Invalid 2FA token for user ${username}`);
 			return { success: false, error: "Invalid 2FA token" };
 		}
 	} catch (e) {
@@ -213,7 +212,7 @@ export const enable2FA = async (userId: number): Promise<Enable2FAResultObj> => 
 
 		const totp = new OTPAuth.TOTP({
 			issuer: 'Transendence',
-			label: row.username, // change this label or fetch username
+			label: username, // change this label or fetch username
 			algorithm: 'SHA1',
 			digits: 6,
 			period: 30
