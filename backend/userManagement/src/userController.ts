@@ -1,4 +1,5 @@
 import { FastifyRequest, FastifyReply } from "fastify";
+import { promises as fs } from "fs";
 
 import {
 	insertUser,
@@ -6,6 +7,7 @@ import {
 	updateUsername,
 	updatePassword,
 	updateStatus,
+	getUserAvatarPath,
 	getUserId
 } from "./userService";
 
@@ -116,7 +118,7 @@ export const setStatusHandler = async (request: FastifyRequest, reply: FastifyRe
 		reply.send({ success: true });
 	} catch (e) {
 		console.error('Error setting status:', e);
-		reply.send({
+		reply.status(500).send({
 			success: false,
 			error: 'An error occured setting the status' + e
 		});
@@ -145,6 +147,41 @@ export const getUserIdByUsernameHandler = async (request: FastifyRequest, reply:
 			reply.status(500).send({
 				success: false,
 				error: e
+			});
+		}
+	}
+}
+
+export const getUserAvatarHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+	try {
+		console.log('[User Controller] Getting user avatar from user db for:', request.user.userId);
+		const avatarPath = await getUserAvatarPath(request.user.userId);
+		console.log('[User Controller] Getting user avatar successful:', avatarPath);
+
+		if (!avatarPath) {
+			reply.status(404).send({
+				success: false,
+				error: "Avatar not found"
+			});
+		}
+		
+		console.log('[User Controller] Reading from file', avatarPath);
+		const data = await fs.readFile(avatarPath);
+		console.log('[User Controller] Sending avatar data', data);
+		
+		reply.type('image/jpg').send(data);
+	} catch (e: any) {
+		if (e.code === "ENOENT") {
+			console.error('[User Controller] Error getting the avatar:', e);
+			reply.status(404).send({
+                success: false,
+                error: "Avatar file not found"
+            });
+		} else {
+			console.error('[User Controller] Error getting the avatar:', e);
+			reply.status(500).send({
+				success: false,
+				error: 'Error getting the avatar: ' + e
 			});
 		}
 	}

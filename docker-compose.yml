@@ -40,7 +40,7 @@ services:
     environment:
       - AUTH_SERVICE_URL=http://auth_service:8080/auth
       - USER_DB_PATH=/app/data/database/user_db.sqlite3
-      - DEFAULT_AVATAR_PATH=/app/data/avatars/default/default_avatar.png
+      - DEFAULT_AVATAR_PATH=/app/data/avatars/default/default_avatar.jpg
     env_file:
       - .env
 

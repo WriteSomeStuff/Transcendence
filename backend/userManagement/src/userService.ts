@@ -106,3 +106,23 @@ export const getUserId = async (username: string): Promise<number> => {
 		throw e;
 	}
 }
+
+export const getUserAvatarPath = async (userId: number): Promise<string> => {
+	try {
+		const stmt = db.prepare(`
+			SELECT avatar_path
+			FROM user
+			WHERE user_id = ?
+		`);
+
+		const row = stmt.get(userId) as { avatar_path: string } | undefined;
+		
+		if (!row) {
+			throw new Error("User not found");
+		}
+
+		return row.avatar_path;
+	} catch (e) {
+		throw e;
+	}
+}
