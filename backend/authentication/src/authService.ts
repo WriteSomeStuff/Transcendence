@@ -212,7 +212,7 @@ export const enable2FA = async (userId: number): Promise<Enable2FAResultObj> => 
 
 		const totp = new OTPAuth.TOTP({
 			issuer: 'Transendence',
-			label: username, // change this label or fetch username
+			label: username,
 			algorithm: 'SHA1',
 			digits: 6,
 			period: 30
