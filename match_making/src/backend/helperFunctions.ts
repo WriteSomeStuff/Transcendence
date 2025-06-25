@@ -8,14 +8,14 @@ import { Room } from "./room";
 export function playerIsAlreadyInRoom(userID: number): boolean { //TODO check tournament rooms too
   for (const gameMode in roomQueues) {
     const rooms = roomQueues[gameMode as GameMode];
-    if (rooms.some((room: Room) => room.playerList.includes(userID))) {
+    if (rooms.some((room: Room) => room.playerList.has(userID))) {
 		console.log("User " + userID + " was already in a normal room") //DEBUG
       return true;
     }
   }
     for (const gameMode in tournamentQueues) {
     const rooms = tournamentQueues[gameMode as GameMode];
-    if (rooms.some((room: Room) => room.playerList.includes(userID))) {
+    if (rooms.some((room: Room) => room.playerList.has(userID))) {
 		console.log("User " + userID + " was already in a tournament room") //DEBUG
 		return true;
     }

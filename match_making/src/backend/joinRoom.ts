@@ -3,14 +3,12 @@ import { Room } from "./room";
 import { roomQueues, GameMode } from "./types";
 import { playerIsAlreadyInRoom, getMaxPlayerAmount } from "./helperFunctions";
 
-export function joinRoom(userID: number, playersGameMode: string) : Room {
-	console.log('"' + userID + '"' + " is trying to join a room in gameMode: " + playersGameMode); //DEBUG
+export function joinRoom(userID: number, GameMode: string){
+		console.log('"' + userID + '"' + " is trying to join a room in gameMode: " + GameMode); //DEBUG
 
-	// if (playerIsAlreadyInRoom(userID)) //TODO delete after i implement that switching pages == leaving a room
-	// 	return null;
 
-	const gameMode = playersGameMode as GameMode;
-	
+	const gameMode = GameMode as GameMode;
+
 	//check if a room exists
 	if (roomQueues[gameMode].length > 0)
 	{	//join first available room
@@ -26,7 +24,7 @@ export function joinRoom(userID: number, playersGameMode: string) : Room {
 
 	//player will always join first available room so can try to start with [0];
 	roomQueues[gameMode][0].tryStartGame();
-	
+
 	console.log(roomQueues); //DEBUG
-	return (roomQueues[gameMode][0]);
 }
+

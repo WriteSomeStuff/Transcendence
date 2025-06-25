@@ -2,15 +2,16 @@ import { Room } from "./room";
 import { roomQueues, GameMode } from "./types";
 
 export function leaveRoom(userID: number){
+
 	for (const gameMode in roomQueues)
 	{
 		const rooms = roomQueues[gameMode as GameMode];
 
 		for (const room of rooms) {
-			if (room.playerList.includes(userID))
+			if (room.playerList.has(userID))
 			{
 				//remove player from playerlist
-				room.playerList = room.playerList.filter((iD) => iD !== userID);
+				room.playerList.delete(userID);
 				room.amountPlayersInRoom--;
 				console.log(room)
 				if (room.amountPlayersInRoom == 0)
@@ -22,6 +23,6 @@ export function leaveRoom(userID: number){
 			}
 		}
 	}
-
+	console.log("userId: " + userID + " has left the Room");
 	console.log(roomQueues);
 }

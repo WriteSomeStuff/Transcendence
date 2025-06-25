@@ -6,15 +6,22 @@ export function tournamentLeaveRoom(userID: number){
 		const rooms = tournamentQueues[gameMode as GameMode];
 
 		for (const room of rooms) {
-			if (room.playerList.includes(userID))
+			if (room.playerList.has(userID))
 			{
 				//remove player from playerlist
-				room.playerList = room.playerList.filter((iD) => iD !== userID);
+				room.playerList.delete(userID);
 				room.amountPlayersInRoom--;
 				//if the host has left, set new host
 				if (userID == room.host)
 				{
-					room.host = room.playerList[0];
+					const nextEntry = room.playerList.keys().next().value;
+					if (nextEntry !== undefined) {
+						room.host = nextEntry;
+					}
+					else{
+						console.log("Something went wrong in assigning new room. deleting room");
+						room.amountPlayersInRoom = 0;
+					}
 				}
 				if (room.amountPlayersInRoom == 0)
 				{

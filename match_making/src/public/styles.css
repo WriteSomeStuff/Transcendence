@@ -99,3 +99,22 @@ p {
 .joinGameButton:hover::before {
     left: 100%;
 }
+
+.lobby-flex {
+	display: flex;
+	justify-content: center;
+	align-items: flex-start;
+	gap: 2rem;
+	margin-top: 2rem;
+}
+.container {
+	min-width: 350px;
+	max-width: 400px;
+	flex: 1 1 0;
+}
+@media (max-width: 900px) {
+	.lobby-flex {
+	flex-direction: column;
+	align-items: center;
+	}
+}

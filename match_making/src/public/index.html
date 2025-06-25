@@ -1,45 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Game Menu</title>
-	<link rel="stylesheet" href="style.css">
-	<style>
-		body {
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			height: 100vh;
-			margin: 0;
-			background-color: #f0f0f0;
-		}
-		.button-container {
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			gap: 20px;
-		}
-		.big-button {
-			padding: 20px 40px;
-			font-size: 1.5rem;
-			text-decoration: none;
-			color: #fff;
-			background-color: #007bff;
-			border: none;
-			border-radius: 8px;
-			cursor: pointer;
-			transition: background-color 0.3s;
-		}
-		.big-button:hover {
-			background-color: #0056b3;
-		}
-	</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Game Lobby</title>
+  <link rel="stylesheet" href="styles.css">
+
 </head>
 <body>
-	<div class="button-container">
-		<a class="big-button" href="match.html">Standard Match</a>
-		<a class="big-button" href="tournament.html">Tournament</a>
-	</div>
+  <div class="lobby-flex">
+    <!-- Match Section -->
+    <div class="container" id="matchContainer">
+      <h1>Standard Match</h1>
+      <p>Join a standard game room and play instantly!</p>
+      <form id="matchForm2">
+        <button class="joinGameButton" name="gameMode" value="pong_2" type="submit">
+          Join Room Pong (2 players)
+        </button>
+      </form>
+      <form id="matchForm3">
+        <button class="joinGameButton" name="gameMode" value="pong_3" type="submit">
+          Join Room Pong (3 players)
+        </button>
+      </form>
+      <form id="matchForm4">
+        <button class="joinGameButton" name="gameMode" value="pong_4" type="submit">
+          Join Room Pong (4 players)
+        </button>
+      </form>
+      <form id="matchFormMemory">
+        <button class="joinGameButton" name="gameMode" value="memory" type="submit">
+          Join Memory Game (2 players)
+        </button>
+      </form>
+      <form id="matchLeaveForm">
+        <button class="joinGameButton" type="button" id="leaveMatchBtn">
+          Leave game
+        </button>
+      </form>
+      <div id="matchRoomStatusContainer" style="display: none;">
+        <h3>Game Room</h3>
+        <p>Game Mode: <span id="matchGameMode"></span></p>
+        <p>Players: <span id="matchPlayerCount"></span>/<span id="matchMaxPlayers"></span></p>
+        <p>Status: <span id="matchRoomStatusText"></span></p>
+      </div>
+    </div>
+
+    <!-- Tournament Section -->
+    <div class="container" id="tournamentContainer">
+      <h1>Tournament</h1>
+      <p>Join a tournament room and compete for glory!</p>
+      <form id="tournamentForm2">
+        <button class="joinGameButton" name="gameMode" value="pong_2" type="submit">
+          Join Room Pong (2 players)
+        </button>
+      </form>
+      <form id="tournamentForm3">
+        <button class="joinGameButton" name="gameMode" value="pong_3" type="submit">
+          Join Room Pong (3 players)
+        </button>
+      </form>
+      <form id="tournamentForm4">
+        <button class="joinGameButton" name="gameMode" value="pong_4" type="submit">
+          Join Room Pong (4 players)
+        </button>
+      </form>
+      <form id="tournamentFormMemory">
+        <button class="joinGameButton" name="gameMode" value="memory" type="submit">
+          Join Memory Game (2 players)
+        </button>
+      </form>
+      <form id="tournamentLeaveForm">
+        <button class="joinGameButton" type="button" id="leaveTournamentBtn">
+          Leave game
+        </button>
+      </form>
+      <div id="tournamentRoomStatusContainer" style="display: none;">
+        <h3>Tournament Room</h3>
+        <p>Game Mode: <span id="tournamentGameMode"></span></p>
+        <p>Players: <span id="tournamentPlayerCount"></span>/<span id="tournamentMaxPlayers"></span></p>
+        <p>Host: <span id="tournamentHostId"></span></p>
+        <p>Status: <span id="tournamentRoomStatusText"></span></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Shared helpers ---
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+    const userId = getCookie('userId');
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const ws = new WebSocket(`${protocol}//${window.location.host}/ws`);
+
+    ws.onopen = () => {
+      console.log("WebSocket connected");
+      ws.send(JSON.stringify({ action: "init", payload: { userId: userId } }));
+    };
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log("Message from server:", data);
+      // Optionally update UI here based on server messages
+    };
+    ws.onclose = (event) => {
+      if (event.wasClean) {
+        console.log(`WebSocket connection closed cleanly, code=${event.code} reason=${event.reason}`);
+      } else {
+        console.error('WebSocket connection died:', event.code, event.reason);
+      }
+    };
+    ws.onerror = (error) => {
+      console.error("WebSocket connection error:", error);
+    };
+
+    // --- Match Room Logic ---
+    ["2", "3", "4", "Memory"].forEach(mode => {
+      document.getElementById(`matchForm${mode}`).addEventListener('submit', function(e) {
+        e.preventDefault();
+        ws.send(JSON.stringify({
+          action: "joinRoom",
+          payload: {
+            playerId: userId,
+            gameMode: mode.toLowerCase() === "memory" ? "memory" : `pong_${mode}`,
+            gameType: "singleGame"
+          }
+        }));
+        // Optionally update UI to show waiting/joined state
+      });
+    });
+    document.getElementById('leaveMatchBtn').addEventListener('click', function() {
+		console.log("leave match button pressed");
+      ws.send(JSON.stringify({
+        action: "leaveRoom",
+        payload: { playerId: userId, gameType: "singleGame" }
+      }));
+      // Optionally update UI to show left state
+    });
+
+    // --- Tournament Room Logic ---
+    ["2", "3", "4", "Memory"].forEach(mode => {
+      document.getElementById(`tournamentForm${mode}`).addEventListener('submit', function(e) {
+        e.preventDefault();
+        ws.send(JSON.stringify({
+          action: "joinRoom",
+          payload: {
+            playerId: userId,
+            gameMode: mode.toLowerCase() === "memory" ? "memory" : `pong_${mode}`,
+            gameType: "tournament"
+          }
+        }));
+        // Optionally update UI to show waiting/joined state
+      });
+    });
+    document.getElementById('leaveTournamentBtn').addEventListener('click', function() {
+		console.log("leave tournament button pressed");
+      ws.send(JSON.stringify({
+        action: "leaveRoom",
+        payload: { playerId: userId, gameType: "tournament" }
+      }));
+      // Optionally update UI to show left state
+    });
+  </script>
 </body>
 </html>
