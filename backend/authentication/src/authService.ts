@@ -129,17 +129,25 @@ export const verify2FA = async (userId: number, token: string): Promise<AuthResu
 			SELECT 
 				username,
 				two_fa_secret
+				two_fa_enabled
 			FROM
 				user
 			WHERE
 				user_id = ?
 		`);
-		const row = stmt.get(userId) as { username: string, two_fa_secret: string };
+		const row = stmt.get(userId) as { username: string, two_fa_secret: string, two_fa_enabled: number };
 
 		if (!row) {
+			console.error(`[Auth Service] User with ID ${userId} not found for 2FA verification`);
 			return { success: false, error: "User not found" };
 		}
 
+		if (!row.two_fa_secret || row.two_fa_enabled !== 1) {
+			console.error(`[Auth Service] User with ID ${userId} does not have 2FA enabled`);
+			return { success: false, error: "2FA is not enabled for this user" };
+		}
+
+		console.log(`[Auth Service] Verifying 2FA token for user ${row.username} (ID: ${userId})`);
 		const totp = new OTPAuth.TOTP({
 			issuer: 'Transendence',
 			label: row.username, // change this label or fetch username
@@ -149,13 +157,16 @@ export const verify2FA = async (userId: number, token: string): Promise<AuthResu
 			secret: OTPAuth.Secret.fromBase32(row.two_fa_secret)
 		});
 
+		console.log(`[Auth Service] TOTP instance created for user ${row.username} with secret ${row.two_fa_secret}`);
 		if (await totp.validate({ token, window: 1 })) {
+			console.log(`[Auth Service] 2FA token for user ${row.username} is valid`);
 			return { success: true, username: row.username };
 		} else {
+			console.error(`[Auth Service] Invalid 2FA token for user ${row.username}`);
 			return { success: false, error: "Invalid 2FA token" };
 		}
 	} catch (e) {
-		console.error('Error during 2FA verification:', e);
+		console.error('[Auth Service] Error during 2FA verification:', e);
 		return { success: false, error: "An error occured during 2FA verification" };
 	}
 }
