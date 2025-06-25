@@ -7,7 +7,6 @@ export const insertUser = async (username: string, userId: number) => {
 			INSERT INTO user (user_id, username)
 			VALUES (?, ?)
 		`);
-		// TODO: set default avatar path
 
 		stmt.run(userId, username);
 	} catch (e) {
