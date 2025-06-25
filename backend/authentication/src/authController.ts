@@ -81,6 +81,7 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 		
 		// If login is successful and 2FA is enabled, send a response indicating that 2FA verification is required
 		if (result.twoFA) {
+			console.log(`[Auth Controller] User ${result.userId} ${username} has 2FA enabled`);
 			reply.status(200).send({
 				success: true,
 				twoFA: true,
@@ -126,8 +127,9 @@ export const verify2FATokenHandler = async (request: FastifyRequest, reply: Fast
 			return;
 		}
 
+		console.log(`[Auth Controller] Verifying 2FA token for user ${userId}`);
 		const result = await verify2FA(userId, token);
-
+		
 		if (!result.success) {
 			reply.status(401).send({ error: result.error });
 			return;
@@ -136,11 +138,18 @@ export const verify2FATokenHandler = async (request: FastifyRequest, reply: Fast
 			throw new Error("Username is missing");
 		}
 		
-		console.log('User %d verified via 2FA', result.username);
+		console.log(`[Auth Controller] User ${userId} ${result.username} verified 2FA token successfully`);
+		
 
+		console.log(`[Auth Controller] Handling successful login for user ${userId} ${result.username}`);
 		await handleSuccessfulLogin(request, reply, userId, result.username);
+		console.log(`[Auth Controller] User ${userId} ${result.username} logged in successfully after 2FA verification`);
 
-		reply.status(200).send({ message: "2FA verification successful" });
+		reply.status(200).send({ 
+			success: true,
+			message: "2FA token verified successfully",
+			next: "/home"
+		});
 
 	} catch (e) {
 		console.error('Error verifying 2FA token:', e);
