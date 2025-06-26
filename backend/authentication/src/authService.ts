@@ -120,7 +120,7 @@ export const verify2FA = async (userId: number, token: string, username: string)
 	try {
 		const stmt = db.prepare(`
 			SELECT 
-				two_fa_secret
+				two_fa_secret,
 				two_fa_enabled
 			FROM
 				user
