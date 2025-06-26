@@ -7,6 +7,15 @@ import { joinLobby, leaveLobby } from './backend/Lobby';
 import { User } from './backend/types'
 import { findPlayerAndKick } from './backend/helperFunctions';
 
+const MATCH_MAKING_PORT = process.env.MATCH_MAKING_PORT ? 
+  parseInt(process.env.MATCH_MAKING_PORT, 10) : 8080;
+
+// Log warning if using default port
+if (!process.env.MATCH_MAKING_PORT) {
+  console.log("CAUTION: No MATCH_MAKING_PORT environment variable found. Using default port 8080.");
+}
+
+
 const fastify = Fastify({});
 fastify.register(fastifyStatic, {
   root: path.join(__dirname, 'public'),
@@ -77,7 +86,7 @@ fastify.get('/', (req, reply) => { //TODO this is for DEBUG. later should only g
 });
 
 
-fastify.listen({ port: 8080, host: '0.0.0.0' }, (err, address) => {
+fastify.listen({ port: MATCH_MAKING_PORT, host: '0.0.0.0' }, (err, address) => {
   if (err) {
     console.error(err);
     process.exit(1);

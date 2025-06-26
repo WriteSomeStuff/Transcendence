@@ -1,5 +1,7 @@
 import { roomQueues, GameMode, User } from "./types";
 import http from "http";
+import {GAME_MODULE_PORT} from './types'
+
 
 export class Room {
 	playerList: User[];
@@ -49,8 +51,8 @@ export class Room {
 	tryStartGame(){
 		if (this.amountPlayersInRoom == this.maxPlayerAmount)
 		{
+			//--------------------------- TODO: Fix this so it works with the gameModule
 			// Prepare data to send
-			
 			let arr: any[] = [];
 
 			arr.push(this.roomGameMode);
@@ -61,8 +63,6 @@ export class Room {
 			console.log("starting game now!");
 			console.log(data);
 
-
-			const GAME_MODULE_PORT = process.env.GAME_MODULE_PORT || -1;
 			const options = {
 				hostname: 'localhost',
 				port: GAME_MODULE_PORT,
@@ -70,7 +70,7 @@ export class Room {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
-					// 'Content-Length': Buffer.byteLength(data)
+					'Content-Length': Buffer.byteLength(data)
 				}
 			};
 
@@ -87,6 +87,8 @@ export class Room {
 
 			req.write(data); //TODO: test!
 			req.end();
+
+			//------------------------
 
 			// Remove this room from the queue
 			const roomIndex = roomQueues[this.roomGameMode].indexOf(this);

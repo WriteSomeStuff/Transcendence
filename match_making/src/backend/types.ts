@@ -27,3 +27,11 @@ export const tournamentQueues: Record<GameMode, tournamentRoom[]> = {
 	pong_4: [],
 	memory: []
 };
+
+export const GAME_MODULE_PORT = process.env.GAME_MODULE_PORT ? 
+  parseInt(process.env.GAME_MODULE_PORT, 10) : 8081;
+
+// Log warning if using default port
+if (!process.env.GAME_MODULE_PORT) {
+  console.log("CAUTION: No GAME_MODULE_PORT environment variable found. Using default port 8081.");
+}
