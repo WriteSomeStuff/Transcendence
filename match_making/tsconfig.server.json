@@ -111,5 +111,5 @@
     "skipLibCheck": true,                                 /* Skip type checking all .d.ts files. */
 	"outDir": "./dist/"
 },
-"include": ["src/serv.ts"],
+"include": ["src/server.ts"],
 }

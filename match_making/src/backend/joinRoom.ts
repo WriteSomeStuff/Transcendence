@@ -1,23 +1,21 @@
 
 import { Room } from "./room";
-import { roomQueues, GameMode } from "./types";
+import { roomQueues, GameMode, User } from "./types";
 import { playerIsAlreadyInRoom, getMaxPlayerAmount } from "./helperFunctions";
 
-export function joinRoom(userID: number, GameMode: string){
-		console.log('"' + userID + '"' + " is trying to join a room in gameMode: " + GameMode); //DEBUG
-
+export function joinRoom(user: User, GameMode: string){
 
 	const gameMode = GameMode as GameMode;
 
 	//check if a room exists
 	if (roomQueues[gameMode].length > 0)
 	{	//join first available room
-		roomQueues[gameMode][0].joinRoom(userID); 
+		roomQueues[gameMode][0].joinRoom(user); 
 	}
 	else{
 		//create a room and put player in it
 		const maxPlayers = getMaxPlayerAmount(gameMode);
-		const newRoom = new Room(userID, maxPlayers, gameMode); 
+		const newRoom = new Room(user, maxPlayers, gameMode); 
 
 		roomQueues[gameMode].push(newRoom);
 	}
@@ -25,6 +23,5 @@ export function joinRoom(userID: number, GameMode: string){
 	//player will always join first available room so can try to start with [0];
 	roomQueues[gameMode][0].tryStartGame();
 
-	console.log(roomQueues); //DEBUG
 }
 

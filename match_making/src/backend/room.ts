@@ -1,18 +1,18 @@
-import { roomQueues, GameMode } from "./types";
+import { roomQueues, GameMode, User } from "./types";
 import http from "http";
 
 export class Room {
-	playerList: Map<number, any>; // userID -> socket
+	playerList: User[];
 	amountPlayersInRoom: number;
 	maxPlayerAmount: number;
 	roomGameMode: GameMode;
 	lastActivity: Date;
 
 
-	constructor(userID: number, maxPlayerAmount: number, mode: GameMode, socket?: any){
+	constructor(user: User, maxPlayerAmount: number, mode: GameMode, socket?: any){
 
-		this.playerList = new Map();
-		this.playerList.set(userID, socket);
+		this.playerList = [];
+		this.playerList.push(user);
 
 		this.amountPlayersInRoom = 1;
 
@@ -23,29 +23,46 @@ export class Room {
 		this.lastActivity = new Date();
 	}
 
-	joinRoom(playerid: number, socket?: any){
+	joinRoom(user: User, socket?: any){
 		if (this.amountPlayersInRoom == this.maxPlayerAmount)
 		{
 			//TODO send error here
 			return ;
 		}
-		this.playerList.set(playerid, socket);
+		this.playerList.push(user);
 		this.amountPlayersInRoom++;
 		this.lastActivity = new Date();
+		this.broadcastPlayers();
+	}
+
+	broadcastPlayers(){
+		let data: number[] = [];
+
+		this.playerList.forEach (player => {
+			data.push(player.userID);
+		})
+		this.playerList.forEach( player => {
+			player.socket.send(JSON.stringify(data));
+		})
 	}
 
 	tryStartGame(){
 		if (this.amountPlayersInRoom == this.maxPlayerAmount)
 		{
 			// Prepare data to send
-			const playerIds = Array.from(this.playerList.keys());
-			const data = JSON.stringify({
-				playerList: playerIds,
-				gameMode: this.roomGameMode
-			});
+			
+			let arr: any[] = [];
 
-			const GAME_MODULE_PORT = process.env.GAME_MODULE_PORT || 9000;
-			console.log("PORT = " + GAME_MODULE_PORT);
+			arr.push(this.roomGameMode);
+			this.playerList.forEach (player => {
+				arr.push(player.userID);
+			})
+			let data = JSON.stringify(arr);
+			console.log("starting game now!");
+			console.log(data);
+
+
+			const GAME_MODULE_PORT = process.env.GAME_MODULE_PORT || -1;
 			const options = {
 				hostname: 'localhost',
 				port: GAME_MODULE_PORT,
@@ -53,7 +70,7 @@ export class Room {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
-					'Content-Length': Buffer.byteLength(data)
+					// 'Content-Length': Buffer.byteLength(data)
 				}
 			};
 

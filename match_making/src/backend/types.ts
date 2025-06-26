@@ -1,6 +1,11 @@
 import { Room } from "./room"
 import { tournamentRoom } from "./tournamentRoom";
 
+export type User = {
+	userID: number;
+	socket: any;
+};
+
 /*Shows which game we are referencing */
 export enum GameMode {
 	pong_2 = "pong_2",

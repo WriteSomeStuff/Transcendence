@@ -4,6 +4,8 @@ import path from 'path';
 import ws from 'ws';
 
 import { joinLobby, leaveLobby } from './backend/Lobby';
+import { User } from './backend/types'
+import { findPlayerAndKick } from './backend/helperFunctions';
 
 const fastify = Fastify({});
 fastify.register(fastifyStatic, {
@@ -19,23 +21,23 @@ wss.on('connection', (socket) => {
 		const msg = JSON.parse(data.toString());
 		const { playerId, gameMode, gameType } = msg.payload || {};
 
-		console.log("action = " + msg.action);
 		switch(msg.action) {
 			case 'joinRoom': {
 				if (!playerId || !gameMode || !gameType) {
 					socket.send(JSON.stringify({ error: 'Invalid joinRoom payload' }));
 					return;
 				}
-				joinLobby(playerId, gameMode, gameType);
+				const user : User = {userID: playerId, socket: socket};
+				joinLobby(user, gameMode, gameType);
 				break;
 			}
 			case 'leaveRoom': {
-				console.log("leaveRoom req");
 				if (!playerId || !gameType) {
 					socket.send(JSON.stringify({ error: 'Invalid joinRoom payload' }));
 					return;
 				}
-				leaveLobby(playerId, gameType);
+				const user : User = {userID: playerId, socket: socket};
+				leaveLobby(user, gameType);
 				break;
 			}
 			default:
@@ -45,11 +47,16 @@ wss.on('connection', (socket) => {
 	catch (err){
 		console.error('Invalid Room request received:', err);
 	}
+	// console.log(roomQueues);
+	// console.log(tournamentQueues);
   });
+
+socket.on('close', () => {
+	console.log("user Disconnected");
+	findPlayerAndKick(socket);
+	});
 });
 
-
-//TODO make user leaves or disconnects
 
 fastify.server.on('upgrade', (request, socket, head) => {
   if (request.url === '/ws') {
@@ -68,7 +75,6 @@ fastify.get('/', (req, reply) => { //TODO this is for DEBUG. later should only g
   index >= 10 ? index = 1 : index++;
   return reply.sendFile('index.html');
 });
-
 
 
 fastify.listen({ port: 8080, host: '0.0.0.0' }, (err, address) => {

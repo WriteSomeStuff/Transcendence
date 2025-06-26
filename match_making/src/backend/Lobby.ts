@@ -4,29 +4,35 @@ import { tournamentJoinRoom } from './tournamentJoinRoom';
 import { playerIsAlreadyInRoom } from './helperFunctions';
 import { leaveRoom } from './leaveRoom';
 import { tournamentLeaveRoom } from './tournamentLeaveRoom';
+import { User } from "./types";
 
-export function joinLobby(userID: number, gameMode: string, gameType: string) {
+export function joinLobby(user: User, gameMode: string, gameType: string) {
 
-	if (playerIsAlreadyInRoom(userID))
+	console.log('"' + user.userID + '"' + " is trying to join a room in gameMode: " + gameMode); //DEBUG
+	
+
+	if (playerIsAlreadyInRoom(user))
 		return; //TODO send error here?
 
-	console.log("Uid = " + userID + "; gameMode = " + gameMode + "; gameType = " + gameType + ";");
-
 	if (gameType === "singleGame") {
-		joinRoom(userID, gameMode);
+		joinRoom(user, gameMode);
 	}
 	else if (gameType === "tournament")
-		tournamentJoinRoom(userID, gameMode);
+		tournamentJoinRoom(user, gameMode);
+
 
 	//TODO broadcast new join to the whole Room
 }
 
-export function leaveLobby(userID: number, gameType: string){
-
+export function leaveLobby(user: User, gameType: string){
+	
 	if (gameType === "singleGame")
-		leaveRoom(userID);
+	{
+		leaveRoom(user);
+	}
 	else if (gameType ===  "tournament")
-		tournamentLeaveRoom(userID);
-
-	//TODO broadcast leave to the whole room
+	{
+		tournamentLeaveRoom(user);
+	}
+	console.log(user.userID + " has left their lobby");
 }

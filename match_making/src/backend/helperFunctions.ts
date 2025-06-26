@@ -1,27 +1,77 @@
 //// filepath: /home/tknibbe/Documents/rank6/transcendacne/match_making/src/backend/helperFunct.ts
-import { roomQueues, GameMode, tournamentQueues } from "./types";
+import { roomQueues, GameMode, tournamentQueues, User} from "./types";
 import { Room } from "./room";
+import { leaveRoom } from "./leaveRoom";
+import { tournamentLeaveRoom } from "./tournamentLeaveRoom";
 
 /**
  * Checks if a player is already in any room
  */
-export function playerIsAlreadyInRoom(userID: number): boolean { //TODO check tournament rooms too
-  for (const gameMode in roomQueues) {
-    const rooms = roomQueues[gameMode as GameMode];
-    if (rooms.some((room: Room) => room.playerList.has(userID))) {
-		console.log("User " + userID + " was already in a normal room") //DEBUG
-      return true;
-    }
-  }
-    for (const gameMode in tournamentQueues) {
-    const rooms = tournamentQueues[gameMode as GameMode];
-    if (rooms.some((room: Room) => room.playerList.has(userID))) {
-		console.log("User " + userID + " was already in a tournament room") //DEBUG
-		return true;
-    }
-  }
+export function playerIsAlreadyInRoom(user: User): boolean { //TODO check tournament rooms too
+	for (const gameMode in roomQueues) {
+		const rooms = roomQueues[gameMode as GameMode];
+		for (const room of rooms)
+		{
+			for(const player of room.playerList)
+			{
+				if (player.userID == user.userID)
+				{
+					console.log("error, player is already in a room");
+					return true;
+				}
+			}
+		}
+	}
+	for (const gameMode in tournamentQueues) {
+		const rooms = tournamentQueues[gameMode as GameMode];
+		for (const room of rooms)
+		{
+			for(const player of room.playerList)
+			{
+				if (player.userID == user.userID)
+				{
+					console.log("error, player is already in a room");
+					return true;
+				}
+			}
+		}
+	}
   return false;
 }
+
+export function findPlayerAndKick(socket: any) {
+	for (const gameMode in roomQueues) {
+		const rooms = roomQueues[gameMode as GameMode];
+		for (const room of rooms)
+		{
+			for(const player of room.playerList)
+			{
+				if (player.socket == socket)
+				{
+					const user : User = {userID: player.userID, socket: socket};
+					leaveRoom(user);
+					tournamentLeaveRoom(user);
+				}
+			}
+		}
+	}
+	for (const gameMode in tournamentQueues) {
+		const rooms = tournamentQueues[gameMode as GameMode];
+		for (const room of rooms)
+		{
+			for(const player of room.playerList)
+			{
+				if (player.socket == socket)
+				{
+					const user : User = {userID: player.userID, socket: socket};
+					leaveRoom(user);
+					tournamentLeaveRoom(user);
+				}
+			}
+		}
+	}
+}
+
 
 /**
  * Returns the maximum number of players for a given game mode
