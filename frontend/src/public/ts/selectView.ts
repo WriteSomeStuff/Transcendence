@@ -33,6 +33,14 @@ function selectView(page: string, push: boolean)
 			if (formBindings[page]) {
 				bindForm(formBindings[page]);
 			}
+			if (page === "leaderboard") {
+				import("./pullUsername.js").then((module) => {
+					// Optional: call a specific function if needed
+					if (module.displayLeaderboardData) {
+						module.displayLeaderboardData();
+					}
+				});
+			}
 		}
 		else {
 			console.error("Element spa not found.");
