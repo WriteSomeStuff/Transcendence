@@ -22,6 +22,12 @@
         <button onclick="" class="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6"> <!-- make functionality work -->
           <img class="w-full h-full object-contain" src="./public/assets/gifs/pencil.gif" alt="Edit username, avatar or password"/>
         </button>
+		<!-- Change avatar button logic -->
+		 <input type="file" id="avatarInput" accept="image/*" style="display:none">
+		 <button id="avatarUploadBtn" type="button">
+			Edit avatar
+		 </button>
+		 <!-- Change avatar button logic end -->
         <img class="w-full max-w-xs h-auto" src="/api/user/avatar" alt="User Avatar"/>
       </div>
       <div class="flex flex-col items-center border-8 animate-rainbow p-4">
