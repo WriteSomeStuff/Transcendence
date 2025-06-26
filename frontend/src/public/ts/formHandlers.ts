@@ -1,6 +1,6 @@
 export const formBindings: Record<string, { formId: string; url: string; serviceName: string }> = {
-    register:	{ formId: 'registrationForm',	url: '/auth/register', serviceName: 'Registration' },
-    login:		{ formId: 'loginForm',		url: '/auth/login',    serviceName: 'Login' }
+    register:	{ formId: 'registrationForm',	url: '/api/auth/register', serviceName: 'Registration' },
+    login:		{ formId: 'loginForm',		url: '/api/auth/login',    serviceName: 'Login' }
 };
 
 type formBinding = { formId: string; url: string; serviceName: string };
