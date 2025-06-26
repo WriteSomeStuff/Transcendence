@@ -18,8 +18,8 @@ const authRoutes = async (app: FastifyInstance) => {
 	app.put('/password',	updatePasswordHandler);
 	
 	app.post('/verify2FA',	verify2FATokenHandler);
-	app.post('/enable2FA',	enable2FAHandler);
-	app.post('/disable2FA',	disable2FAHandler);
+	app.post('/enable2FA',	{ preHandler: [app.authenticate] }, enable2FAHandler);
+	app.post('/disable2FA',	{ preHandler: [app.authenticate] }, disable2FAHandler);
 };
 
 export default authRoutes;
