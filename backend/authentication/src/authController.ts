@@ -124,7 +124,7 @@ export const verify2FATokenHandler = async (request: FastifyRequest, reply: Fast
 
 		if (!userId || !token || !username) {
 			console.error(`[Auth Controller] Missing userId, token or username in request body`);
-			reply.status(400).send({ error: 'UserId and token are required' });
+			reply.status(400).send({ error: 'UserId, username and token are required' });
 			return;
 		}
 
