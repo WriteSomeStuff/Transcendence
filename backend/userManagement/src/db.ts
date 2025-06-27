@@ -5,9 +5,9 @@ if (!DB_PATH) {
 	throw new Error("DB_PATH environment variable is not set");
 }
 
-const DEFAULT_AVATAR_PATH: string = process.env.DEFAULT_AVATAR_PATH as string;
+const DEFAULT_AVATAR_PATH: string = `${process.env.AVATAR_DIR_PATH as string}/default/default_avatar.jpg`;
 if (!DEFAULT_AVATAR_PATH) {
-	throw new Error("DEFAULT_AVATAR_PATH environment variable is not set");
+	throw new Error("AVATAR_DIR_PATH environment variable is not set");
 }
 
 const db = new Database(DB_PATH, {
