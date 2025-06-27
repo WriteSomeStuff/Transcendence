@@ -1,3 +1,5 @@
+import fs from 'fs/promises';
+
 import db from "./db";
 import { UserObj } from "./types/types";
 
@@ -122,6 +124,23 @@ export const getUserAvatarPath = async (userId: number): Promise<string> => {
 		}
 
 		return row.avatar_path;
+	} catch (e) {
+		throw e;
+	}
+}
+
+export const updateAvatar = async (userId: number, filePath: string, newAvatar: Buffer) => {
+	try {
+		await fs.writeFile(filePath, newAvatar);
+
+		const stmt = db.prepare(`
+			UPDATE user
+			SET avatar_path = ?
+			WHERE
+				user_id = ?
+		`);
+
+		stmt.run(filePath, userId);
 	} catch (e) {
 		throw e;
 	}

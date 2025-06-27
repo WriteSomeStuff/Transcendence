@@ -5,7 +5,7 @@ export const formBindings: Record<string, { formId: string; url: string; service
 
 type formBinding = { formId: string; url: string; serviceName: string };
 
-export function bindForm(formBinding: formBinding) {
+export function bindCredentialsForm(formBinding: formBinding) {
 	const form = document.getElementById(formBinding.formId) as HTMLFormElement | null;
 	if (!form) {
 		return;
@@ -43,4 +43,39 @@ export function bindForm(formBinding: formBinding) {
 				// TODO further handling
 			}
 		});
+}
+
+export function bindAvatarForm() {
+	const form = document.getElementById('avatarForm') as HTMLFormElement | null;
+	if (!form) return;
+
+	form.addEventListener('submit', async function (event: Event) {
+		event.preventDefault();
+		console.log("[FRONTEND] Handling avatar upload");
+
+		const input = document.getElementById('avatarInput') as HTMLInputElement;
+		if (!input || !input.files) return;
+		
+		const file = input.files[0];
+		if (!file) return;
+
+		const formData = new FormData();
+		formData.append('avatar', file);
+
+		const response = await fetch('/api/user/avatar', {
+			method: 'PUT',
+			body: formData
+		});
+
+		const data = await response.json() as { success: boolean, error?: string};
+		
+		if (!response.ok || data.success === false) {
+			throw new Error(data.error || `HTTP error; status: ${response.status}`);
+		}
+
+		console.log("Uploading new avatar successful");
+		alert(`Avatar successfully uploaded!`);
+
+		// TODO reload page
+	});
 }

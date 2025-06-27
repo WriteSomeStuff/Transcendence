@@ -1,4 +1,8 @@
-import { bindForm, formBindings } from "./formHandlers.js";
+import {
+	formBindings,
+	bindCredentialsForm,
+	bindAvatarForm
+} from "./formHandlers.js";
 
 function	bindButtons()
 {
@@ -31,7 +35,9 @@ function selectView(page: string, push: boolean)
 			}
 			bindButtons();
 			if (formBindings[page]) {
-				bindForm(formBindings[page]);
+				bindCredentialsForm(formBindings[page]);
+			} else if (page === 'profile') {
+				bindAvatarForm();
 			}
 		}
 		else {

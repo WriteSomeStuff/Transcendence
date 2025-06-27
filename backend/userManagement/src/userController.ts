@@ -1,5 +1,6 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { promises as fs } from "fs";
+import path from 'path';
 
 import {
 	insertUser,
@@ -8,7 +9,8 @@ import {
 	updatePassword,
 	updateStatus,
 	getUserAvatarPath,
-	getUserId
+	getUserId,
+	updateAvatar
 } from "./userService";
 
 export const insertUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -184,5 +186,40 @@ export const getUserAvatarHandler = async (request: FastifyRequest, reply: Fasti
 				error: 'Error getting the avatar: ' + e
 			});
 		}
+	}
+}
+
+export const updateUserAvatarHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+	try {
+		const file = await request.file();
+		if (!file) {
+			reply.status(400).send({
+				success: false,
+				error: "No file uploaded"
+			});
+			return;
+		}
+		
+		const ext = file.mimetype.split('/')[1];
+		const filename = `user_${request.user.userId}.${ext}`;
+		const filePath = path.join(process.env.AVATAR_DIR_PATH as string, 'user_uploads/', filename);
+		console.log(`${filePath}: ${file}`);
+		
+		const buffer = await file.toBuffer();
+
+		console.log(`[User Controller] Updating avatar in db for user ${request.user.userId}`);
+		await updateAvatar(request.user.userId, filePath, buffer);
+		console.log(`[User Controller] Updating avatar for user ${request.user.userId} successful`);
+
+		reply.status(200).send({
+			success: true,
+			message: "Avatar successfully changed"
+		});
+	} catch (e) {
+		console.error('Error uploading avatar:', e);
+		reply.status(500).send({
+			success: false,
+			error: 'An error occured uploading avatar:' + e
+		});
 	}
 }

@@ -23,10 +23,10 @@
           <img class="w-full h-full object-contain" src="./public/assets/gifs/pencil.gif" alt="Edit username, avatar or password"/>
         </button>
 		<!-- Change avatar button logic -->
-		 <input type="file" id="avatarInput" accept="image/*" style="display:none">
-		 <button id="avatarUploadBtn" type="button">
-			Edit avatar
-		 </button>
+		 <form id="avatarForm" enctype="multipart/form-data">
+		 	<input type="file" id="avatarInput" accept="image/*" name="avatar">
+			<button type="submit">Upload</button>
+		 </form>
 		 <!-- Change avatar button logic end -->
         <img class="w-full max-w-xs h-auto" src="/api/user/avatar" alt="User Avatar"/>
       </div>
