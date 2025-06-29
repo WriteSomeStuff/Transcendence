@@ -2,10 +2,7 @@
   "name": "matchmaking",
   "version": "1.0.0",
   "description": "the matchmaking service",
-  "keywords": [
-    "matchmaking",
-    "microservice"
-  ],
+  "keywords": ["matchmaking", "microservice"],
   "license": "MIT",
   "author": "cat",
   "type": "module",

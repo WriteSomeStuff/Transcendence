@@ -1,17 +1,18 @@
 import { z } from "zod";
 
-export const Vector2DTO = z.object({
+import { createDtoTransformable } from "./dto_transformable.js";
+
+const Vector2Dto = z.object({
   x: z.number(),
   y: z.number(),
 });
 
-export type Vector2DTO = z.infer<typeof Vector2DTO>;
-
-export class Vector2 {
+export class Vector2 extends createDtoTransformable(Vector2Dto) {
   public readonly x: number;
   public readonly y: number;
 
   constructor(x: number, y: number) {
+    super();
     this.x = x;
     this.y = y;
   }
@@ -41,7 +42,7 @@ export class Vector2 {
   }
 
   public length(): number {
-    return Math.sqrt(this.x * this.x + this.y * this.y);
+    return Math.hypot(this.x, this.y);
   }
 
   public normalize(): Vector2 {
@@ -59,3 +60,8 @@ export class Vector2 {
     return new Vector2(Math.cos(angle), Math.sin(angle));
   }
 }
+
+// const myVecDto = {x: 1, y: 1};
+// const myVec = Vector2.fromDTO(myVecDto);
+// console.log(myVec);
+// console.log(myVec.normalize().toDTO());

@@ -22,10 +22,16 @@ export class PlayerScore {
     if (first.points > second.points) {
       return 1;
     }
-    if (first.latestUpdateType === "increase" && second.latestUpdateType === "decrease") {
+    if (
+      first.latestUpdateType === "increase" &&
+      second.latestUpdateType === "decrease"
+    ) {
       return 1;
     }
-    if (first.latestUpdateType === "decrease" && second.latestUpdateType === "increase") {
+    if (
+      first.latestUpdateType === "decrease" &&
+      second.latestUpdateType === "increase"
+    ) {
       return -1;
     }
     if (first.latestUpdateType === "decrease") {

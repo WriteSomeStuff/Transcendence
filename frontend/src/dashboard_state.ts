@@ -68,12 +68,17 @@ export class DashboardState extends AppState {
   }
 
   private async handleCreateRoom() {
-    this.room = await getAuthorized("/matchmaking/create_room", { size: "2", game: "pong" }).then(res => res.json());
+    this.room = await getAuthorized("/matchmaking/create_room", {
+      size: "2",
+      game: "pong",
+    }).then((res) => res.json());
     this.renderRoom();
   }
 
   private async handleJoinRoom() {
-    this.room = await getAuthorized("/matchmaking/join_room", {}).then(res => res.json());
+    this.room = await getAuthorized("/matchmaking/join_room", {}).then((res) =>
+      res.json(),
+    );
     this.renderRoom();
   }
 
@@ -81,7 +86,10 @@ export class DashboardState extends AppState {
     if (this.room === undefined) {
       return;
     }
-    const room: GameRoom = await getAuthorized("/matchmaking/get_room", {}).then(res => res.json());
+    const room: GameRoom = await getAuthorized(
+      "/matchmaking/get_room",
+      {},
+    ).then((res) => res.json());
     if (room !== this.room) {
       this.room = room;
       this.renderRoom();

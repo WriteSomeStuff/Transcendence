@@ -101,13 +101,10 @@ app.get(
           console.log(slot, userIds);
         }
         const response = await (
-          await fetch(
-            "http://game/create",
-            {
-              method: "POST",
-              body: JSON.stringify({ userIds: userIds }),
-            }
-          )
+          await fetch("http://game/create", {
+            method: "POST",
+            body: JSON.stringify({ userIds: userIds }),
+          })
         ).json();
         console.log(response);
         room.game_id = response.gameId;

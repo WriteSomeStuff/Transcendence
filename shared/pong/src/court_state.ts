@@ -1,32 +1,41 @@
+import { z } from "zod";
+
+import { createDtoTransformable } from "./dto_transformable.js";
+
 import { Vector2 } from "./vector2.ts";
 import { PaddleState, initPaddle, updatePaddle } from "./paddle_state.ts";
 import { CourtGeometry } from "./court_geometry.ts";
 
-export interface CourtState {
-  ballPosition: Vector2;
-  ballVelocity: Vector2;
-  paddles: PaddleState[];
-}
+const CourtStateDto = z.object({
+  ballPosition: Vector2.getSchema(),
+  ballVelocity: Vector2.getSchema(),
+  paddles: z.array(z.any()),
+});
 
 function chooseRandomBallDirection(
   geometry: CourtGeometry,
   ballSpeed: number,
 ): Vector2 {
-  const index = Math.floor(Math.random() * geometry.size);
-  const [a, b] = geometry.getBaselineSurface(index);
+  const index = Math.floor(Math.random() * geometry.playerCount);
+  const [a, b] = geometry.getPlayerLineSurface(index);
   return b.subtract(a).scale(Math.random()).add(b).normalize().scale(ballSpeed);
 }
 
-export function initCourtState(
-  geometry: CourtGeometry,
-  ballSpeed: number,
-  paddleToEdgeRatios: number[],
-): CourtState {
-  return {
-    ballPosition: new Vector2(0, 0),
-    ballVelocity: chooseRandomBallDirection(geometry, ballSpeed),
-    paddles: paddleToEdgeRatios.map((ratio) => initPaddle(ratio)),
-  };
+export class CourtState extends createDtoTransformable(CourtStateDto) {
+  ballPosition: Vector2;
+  ballVelocity: Vector2;
+  paddles: PaddleState[];
+
+  constructor(
+    geometry: CourtGeometry,
+    ballSpeed: number,
+    paddleToEdgeRatios: number[],
+  ) {
+    super();
+    this.ballPosition = new Vector2(0, 0);
+    this.ballVelocity = chooseRandomBallDirection(geometry, ballSpeed);
+    this.paddles = paddleToEdgeRatios.map((ratio) => initPaddle(ratio));
+  }
 }
 
 function doesBounce(
@@ -70,18 +79,18 @@ export function updateCourtState(
   let bouncedPaddleIndex = -1;
   let newDirection = state.ballVelocity;
   let minDistance = Number.POSITIVE_INFINITY;
-  for (let i = 0; i < geometry.size; i++) {
-    const [sidelineStart, sidelineEnd] = geometry.getSidelineSurface(i);
+  for (let i = 0; i < geometry.playerCount; i++) {
+    const [sidelineStart, sidelineEnd] = geometry.getWallSurface(i);
     const sidelineDistance = doesBounce(
       state.ballPosition,
       geometry.ballRadius,
       sidelineStart,
       sidelineEnd,
-      geometry.getSidelineNormal(i),
+      geometry.getWallNormal(i),
     );
     if (sidelineDistance < minDistance) {
       bouncedPaddleIndex = -1;
-      newDirection = state.ballVelocity.reflect(geometry.getSidelineNormal(i));
+      newDirection = state.ballVelocity.reflect(geometry.getWallNormal(i));
       minDistance = sidelineDistance;
     }
     const [paddleStart, paddleEnd] = geometry.getPaddleSurface(
@@ -93,22 +102,24 @@ export function updateCourtState(
       geometry.ballRadius,
       paddleStart,
       paddleEnd,
-      geometry.getBaselineNormal(i),
+      geometry.getPlayerLineNormal(i),
     );
     if (paddleDistance < minDistance) {
       bouncedPaddleIndex = i;
-      newDirection = state.ballVelocity.reflect(geometry.getBaselineNormal(i));
+      newDirection = state.ballVelocity.reflect(
+        geometry.getPlayerLineNormal(i),
+      );
       minDistance = paddleDistance;
     }
     if (
       doesBounce(
         state.ballPosition,
         geometry.ballRadius,
-        ...geometry.getBaselineSurface(i),
-        geometry.getBaselineNormal(i),
+        ...geometry.getPlayerLineSurface(i),
+        geometry.getPlayerLineNormal(i),
       ) != Number.POSITIVE_INFINITY
     ) {
-      state = initCourtState(
+      state = new CourtState(
         geometry,
         state.ballVelocity.length(),
         state.paddles.map((paddle) => paddle.edgeRatio),

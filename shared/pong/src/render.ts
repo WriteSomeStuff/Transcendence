@@ -6,8 +6,8 @@ function translatePoint(
   ctx: CanvasRenderingContext2D,
   p: Vector2,
 ): Vector2 {
-  const widthRatio = ctx.canvas.width / court.geometry.width;
-  const heightRatio = ctx.canvas.height / court.geometry.height;
+  const widthRatio = ctx.canvas.width / court.geometry.frameWidth;
+  const heightRatio = ctx.canvas.height / court.geometry.frameHeight;
   return new Vector2(
     p.x * widthRatio + ctx.canvas.width / 2,
     p.y * heightRatio + ctx.canvas.height / 2,
@@ -31,16 +31,16 @@ function addQuadrilateral(
 
 export function render(court: Court, ctx: CanvasRenderingContext2D) {
   ctx.reset();
-  for (let i = 0; i < court.geometry.size; i++) {
-    addQuadrilateral(court, ctx, court.geometry.getSidelineQuadrilateral(i));
+  for (let i = 0; i < court.geometry.playerCount; i++) {
+    addQuadrilateral(court, ctx, court.geometry.getWallQuadrilateral(i));
     addQuadrilateral(
       court,
       ctx,
-      court.geometry.getBaselinePaddleQuadrilateral(i, court.state.paddles[i]!),
+      court.geometry.getPaddleQuadrilateral(i, court.state.paddles[i]!),
     );
   }
-  const widthRatio = ctx.canvas.width / court.geometry.width;
-  const heightRatio = ctx.canvas.height / court.geometry.height;
+  const widthRatio = ctx.canvas.width / court.geometry.frameWidth;
+  const heightRatio = ctx.canvas.height / court.geometry.frameHeight;
   ctx.beginPath();
   ctx.ellipse(
     ...translatePoint(court, ctx, court.state.ballPosition).toTuple(),

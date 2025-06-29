@@ -2,10 +2,7 @@
   "name": "authentication",
   "version": "1.0.0",
   "description": "the authentication service",
-  "keywords": [
-    "authentication",
-    "microservice"
-  ],
+  "keywords": ["authentication", "microservice"],
   "license": "MIT",
   "author": "milana",
   "type": "module",

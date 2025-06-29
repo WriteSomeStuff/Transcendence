@@ -2,10 +2,7 @@
   "name": "game",
   "version": "1.0.0",
   "description": "the game service",
-  "keywords": [
-    "game",
-    "microservice"
-  ],
+  "keywords": ["game", "microservice"],
   "license": "MIT",
   "author": "milana",
   "type": "module",

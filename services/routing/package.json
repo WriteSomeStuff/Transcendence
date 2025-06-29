@@ -2,10 +2,7 @@
   "name": "routing",
   "version": "1.0.0",
   "description": "the routing service",
-  "keywords": [
-    "routing",
-    "microservice"
-  ],
+  "keywords": ["routing", "microservice"],
   "license": "MIT",
   "author": "milana",
   "type": "module",

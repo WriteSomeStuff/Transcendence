@@ -26,6 +26,7 @@ export class CourtController {
   }
 
   public updateInput(playerIndex: number, playerInput: PlayerInput): void {
+    console.log("new input", playerIndex, playerInput);
     this.court.state.paddles[playerIndex]!.velocity =
       playerInput.getDirection();
   }

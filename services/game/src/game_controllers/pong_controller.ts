@@ -13,7 +13,7 @@ export class PongController extends GameController {
   public constructor() {
     super(2);
     this.playerMessages = [[], []];
-    this.scores = Array.from({ length: 2 }).map(_ => new PlayerScore());
+    this.scores = Array.from({ length: 2 }).map((_) => new PlayerScore());
     this.scoreController = new Pong2PlayersScoreController(this.scores);
     this.courtController = new CourtController(this.scoreController);
   }
@@ -31,18 +31,21 @@ export class PongController extends GameController {
   }
 
   onPlayerAction(index: number, action: object): void {
-    this.courtController.updateInput(index, Object.assign(new PlayerInput(), action));
+    this.courtController.updateInput(
+      index,
+      Object.assign(new PlayerInput(), action),
+    );
     this.broadcastMessages.push({
-      "type": "stateSet",
-      "payload": this.courtController.getState(),
+      type: "stateSet",
+      payload: this.courtController.getState(),
     });
   }
 
   onPlayerJoin(index: number): void {
     this.courtController.updateInput(index, new PlayerInput());
     this.playerMessages[index]!.push({
-      "type": "courtSet",
-      "payload": this.courtController.getCourt(),
+      type: "courtSet",
+      payload: this.courtController.getCourt(),
     });
   }
 
@@ -52,16 +55,16 @@ export class PongController extends GameController {
 
   start(): void {
     this.broadcastMessages.push({
-      "type": "courtSet",
-      "payload": this.courtController.getCourt(),
+      type: "courtSet",
+      payload: this.courtController.getCourt(),
     });
   }
 
   update(delta: number): void {
     this.courtController.update(delta);
     this.broadcastMessages.push({
-      "type": "stateSet",
-      "payload": this.courtController.getState(),
+      type: "stateSet",
+      payload: this.courtController.getState(),
     });
   }
 }

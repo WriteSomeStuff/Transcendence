@@ -104,7 +104,10 @@ app.addHook("preHandler", async (req, res) => {
     req.headers.authorization = undefined;
     if (req.headers["sec-websocket-protocol"] !== undefined) {
       // console.log(req.headers["user_id"], req.headers["sec-websocket-protocol"].split(", ")[1]);
-      if (req.headers["user_id"] !== req.headers["sec-websocket-protocol"].split(", ")[0]) {
+      if (
+        req.headers["user_id"] !==
+        req.headers["sec-websocket-protocol"].split(", ")[0]
+      ) {
         return res.status(401).send({ error: "Wrong user id" });
       }
     }

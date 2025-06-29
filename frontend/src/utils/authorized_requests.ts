@@ -6,16 +6,19 @@ function getJWT(): string {
   return result;
 }
 
-export async function getAuthorized(endpoint: string, queryParams: Record<string, string>) {
+export async function getAuthorized(
+  endpoint: string,
+  queryParams: Record<string, string>,
+) {
   const query = new URLSearchParams(queryParams).toString();
   const url = query ? `${endpoint}?${query}` : endpoint;
   console.debug(url.toString());
   return await fetch(url.toString(), {
-    method: 'GET',
+    method: "GET",
     headers: {
       Authorization: `Bearer ${getJWT()}`,
-    }
-  })
+    },
+  });
 }
 
 export async function websocketAuthorized(endpoint: string) {

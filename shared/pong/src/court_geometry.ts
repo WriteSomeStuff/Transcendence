@@ -1,113 +1,63 @@
+import { z } from "zod";
+
+import { createDtoTransformable } from "./dto_transformable.js";
+
 import { Vector2 } from "./vector2.ts";
 import { PaddleState } from "./paddle_state.ts";
 
-export class CourtGeometry {
-  public readonly size: number;
+const CourtGeometryDto = z.object({
+  playerCount: z.number().int().min(2),
+  playerZoneDepth: z.number(),
+  wallZoneDepth: z.number(),
+  ballRadius: z.number(),
+  paddleThickness: z.number(),
+  wallThickness: z.number(),
+
+  vertices: z.array(Vector2.getSchema()),
+  normals: z.array(Vector2.getSchema()),
+  renderEdgeAngle: z.number(),
+});
+
+export class CourtGeometry extends createDtoTransformable(CourtGeometryDto) {
+  public readonly playerCount: number;
   public readonly ballRadius: number;
-  public readonly sidelineAngle: number; // 0 - parallel
-  public readonly sidelineThickness: number;
   public readonly paddleThickness: number;
-  public readonly width: number;
-  public readonly height: number;
-  private readonly edgeCount: number;
+  public readonly wallThickness: number;
+
   private readonly vertices: Vector2[];
   private readonly normals: Vector2[];
+  private readonly renderEdgeAngle: number;
+
+  public readonly frameWidth: number;
+  public readonly frameHeight: number;
+
+  private readonly edgeCount: number;
 
   constructor(
-    playersCount: number,
-    distanceToBaseline: number,
-    distanceToSideline: number,
-    paddleThickness: number,
-    sidelineThickness: number,
+    playerCount: number,
     ballRadius: number,
+    paddleThickness: number,
+    wallThickness: number,
+    vertices: Vector2[],
+    normals: Vector2[],
+    renderEdgeAngle: number,
+    frameWidth: number,
+    frameHeight: number,
   ) {
-    this.size = playersCount;
-    this.edgeCount = playersCount * 2;
+    super();
+    this.playerCount = playerCount;
     this.ballRadius = ballRadius;
     this.paddleThickness = paddleThickness;
-    this.sidelineThickness = sidelineThickness;
-    if (!Number.isInteger(playersCount) || playersCount < 2) {
-      throw new Error("Invalid playersCount");
-    }
-    if (playersCount == 2) {
-      this.sidelineAngle = 0;
-      this.vertices = [
-        new Vector2(-distanceToBaseline, -distanceToSideline),
-        new Vector2(distanceToBaseline, -distanceToSideline),
-        new Vector2(distanceToBaseline, distanceToSideline),
-        new Vector2(-distanceToBaseline, distanceToSideline),
-      ];
-      this.normals = [
-        new Vector2(0, 1),
-        new Vector2(-1, 0),
-        new Vector2(0, -1),
-        new Vector2(1, 0),
-      ];
-      this.width = 2 * distanceToBaseline;
-      this.height = 2 * (distanceToSideline + this.sidelineThickness);
-    } else {
-      this.sidelineAngle = Math.PI - Math.PI / playersCount;
-      const extraBaselineDistance =
-        sidelineThickness / Math.cos(this.sidelineAngle);
-      const innerPolygonSide =
-        distanceToBaseline * 2 * Math.tan(Math.PI / playersCount);
-      const distanceToInnerPolygonVertex =
-        innerPolygonSide / (2 * Math.sin(Math.PI / playersCount));
-      const distanceFromInnerPolygonVertex =
-        (distanceToInnerPolygonVertex - distanceToSideline) /
-        Math.cos(((playersCount - 2) * Math.PI) / playersCount / 2);
-      let innerPolygonVertices: Vector2[] = [];
-      for (let i = 0; i < playersCount; i++) {
-        const angle = ((2 * Math.PI) / playersCount) * i;
-        innerPolygonVertices.push(
-          new Vector2(Math.sin(angle), -Math.cos(angle)).scale(
-            distanceToInnerPolygonVertex,
-          ),
-        );
-      }
-      this.vertices = [];
-      this.normals = [];
-      for (let i = 0; i < playersCount; i++) {
-        const prev =
-          innerPolygonVertices[(playersCount + i - 1) % playersCount]!;
-        const next =
-          innerPolygonVertices[(playersCount + i + 1) % playersCount]!;
-        const curr = innerPolygonVertices[i]!;
-        this.vertices.push(
-          curr.add(
-            prev
-              .subtract(curr)
-              .normalize()
-              .scale(distanceFromInnerPolygonVertex),
-          ),
-        );
-        this.vertices.push(
-          curr.add(
-            next
-              .subtract(curr)
-              .normalize()
-              .scale(distanceFromInnerPolygonVertex),
-          ),
-        );
-        this.normals.push(
-          this.vertices[i * 2]!.add(this.vertices[i * 2 + 1]!)
-            .scale(-1)
-            .normalize(),
-        );
-        this.normals.push(curr.add(next).scale(-1).normalize());
-      }
-      const outerPolygonSide =
-        (distanceToBaseline + extraBaselineDistance) *
-        2 *
-        Math.tan(Math.PI / playersCount);
-      const distanceToOuterPolygonVertex =
-        outerPolygonSide / (2 * Math.sin(Math.PI / playersCount));
-      this.width = 4 * distanceToOuterPolygonVertex;
-      this.height = 4 * distanceToOuterPolygonVertex;
-    }
+    this.wallThickness = wallThickness;
+    this.vertices = vertices;
+    this.normals = normals;
+    this.renderEdgeAngle = renderEdgeAngle;
+    this.frameWidth = frameWidth;
+    this.frameHeight = frameHeight;
+    this.edgeCount = playerCount * 2;
   }
 
-  public getSidelineQuadrilateral(
+  public getWallQuadrilateral(
     index: number,
   ): [Vector2, Vector2, Vector2, Vector2] {
     const a = this.vertices[(index * 2) % this.edgeCount]!;
@@ -115,25 +65,23 @@ export class CourtGeometry {
     const shiftAtoB = b
       .subtract(a)
       .normalize()
-      .scale(Math.tan(this.sidelineAngle) * this.sidelineThickness);
+      .scale(Math.tan(this.renderEdgeAngle) * this.wallThickness);
     return [
       a,
       b,
       b
-        .add(this.normals[index * 2]!.scale(-this.sidelineThickness))
+        .add(this.normals[index * 2]!.scale(-this.wallThickness))
         .add(shiftAtoB.scale(-1)),
-      a
-        .add(this.normals[index * 2]!.scale(-this.sidelineThickness))
-        .add(shiftAtoB),
+      a.add(this.normals[index * 2]!.scale(-this.wallThickness)).add(shiftAtoB),
     ];
   }
 
-  private getPaddleBaselinePoints(
+  private getPaddlePoints(
     index: number,
     paddle: PaddleState,
     reducedByRadius: boolean,
   ): [Vector2, Vector2] {
-    const [a, b] = this.getBaselineSurface(index);
+    const [a, b] = this.getPlayerLineSurface(index);
     const edgeLength = a.subtract(b).length();
     const paddleLength = edgeLength * paddle.edgeRatio;
     const edgeDirection = b.subtract(a).normalize();
@@ -154,33 +102,33 @@ export class CourtGeometry {
     ];
   }
 
-  public getSidelineNormal(index: number): Vector2 {
+  public getWallNormal(index: number): Vector2 {
     return this.normals[index * 2]!;
   }
 
-  public getBaselineNormal(index: number): Vector2 {
+  public getPlayerLineNormal(index: number): Vector2 {
     return this.normals[(index * 2 + 1) % this.edgeCount]!;
   }
 
-  public getBaselinePaddleQuadrilateral(
+  public getPaddleQuadrilateral(
     index: number,
     paddle: PaddleState,
   ): [Vector2, Vector2, Vector2, Vector2] {
-    const [a, b] = this.getPaddleBaselinePoints(index, paddle, true);
+    const [a, b] = this.getPaddlePoints(index, paddle, true);
     const normalShift = this.normals[index * 2 + 1]!.scale(
       this.paddleThickness,
     );
     return [a, b, b.add(normalShift), a.add(normalShift)];
   }
 
-  public getSidelineSurface(index: number): [Vector2, Vector2] {
+  public getWallSurface(index: number): [Vector2, Vector2] {
     return [
       this.vertices[index * 2]!,
       this.vertices[(index * 2 + 1) % this.edgeCount]!,
     ];
   }
 
-  public getBaselineSurface(index: number): [Vector2, Vector2] {
+  public getPlayerLineSurface(index: number): [Vector2, Vector2] {
     return [
       this.vertices[(index * 2 + 1) % this.edgeCount]!,
       this.vertices[(index * 2 + 2) % this.edgeCount]!,
@@ -191,10 +139,121 @@ export class CourtGeometry {
     index: number,
     paddle: PaddleState,
   ): [Vector2, Vector2] {
-    const [a, b] = this.getPaddleBaselinePoints(index, paddle, false);
+    const [a, b] = this.getPaddlePoints(index, paddle, false);
     const normalShift = this.normals[index * 2 + 1]!.scale(
       this.paddleThickness,
     );
     return [a.add(normalShift), b.add(normalShift)];
   }
+}
+
+function create2PlayerCourt(
+  playerZoneDepth: number,
+  wallZoneDepth: number,
+  ballRadius: number,
+  paddleThickness: number,
+  wallThickness: number,
+): CourtGeometry {
+  const vertices = [
+    new Vector2(-playerZoneDepth, -wallZoneDepth),
+    new Vector2(playerZoneDepth, -wallZoneDepth),
+    new Vector2(playerZoneDepth, wallZoneDepth),
+    new Vector2(-playerZoneDepth, wallZoneDepth),
+  ];
+  const normals = [
+    new Vector2(0, 1),
+    new Vector2(-1, 0),
+    new Vector2(0, -1),
+    new Vector2(1, 0),
+  ];
+  return new CourtGeometry(
+    2,
+    ballRadius,
+    paddleThickness,
+    wallThickness,
+    vertices,
+    normals,
+    0,
+    2 * playerZoneDepth,
+    2 * (wallZoneDepth + wallThickness),
+  );
+}
+
+export function createCourtGeometry(
+  playerCount: number,
+  playerZoneDepth: number,
+  wallZoneDepth: number,
+  ballRadius: number,
+  paddleThickness: number,
+  wallThickness: number,
+): CourtGeometry {
+  if (playerCount === 2) {
+    return create2PlayerCourt(
+      playerZoneDepth,
+      wallZoneDepth,
+      ballRadius,
+      paddleThickness,
+      wallThickness,
+    );
+  }
+  const renderEdgeAngle = Math.PI - Math.PI / playerCount;
+  const extraPlayerZoneDepth = wallThickness / Math.cos(renderEdgeAngle);
+  const innerPolygonSide =
+    playerZoneDepth * 2 * Math.tan(Math.PI / playerCount);
+  const distanceToInnerPolygonVertex =
+    innerPolygonSide / (2 * Math.sin(Math.PI / playerCount));
+  const distanceFromInnerPolygonVertex =
+    (distanceToInnerPolygonVertex - wallZoneDepth) /
+    Math.cos(((playerCount - 2) * Math.PI) / playerCount / 2);
+  let innerPolygonVertices: Vector2[] = [];
+  for (let i = 0; i < playerCount; i++) {
+    const angle = ((2 * Math.PI) / playerCount) * i;
+    innerPolygonVertices.push(
+      new Vector2(Math.sin(angle), -Math.cos(angle)).scale(
+        distanceToInnerPolygonVertex,
+      ),
+    );
+  }
+  const vertices: Vector2[] = [];
+  const normals: Vector2[] = [];
+  for (let i = 0; i < playerCount; i++) {
+    const prev = innerPolygonVertices[(playerCount + i - 1) % playerCount]!;
+    const next = innerPolygonVertices[(playerCount + i + 1) % playerCount]!;
+    const curr = innerPolygonVertices[i]!;
+    vertices.push(
+      curr.add(
+        prev.subtract(curr).normalize().scale(distanceFromInnerPolygonVertex),
+      ),
+    );
+    vertices.push(
+      curr.add(
+        next.subtract(curr).normalize().scale(distanceFromInnerPolygonVertex),
+      ),
+    );
+    normals.push(
+      vertices[i * 2]!.add(vertices[i * 2 + 1]!)
+        .scale(-1)
+        .normalize(),
+    );
+    normals.push(curr.add(next).scale(-1).normalize());
+  }
+  const outerPolygonSide =
+    (playerZoneDepth + extraPlayerZoneDepth) *
+    2 *
+    Math.tan(Math.PI / playerCount);
+  const distanceToOuterPolygonVertex =
+    outerPolygonSide / (2 * Math.sin(Math.PI / playerCount));
+  const width = 4 * distanceToOuterPolygonVertex;
+  const height = 4 * distanceToOuterPolygonVertex;
+  return new CourtGeometry(
+    playerCount,
+    ballRadius,
+    paddleThickness,
+    wallThickness,
+    vertices,
+    normals,
+    renderEdgeAngle,
+    width,
+    height,
+  );
 }
