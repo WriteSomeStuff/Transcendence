@@ -7,7 +7,7 @@ all:
 down:
 	docker compose down
 
-prune:
+prune: clean_volume
 	docker builder prune -f && docker system prune -af
 
 status:
