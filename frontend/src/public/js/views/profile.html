@@ -19,16 +19,24 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 p-6 sm:p-10">
       <div class="grid grid-cols-2 items-center p-8">
         <h1 class="text-base sm:text-lg">Username here</h1>
-        <button onclick="" class="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6"> <!-- make functionality work -->
-          <img class="w-full h-full object-contain" src="./public/assets/gifs/pencil.gif" alt="Edit username, avatar or password"/>
-        </button>
+		<!-- Change user info logic from here -->
+		<button id="open-modal" class="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6"> <!-- make functionality work -->
+		  <img class="w-full h-full object-contain" src="./public/assets/gifs/pencil.gif" alt="Edit username or password"/>
+		</button>
+		<dialog class="modal" id="modal">
+			<h2>Update username, password or avatar</h2>
+			<button class="button close-button">Close</button>
+		</dialog>
 		<!-- Change avatar button logic -->
-		 <form id="avatarForm" enctype="multipart/form-data">
+		<form id="avatarForm" enctype="multipart/form-data">
 		 	<input type="file" id="avatarInput" accept="image/*" name="avatar">
-			<button type="submit">Upload</button>
-		 </form>
+			<button type="submit">
+				Upload
+			</button>
+		</form>
 		 <!-- Change avatar button logic end -->
-        <img class="w-full max-w-xs h-auto" src="/api/user/avatar" alt="User Avatar"/>
+		  <!-- Change user info logic end -->
+        <img class="w-full max-w-xs h-auto" src="/api/user/avatar?ts=TIMESTAMP" alt="User Avatar"/>
       </div>
       <div class="flex flex-col items-center border-8 animate-rainbow p-4">
         <h1>Friends</h1>
