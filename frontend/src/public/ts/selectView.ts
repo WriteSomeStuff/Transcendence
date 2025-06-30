@@ -38,6 +38,10 @@ function selectView(page: string, push: boolean)
 				bindCredentialsForm(formBindings[page]);
 			} else if (page === 'profile') {
 				bindAvatarForm();
+				const avatarImg = document.querySelector('img[alt="User Avatar"]') as HTMLImageElement | null;
+    			if (avatarImg) {
+        			avatarImg.src = `/api/user/avatar?ts=${Date.now()}`; // To bust the cache and reload with the new avatar
+    			}
 			}
 		}
 		else {
@@ -55,4 +59,7 @@ selectView("home", false);
 window.addEventListener("popstate", (event) => {
 	const page: string = location.pathname.slice(1) || "home";
 	selectView(page, false);
-})
+});
+
+// For reloading the page
+(window as any).selectView = selectView;

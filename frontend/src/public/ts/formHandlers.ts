@@ -76,6 +76,6 @@ export function bindAvatarForm() {
 		console.log("Uploading new avatar successful");
 		alert(`Avatar successfully uploaded!`);
 
-		// TODO reload page
+		(window as any).selectView?.("profile", false);
 	});
 }
