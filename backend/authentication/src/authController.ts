@@ -210,23 +210,22 @@ export const updatePasswordHandler = async (request: FastifyRequest, reply: Fast
 
 export const enable2FAHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const { userId } = request.body as { userId: number };
-		if (!userId) {
+		if (!request.user.userId) {
 			console.error(`[Auth Controller] Missing userId in request body`);
 			reply.status(400).send({ error: 'UserId is required' });
 			return;
 		}
 
-		console.log(`[Auth Controller] Enabling 2FA for user ${userId}`);
-		const result = await enable2FA(userId);
+		console.log(`[Auth Controller] Enabling 2FA for user ${request.user.userId}`);
+		const result = await enable2FA(request.user.userId);
 
 		if (!result.success) {
-			console.error(`[Auth Controller] Failed to enable 2FA for user ${userId}: ${result.error}`);
+			console.error(`[Auth Controller] Failed to enable 2FA for user ${request.user.userId}: ${result.error}`);
 			reply.status(400).send({ error: result.error });
 			return;
 		}
 
-		console.log(`[Auth Controller] 2FA enabled successfully for user ${userId}`);
+		console.log(`[Auth Controller] 2FA enabled successfully for user ${request.user.userId}`);
 
 		reply.status(200).send({
 			success: true,
@@ -245,9 +244,7 @@ export const enable2FAHandler = async (request: FastifyRequest, reply: FastifyRe
 
 export const disable2FAHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const { userId } = request.body as { userId: number };
-
-		disable2FA(userId);
+		disable2FA(request.user.userId);
 
 		reply.status(200).send({ success: true, message: "Two-factor authentication disabled successfully" });
 
