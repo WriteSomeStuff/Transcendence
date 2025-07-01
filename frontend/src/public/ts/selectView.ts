@@ -1,7 +1,13 @@
 import {
+	bindProfileModal,
+	displayUsername
+} from "./profile.js";
+
+import {
 	formBindings,
 	bindCredentialsForm,
-	bindAvatarForm
+	bindAvatarForm,
+	bindUserInfoUpdateForm
 } from "./formHandlers.js";
 
 function	bindButtons()
@@ -15,6 +21,18 @@ function	bindButtons()
 			}
 		});
 	});
+}
+
+function bindProfileViewElements() {
+	displayUsername();
+	bindAvatarForm();
+	bindProfileModal();
+	bindUserInfoUpdateForm("username");
+	bindUserInfoUpdateForm("password");
+	const avatarImg = document.querySelector('img[alt="User Avatar"]') as HTMLImageElement | null;
+	if (avatarImg) {
+		avatarImg.src = `/api/user/avatar?ts=${Date.now()}`; // To bust the cache and reload with the new avatar
+	}
 }
 
 function selectView(page: string, push: boolean)
@@ -37,11 +55,7 @@ function selectView(page: string, push: boolean)
 			if (formBindings[page]) {
 				bindCredentialsForm(formBindings[page]);
 			} else if (page === 'profile') {
-				bindAvatarForm();
-				const avatarImg = document.querySelector('img[alt="User Avatar"]') as HTMLImageElement | null;
-    			if (avatarImg) {
-        			avatarImg.src = `/api/user/avatar?ts=${Date.now()}`; // To bust the cache and reload with the new avatar
-    			}
+				bindProfileViewElements();
 			}
 		}
 		else {

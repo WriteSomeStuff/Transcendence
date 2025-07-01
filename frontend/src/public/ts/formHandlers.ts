@@ -46,12 +46,12 @@ export function bindCredentialsForm(formBinding: formBinding) {
 }
 
 export function bindAvatarForm() {
-	const form = document.getElementById('avatarForm') as HTMLFormElement | null;
+	const form = document.getElementById('avatarForm') as HTMLFormElement;
 	if (!form) return;
 
 	form.addEventListener('submit', async function (event: Event) {
 		event.preventDefault();
-		console.log("[FRONTEND] Handling avatar upload");
+		console.log("[formHandlers] Handling avatar upload");
 
 		const input = document.getElementById('avatarInput') as HTMLInputElement;
 		if (!input || !input.files) return;
@@ -70,12 +70,56 @@ export function bindAvatarForm() {
 		const data = await response.json() as { success: boolean, error?: string};
 		
 		if (!response.ok || data.success === false) {
+			console.error("[formHandlers] Uploading new avatar failed");
 			throw new Error(data.error || `HTTP error; status: ${response.status}`);
 		}
 
-		console.log("Uploading new avatar successful");
+		console.log("[formHandlers] Uploading new avatar successful");
 		alert(`Avatar successfully uploaded!`);
 
 		(window as any).selectView?.("profile", false);
 	});
+}
+
+//TODO check if new username and password are valid, maybe do this in backend
+export function bindUserInfoUpdateForm(infoType: string) {
+	if (infoType != "username" && infoType != "password") {
+		throw new Error("Incorrect usage of bindUserInfoUpdateForm function");
+	}
+
+	const form = document.getElementById(`${infoType}Form`) as HTMLFormElement;
+	if (!form) return;
+	
+	form.addEventListener('submit', async function (event: Event) {
+		event.preventDefault();
+		console.log(`[formHandlers] Handling ${infoType} update`);
+		
+		const infoTypeCapitalized = infoType.charAt(0).toUpperCase() + infoType.slice(1);
+		const input = document.getElementById(`new${infoTypeCapitalized}`) as HTMLInputElement;
+		if (!input) return;
+
+		const newValue = input.value;
+
+		console.log('new username:', newValue);
+
+		const response = await fetch(`/api/user/${infoType}`, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ newValue })
+		});
+
+		const data = await response.json() as { success: boolean, error?: string};
+
+		if (!response.ok || data.success === false) {
+			console.error(`[formHandlers] Updating ${infoType} failed`)
+			throw new Error(data.error || `HTTP error; status: ${response.status}`);
+		}
+
+		console.log(`[formHandlers] Updating ${infoType} successful`);
+		alert(`${infoTypeCapitalized} successfully updated!`);
+
+		(window as any).selectView?.("profile", false);
+	})
 }
