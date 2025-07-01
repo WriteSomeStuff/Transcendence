@@ -71,7 +71,9 @@ export function bindAvatarForm() {
 		
 		if (!response.ok || data.success === false) {
 			console.error("[formHandlers] Uploading new avatar failed");
-			throw new Error(data.error || `HTTP error; status: ${response.status}`);
+			alert(data.error || `HTTP error; status: ${response.status}`);
+			// further handling
+			// throw new Error(data.error || `HTTP error; status: ${response.status}`);
 		}
 
 		console.log("[formHandlers] Uploading new avatar successful");
@@ -84,7 +86,8 @@ export function bindAvatarForm() {
 //TODO check if new username and password are valid, maybe do this in backend
 export function bindUserInfoUpdateForm(infoType: string) {
 	if (infoType != "username" && infoType != "password") {
-		throw new Error("Incorrect usage of bindUserInfoUpdateForm function");
+		alert("Incorrect usage of bindUserInfoUpdateForm function");
+		// throw new Error("Incorrect usage of bindUserInfoUpdateForm function");
 	}
 
 	const form = document.getElementById(`${infoType}Form`) as HTMLFormElement;
@@ -114,7 +117,8 @@ export function bindUserInfoUpdateForm(infoType: string) {
 
 		if (!response.ok || data.success === false) {
 			console.error(`[formHandlers] Updating ${infoType} failed`)
-			throw new Error(data.error || `HTTP error; status: ${response.status}`);
+			alert(data.error || `HTTP error; status: ${response.status}`);
+			// throw new Error(data.error || `HTTP error; status: ${response.status}`);
 		}
 
 		console.log(`[formHandlers] Updating ${infoType} successful`);
