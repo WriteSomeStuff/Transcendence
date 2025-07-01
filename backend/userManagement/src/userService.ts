@@ -1,3 +1,5 @@
+import fs from 'fs/promises';
+
 import db from "./db";
 import { UserObj } from "./types/types";
 
@@ -7,7 +9,6 @@ export const insertUser = async (username: string, userId: number) => {
 			INSERT INTO user (user_id, username)
 			VALUES (?, ?)
 		`);
-		// TODO: set default avatar path
 
 		stmt.run(userId, username);
 	} catch (e) {
@@ -124,6 +125,43 @@ export const getUsername = async (userId: number): Promise<string> => {
 			throw new Error("User not found");
 		}
 		return row.username;
+	} catch (e) {
+		throw e;
+	}
+}
+
+export const getUserAvatarPath = async (userId: number): Promise<string> => {
+	try {
+		const stmt = db.prepare(`
+			SELECT avatar_path
+			FROM user
+			WHERE user_id = ?
+		`);
+
+		const row = stmt.get(userId) as { avatar_path: string } | undefined;
+		
+		if (!row) {
+			throw new Error("User not found");
+		}
+
+		return row.avatar_path;
+	} catch (e) {
+		throw e;
+	}
+}
+
+export const updateAvatar = async (userId: number, filePath: string, newAvatar: Buffer) => {
+	try {
+		await fs.writeFile(filePath, newAvatar);
+
+		const stmt = db.prepare(`
+			UPDATE user
+			SET avatar_path = ?
+			WHERE
+				user_id = ?
+		`);
+
+		stmt.run(filePath, userId);
 	} catch (e) {
 		throw e;
 	}

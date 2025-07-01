@@ -11,12 +11,13 @@ services:
     ports:
       - 8081:8080
     volumes:
-      - auth_data:/app/data
+      - auth_db:/app/data/database
     networks:
       - internal
     environment:
       - NODE_ENV=development
       - USER_SERVICE_URL=http://user_service:8080/users
+      - AUTH_DB_PATH=/app/data/database/auth_db.sqlite3
     env_file:
       - .env
 
@@ -32,11 +33,14 @@ services:
     ports:
       - 8082:8080
     volumes:
-      - user_data:/app/data
+      - user_db:/app/data/database
+      - avatars:/app/data/avatars
     networks:
       - internal
     environment:
       - AUTH_SERVICE_URL=http://auth_service:8080/auth
+      - USER_DB_PATH=/app/data/database/user_db.sqlite3
+      - AVATAR_DIR_PATH=/app/data/avatars/
     env_file:
       - .env
 
@@ -51,8 +55,6 @@ services:
       retries: 10
     ports:
       - 8443:443
-    volumes:
-      - user_avatars:/etc/nginx/html/public/assets/avatars/user
     networks:
       - internal
     environment:
@@ -64,23 +66,23 @@ networks:
     driver: bridge
 
 volumes:
-  auth_data:
+  auth_db:
     driver: local
     driver_opts:
       type: none
-      device: ./backend/authentication/data
+      device: ./backend/authentication/data/database
       o: bind
-  user_data:
+  user_db:
     driver: local
     driver_opts:
       type: none
-      device: ./backend/userManagement/data
+      device: ./backend/userManagement/data/database
       o: bind
-  user_avatars:
+  avatars:
     driver: local
     driver_opts:
       type: none
-      device: ./frontend/src/public/assets/avatars/user
+      device: ./backend/userManagement/data/avatars
       o: bind
 
     # Comment out to NOT have database and user uploads available on host TODO

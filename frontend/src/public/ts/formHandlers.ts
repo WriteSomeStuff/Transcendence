@@ -1,11 +1,11 @@
 export const formBindings: Record<string, { formId: string; url: string; serviceName: string }> = {
-    register:	{ formId: 'registrationForm',	url: '/auth/register', serviceName: 'Registration' },
-    login:		{ formId: 'loginForm',		url: '/auth/login',    serviceName: 'Login' }
+    register:	{ formId: 'registrationForm',	url: '/api/auth/register', serviceName: 'Registration' },
+    login:		{ formId: 'loginForm',		url: '/api/auth/login',    serviceName: 'Login' }
 };
 
 type formBinding = { formId: string; url: string; serviceName: string };
 
-export function bindForm(formBinding: formBinding) {
+export function bindCredentialsForm(formBinding: formBinding) {
 	const form = document.getElementById(formBinding.formId) as HTMLFormElement | null;
 	if (!form) {
 		return;
@@ -43,4 +43,83 @@ export function bindForm(formBinding: formBinding) {
 				// TODO further handling
 			}
 		});
+}
+
+export function bindAvatarForm() {
+	const form = document.getElementById('avatarForm') as HTMLFormElement;
+	if (!form) return;
+
+	form.addEventListener('submit', async function (event: Event) {
+		event.preventDefault();
+		console.log("[formHandlers] Handling avatar upload");
+
+		const input = document.getElementById('avatarInput') as HTMLInputElement;
+		if (!input || !input.files) return;
+		
+		const file = input.files[0];
+		if (!file) return;
+
+		const formData = new FormData();
+		formData.append('avatar', file);
+
+		const response = await fetch('/api/user/avatar', {
+			method: 'PUT',
+			body: formData
+		});
+
+		const data = await response.json() as { success: boolean, error?: string};
+		
+		if (!response.ok || data.success === false) {
+			console.error("[formHandlers] Uploading new avatar failed");
+			throw new Error(data.error || `HTTP error; status: ${response.status}`);
+		}
+
+		console.log("[formHandlers] Uploading new avatar successful");
+		alert(`Avatar successfully uploaded!`);
+
+		(window as any).selectView?.("profile", false);
+	});
+}
+
+//TODO check if new username and password are valid, maybe do this in backend
+export function bindUserInfoUpdateForm(infoType: string) {
+	if (infoType != "username" && infoType != "password") {
+		throw new Error("Incorrect usage of bindUserInfoUpdateForm function");
+	}
+
+	const form = document.getElementById(`${infoType}Form`) as HTMLFormElement;
+	if (!form) return;
+	
+	form.addEventListener('submit', async function (event: Event) {
+		event.preventDefault();
+		console.log(`[formHandlers] Handling ${infoType} update`);
+		
+		const infoTypeCapitalized = infoType.charAt(0).toUpperCase() + infoType.slice(1);
+		const input = document.getElementById(`new${infoTypeCapitalized}`) as HTMLInputElement;
+		if (!input) return;
+
+		const newValue = input.value;
+
+		console.log('new username:', newValue);
+
+		const response = await fetch(`/api/user/${infoType}`, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ newValue })
+		});
+
+		const data = await response.json() as { success: boolean, error?: string};
+
+		if (!response.ok || data.success === false) {
+			console.error(`[formHandlers] Updating ${infoType} failed`)
+			throw new Error(data.error || `HTTP error; status: ${response.status}`);
+		}
+
+		console.log(`[formHandlers] Updating ${infoType} successful`);
+		alert(`${infoTypeCapitalized} successfully updated!`);
+
+		(window as any).selectView?.("profile", false);
+	})
 }

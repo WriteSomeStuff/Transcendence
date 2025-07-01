@@ -1,4 +1,14 @@
-import { bindForm, formBindings } from "./formHandlers.js";
+import {
+	bindProfileModal,
+	displayUsername
+} from "./profile.js";
+
+import {
+	formBindings,
+	bindCredentialsForm,
+	bindAvatarForm,
+	bindUserInfoUpdateForm
+} from "./formHandlers.js";
 
 function	bindButtons()
 {
@@ -11,6 +21,18 @@ function	bindButtons()
 			}
 		});
 	});
+}
+
+function bindProfileViewElements() {
+	displayUsername();
+	bindAvatarForm();
+	bindProfileModal();
+	bindUserInfoUpdateForm("username");
+	bindUserInfoUpdateForm("password");
+	const avatarImg = document.querySelector('img[alt="User Avatar"]') as HTMLImageElement | null;
+	if (avatarImg) {
+		avatarImg.src = `/api/user/avatar?ts=${Date.now()}`; // To bust the cache and reload with the new avatar
+	}
 }
 
 function selectView(page: string, push: boolean)
@@ -31,7 +53,9 @@ function selectView(page: string, push: boolean)
 			}
 			bindButtons();
 			if (formBindings[page]) {
-				bindForm(formBindings[page]);
+				bindCredentialsForm(formBindings[page]);
+			} else if (page === 'profile') {
+				bindProfileViewElements();
 			}
 		}
 		else {
@@ -49,4 +73,7 @@ selectView("home", false);
 window.addEventListener("popstate", (event) => {
 	const page: string = location.pathname.slice(1) || "home";
 	selectView(page, false);
-})
+});
+
+// For reloading the page
+(window as any).selectView = selectView;

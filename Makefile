@@ -5,9 +5,9 @@ BUILD_CMD += -d
 endif
 
 all: 
-	mkdir -p ./backend/authentication/data
-	mkdir -p ./backend/userManagement/data
-	mkdir -p ./frontend/src/public/assets/avatars/user
+	mkdir -p ./backend/authentication/data/database
+	mkdir -p ./backend/userManagement/data/database
+	mkdir -p ./backend/userManagement/data/avatars/user_uploads
 	${BUILD_CMD}
 
 bg: 
@@ -16,13 +16,22 @@ bg:
 down:
 	docker compose down
 
-prune:
+prune: clean_volume
 	docker builder prune -f && docker system prune -af
 
 status:
 	docker compose ps
 
-db_clean:
+clean_db:
 	find ./backend -type f -name "*.sqlite3" -delete
 
-.PHONY: all down prune status db_clean
+clean_avatars:
+	docker volume rm transcendence_git_avatars || true
+	rm -rf ./backend/userManagement/data/avatars/user_uploads
+
+clean_users: down clean_db clean_avatars
+
+clean_volume: down
+	docker volume rm transcendence_git_auth_db transcendence_git_avatars transcendence_git_user_db || true
+
+.PHONY: all down prune status clean_db clean_avatars clean_users clean_volume
