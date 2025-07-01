@@ -61,10 +61,10 @@ export const getUserDataHandler = async (request: FastifyRequest, reply: Fastify
 
 export const updateUsernameHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const { newUsername } = request.body as { newUsername: string };
+		const { newValue } = request.body as { newValue: string };
 
-		console.log(`[User Controller] Updating username in db for user ${request.user.userId} to '${newUsername}`);
-		await updateUsername(request.user.userId, newUsername);
+		console.log(`[User Controller] Updating username in db for user ${request.user.userId} to '${newValue}'`);
+		await updateUsername(request.user.userId, newValue);
 		console.log(`[User Controller] Updating username for user ${request.user.userId} successful`);
 
 		reply.status(200).send({
@@ -90,10 +90,10 @@ export const updateUsernameHandler = async (request: FastifyRequest, reply: Fast
 
 export const updatePasswordHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const { newPassword } = request.body as { newPassword: string };
+		const { newValue } = request.body as { newValue: string };
 
 		console.log(`[User Controller] Updating password in auth db for user ${request.user.userId}`);
-		await updatePassword(request.user.userId, newPassword);
+		await updatePassword(request.user.userId, newValue);
 		console.log(`[User Controller] Updating password for user ${request.user.userId} successful`);
 
 		reply.status(200).send({
