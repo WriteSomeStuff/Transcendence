@@ -10,6 +10,8 @@ import {
 	bindUserInfoUpdateForm
 } from "./formHandlers.js";
 
+import { bind2FAButtons } from "./2faHandlers.js";
+
 function	bindButtons()
 {
 	document.querySelectorAll("button[page]").forEach(button => {
@@ -29,6 +31,7 @@ function bindProfileViewElements() {
 	bindProfileModal();
 	bindUserInfoUpdateForm("username");
 	bindUserInfoUpdateForm("password");
+	bind2FAButtons();
 	const avatarImg = document.querySelector('img[alt="User Avatar"]') as HTMLImageElement | null;
 	if (avatarImg) {
 		avatarImg.src = `/api/user/avatar?ts=${Date.now()}`; // To bust the cache and reload with the new avatar
