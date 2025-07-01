@@ -63,6 +63,12 @@ export const updateUsernameHandler = async (request: FastifyRequest, reply: Fast
 	try {
 		const { newValue } = request.body as { newValue: string };
 
+		if (newValue.length < 3) {
+			throw new Error("Username too short");
+		} else if (newValue.length > 32) {
+			throw new Error("Username too long");
+		}
+
 		console.log(`[User Controller] Updating username in db for user ${request.user.userId} to '${newValue}'`);
 		await updateUsername(request.user.userId, newValue);
 		console.log(`[User Controller] Updating username for user ${request.user.userId} successful`);
@@ -79,6 +85,11 @@ export const updateUsernameHandler = async (request: FastifyRequest, reply: Fast
 				success: false,
 				error: "Username already exists"
 			})
+		} else if (e.message === "Username too short" || e.message === "Username too long") {
+			reply.status(400).send({
+				success: false,
+				error: e.message
+			});
 		} else {
 			reply.status(500).send({
 				success: false,
@@ -92,6 +103,12 @@ export const updatePasswordHandler = async (request: FastifyRequest, reply: Fast
 	try {
 		const { newValue } = request.body as { newValue: string };
 
+		if (newValue.length < 6) {
+			throw new Error("Password too short");
+		} else if (newValue.length > 64) {
+			throw new Error("Password too long");
+		}
+
 		console.log(`[User Controller] Updating password in auth db for user ${request.user.userId}`);
 		await updatePassword(request.user.userId, newValue);
 		console.log(`[User Controller] Updating password for user ${request.user.userId} successful`);
@@ -100,12 +117,19 @@ export const updatePasswordHandler = async (request: FastifyRequest, reply: Fast
 			success: true,
 			message: "Password successfully changed"
 		});
-	} catch (e) {
+	} catch (e: any) {
 		console.error('Error updating password:', e);
-		reply.status(500).send({
-			success: false,
-			error: 'An error occured updating the password:' + e
-		});
+		if (e.message === "Password too short" || e.message === "Password too long") {
+			reply.status(400).send({
+				success: false,
+				error: e.message
+			});
+		} else {
+			reply.status(500).send({
+				success: false,
+				error: 'An error occured updating the password:' + e
+			});
+		}
 	}
 }
 
