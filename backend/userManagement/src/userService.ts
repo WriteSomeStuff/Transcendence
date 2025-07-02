@@ -163,3 +163,18 @@ export const updateAvatar = async (userId: number, filePath: string, newAvatar: 
 		throw e;
 	}
 }
+
+export const createFriendRequest = async (userId: number, friendId: number) => {
+	try {
+		runTransaction((db) => {
+			const stmt = db.prepare(`
+				INSERT INTO friendship (user_id, friend_id)
+				VALUES (?, ?)
+			`);
+
+			stmt.run(userId, friendId);
+		});
+	} catch (e) {
+		throw e;
+	}
+}

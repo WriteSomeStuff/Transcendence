@@ -10,7 +10,9 @@ import {
 	updateStatus,
 	getUserAvatarPath,
 	getUserId,
-	updateAvatar
+	updateAvatar,
+
+	createFriendRequest
 } from "./userService";
 
 export const insertUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -246,4 +248,85 @@ export const updateUserAvatarHandler = async (request: FastifyRequest, reply: Fa
 			error: 'An error occured uploading avatar:' + e
 		});
 	}
+}
+
+// FRIENDS FEATURE
+export const friendRequestHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+	try {
+		// request done by user: request.user.userId
+		// request should contain friend_id in body
+		const { friendId } = request.body as { friendId: number };
+
+		console.log(`[User Controller] Creating friend request from user ${request.user.userId} to ${friendId}`);
+		await createFriendRequest(request.user.userId, friendId);
+		console.log(`[User Controller] Friend request created from user ${request.user.userId} to ${friendId}`);
+
+		reply.status(201).send({ success: true });
+	} catch (e) {
+		console.error('Error creating a friend request:', e);
+		reply.status(500).send({
+			success: false,
+			error: 'Error creating friend request: ' + e
+		})
+	}
+}
+
+export const acceptFriendRequestHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+	try {
+
+	} catch (e) {
+		console.error('Error:', e);
+		reply.status(500).send({
+			success: false,
+			error: 'Error: ' + e
+		})
+	}
+}
+
+export const rejectFriendRequestHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+	try {
+
+	} catch (e) {
+		console.error('Error:', e);
+		reply.status(500).send({
+			success: false,
+			error: 'Error: ' + e
+		})
+	}
+}
+
+export const getFriendRequestsHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+	try {
+
+	} catch (e) {
+		console.error('Error:', e);
+		reply.status(500).send({
+			success: false,
+			error: 'Error: ' + e
+		})
+	}
+}
+
+export const getFriendsHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+	try {
+
+	} catch (e) {
+		console.error('Error:', e);
+		reply.status(500).send({
+			success: false,
+			error: 'Error: ' + e
+		})
+	}
+}
+
+export const removeFriendHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+	try {
+
+	} catch (e) {
+		console.error('Error:', e);
+		reply.status(500).send({
+			success: false,
+			error: 'Error: ' + e
+		})
+	}	
 }
