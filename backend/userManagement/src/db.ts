@@ -14,6 +14,11 @@ const db = new Database(DB_PATH, {
 	verbose: console.log,
 });
 
+export function runTransaction<T>(fn: (db: Database.Database) => T): T {
+	const transaction = db.transaction(fn);
+	return transaction(db);
+}
+
 const sql = `
 	CREATE TABLE IF NOT EXISTS user (
 		user_id			INTEGER PRIMARY KEY,

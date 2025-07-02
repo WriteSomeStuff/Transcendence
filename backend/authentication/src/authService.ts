@@ -1,7 +1,7 @@
 import argon2 from "argon2";
 import * as OTPAuth from "otpauth";
 import QRCode from "qrcode";
-import db from "./db";
+import db, { runTransaction } from "./db";
 
 import { AuthResultObj, Enable2FAResultObj } from "./types/types";
 import { fetchUserIdByUsername } from "./helpers/authServiceHelpers";
@@ -10,14 +10,17 @@ export const register = async (username: string, password: string): Promise<numb
 	try {
 		const hashedPassword = await argon2.hash(password);
 
-		const stmt = db.prepare(`
-			INSERT INTO user (password_hash) 
-			VALUES (?)
-		`);
+		const newUserId = runTransaction((db) => {
+			const stmt = db.prepare(`
+				INSERT INTO user (password_hash) 
+				VALUES (?)
+			`);
+			const result = stmt.run(hashedPassword);
+			
+			return Number(result.lastInsertRowid);
+		});
 
-		const result = stmt.run(hashedPassword);
-		
-		return Number(result.lastInsertRowid);
+		return newUserId;
 	} catch (e) {
 		throw e;
 	}
@@ -46,26 +49,30 @@ export const login = async (username: string, password: string): Promise<AuthRes
 		const userId = await fetchUserIdByUsername(username);
 		console.log(`[Auth Service] Fetching to get corresponding user id for '${username}' successful: ${userId}`);
 
-		const stmt = db.prepare(`
-			SELECT
-				password_hash,
-				two_fa_enabled
-			FROM
-				user
-			WHERE
-				user_id = ?
-		`);
-		const row = stmt.get(userId) as {password_hash: string, two_fa_enabled: boolean };
+		const userInfo = runTransaction((db) => {
+			const stmt = db.prepare(`
+				SELECT
+					password_hash,
+					two_fa_enabled
+				FROM
+					user
+				WHERE
+					user_id = ?
+			`);
+			const row = stmt.get(userId) as {password_hash: string, two_fa_enabled: boolean };
+			
+			return row;
+		});
 
-		if (!row) {
+		if (!userInfo) {
 			console.log(`[Auth Service] User '${username}' not found in auth service db`);
 			return {
 				success: false, 
 				error: "User not found"
 			};
 		}
-
-		const verified = await argon2.verify(row.password_hash, password);
+		
+		const verified = await argon2.verify(userInfo.password_hash, password);
 		if (!verified) {
 			console.log(`[Auth Service] Incorrect password for user '${username}'`);
 			return {
@@ -77,7 +84,7 @@ export const login = async (username: string, password: string): Promise<AuthRes
 			return {
 				success: true,
 				userId: userId,
-				twoFA: row.two_fa_enabled
+				twoFA: userInfo.two_fa_enabled
 			};
 		}
 
@@ -123,6 +130,7 @@ const fetchUsernameByUserId = async (userId: number): Promise<string> => {
  *          If an error occurs, it returns { success: false, error: <error_message> }.
  */	
 // TODO get username from request
+// TODO use runTransaction
 export const verify2FA = async (userId: number, token: string): Promise<AuthResultObj> => {
 	try {
 		const stmt = db.prepare(`
@@ -164,14 +172,15 @@ export const updatePassword = async (newPassword: string, userId: number) => {
 	try {
 		const hashedPassword = await argon2.hash(newPassword);
 
-		const stmt = db.prepare(`
-			UPDATE user
-			SET password_hash = ?
-			WHERE
-				user_id = ?
-		`);
-
-		stmt.run(hashedPassword, userId);
+		runTransaction((db) => {
+			const stmt = db.prepare(`
+				UPDATE user
+				SET password_hash = ?
+				WHERE
+					user_id = ?
+			`);
+			stmt.run(hashedPassword, userId);
+		});
 	} catch (e) {
 		throw e;
 	}
@@ -184,6 +193,7 @@ export const updatePassword = async (newPassword: string, userId: number) => {
  *          If an error occurs, it returns { success: false, error: <error_message> }.
  */
 // TODO dont use username
+// TODO use runTransaction
 export const enable2FA = async (userId: number): Promise<Enable2FAResultObj> => {
 	try {
 		const stmt = db.prepare(`
@@ -230,6 +240,7 @@ export const enable2FA = async (userId: number): Promise<Enable2FAResultObj> => 
 	}
 };
 
+// TODO use runTransaction
 export const disable2FA = async (userId: number) => {
 	try {
 		const stmt = db.prepare(`
@@ -250,13 +261,14 @@ export const disable2FA = async (userId: number) => {
 
 export const removeUser = async (userId: number) => {
 	try {
-		const stmt = db.prepare(`
-			DELETE FROM user
-			WHERE 
-				user_id = ?
-		`);
-
-		stmt.run(userId);
+		runTransaction((db) => {
+			const stmt = db.prepare(`
+				DELETE FROM user
+				WHERE 
+					user_id = ?
+			`);
+			stmt.run(userId);
+		});
 	} catch (e) {
 		throw e;
 	}
