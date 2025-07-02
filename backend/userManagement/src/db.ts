@@ -29,6 +29,19 @@ const sql = `
 		account_status	TEXT	DEFAULT ('offline')	CHECK(account_status IN ('online', 'offline'))
 	);
 
+	CREATE TABLE IF NOT EXISTS friendship (
+		friendship_id	INTEGER	PRIMARY KEY,
+		user_id			INTEGER	NOT NULL,
+		friend_id		INTEGER	NOT NULL,
+		status			TEXT	DEFAULT ('pending')	CHECK(status IN ('pending', 'accepted', 'rejected'))
+		created_at		TEXT	DEFAULT (datetime('now')),
+
+		FOREIGN KEY (user_id)
+			REFERENCES user (user_id),
+		FOREIGN KEY (friend_id)
+			REFERENCES user (user_id)
+	);
+
 	CREATE TRIGGER IF NOT EXISTS update_last_login
 	AFTER UPDATE OF account_status ON user
 	WHEN NEW.account_status = 'online'
@@ -37,7 +50,9 @@ const sql = `
 		SET last_login = (datetime('now', '+2 hour'))
 		WHERE rowid = NEW.rowid;
 	END;
-`
+
+	PRAGMA foreign_keys = ON;
+`;
 // datetime +2 hour because it returns UTC, +2 hour -> CEST
 
 try {
