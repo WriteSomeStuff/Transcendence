@@ -11,7 +11,7 @@ export const createTournament = async (name: string) => {
 		`);
 
 		const info = stmt.run(name);
-		return info.lastInsertRowid;
+		return Number(info.lastInsertRowid);
 	} catch (e) {
 		throw e;
 	}
@@ -25,7 +25,7 @@ export const createMatchState = async (tournamentId?: number) => {
 			`);
 
 		const info = stmt.run(tournamentId ?? null);
-		return info.lastInsertRowid;
+		return Number(info.lastInsertRowid);
 	} catch (e) {
 		throw e;
 	}
