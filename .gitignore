@@ -1,17 +1,12 @@
 # modules
 node_modules/
 
-# database
+# databases
+database/
 *.sqlite3
 
-# folders
-dist/
-
-# container data
-data/
-
 # user uploads
-user/
+user_uploads/
 
 # environment
 .env
@@ -24,3 +19,4 @@ output.css
 formHandlers.js
 selectView.js
 pullUsername.js
+.vscode/
