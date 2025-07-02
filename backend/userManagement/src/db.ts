@@ -61,6 +61,8 @@ const sql = `
 		SET last_login = (datetime('now', '+2 hour'))
 		WHERE rowid = NEW.rowid;
 	END;
+
+	PRAGMA foreign_keys = ON;
 `
 // datetime +2 hour because it returns UTC, +2 hour -> CEST
 
