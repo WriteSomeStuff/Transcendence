@@ -1,6 +1,7 @@
 import fastify, { FastifyRequest, FastifyReply } from "fastify";
 import fastifyCookie from "@fastify/cookie";
 import fastifyJwt from "@fastify/jwt";
+import fastifyMultipart from '@fastify/multipart';
 
 import userRoutes from "./userRoutes";
 
@@ -19,6 +20,7 @@ app.register(fastifyCookie);
 app.register(fastifyJwt, {
 	secret: process.env.JWT_SECRET as string
 });
+app.register(fastifyMultipart);
 
 app.decorate(
 	'authenticate',
