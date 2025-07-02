@@ -28,7 +28,7 @@ const sql = `
 		tournament_id		INTEGER PRIMARY KEY,
 		tournament_name		TEXT	NOT NULL	UNIQUE,
 		created_at			TEXT	DEFAULT (datetime('now', '+2 hour')),
-		tournament_end		TEXT,
+		tournament_end		TEXT	DEFAULT (NULL),
 		tournament_status	TEXT	DEFAULT ('ongoing')	CHECK(tournament_status IN ('ongoing', 'finished'))
 	);
 
@@ -36,7 +36,7 @@ const sql = `
 		match_id		INTEGER PRIMARY KEY,
 		match_date		TEXT	DEFAULT (datetime('now', '+2 hour')),
 		match_status	TEXT	DEFAULT ('ongoing')	CHECK(match_status IN ('ongoing', 'finished')),
-		match_end		TEXT,
+		match_end		TEXT	DEFAULT (NULL),
 		tournament_id	INTEGER,
 		FOREIGN KEY (tournament_id)
 			REFERENCES tournament (tournament_id)
@@ -61,13 +61,12 @@ const sql = `
 		SET last_login = (datetime('now', '+2 hour'))
 		WHERE rowid = NEW.rowid;
 	END;
-
-	PRAGMA foreign_keys = ON;
 `
 // datetime +2 hour because it returns UTC, +2 hour -> CEST
 
 try {
 	console.log("[user-mgmt-db init] Initialising user management database:");
+	db.pragma('foreign_keys = ON;');
 	db.exec(sql);
 	console.log("[user-mgmt-db init] Successfully initialised user management database");
 } catch (e) {
