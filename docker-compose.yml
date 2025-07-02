@@ -1,36 +1,47 @@
 services:
-  nginx:
+  nginx_service:
     container_name: transcendence_nginx
     restart: always
     build:
       context: ./
       dockerfile: frontend/Dockerfile
+    healthcheck:
+      test: [ "CMD", "curl", "-fk", "https://localhost/index.html" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     ports:
-      - "8080:80"
+      - "8443:443"
     networks:
       - internal
+    environment:
+      - AUTH_SERVICE_URL=http://auth_service:8080/auth
     depends_on:
-      - authentication
-  authentication:
+      - auth_service
+  auth_service:
     container_name: transcendence_authentication
     restart: always
     build:
       context: ./
       dockerfile: services/authentication/Dockerfile
-    environment:
-      - JWT_SECRET="Some secret"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/auth/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     volumes:
       - auth_data:/var/authentication
     networks:
       - internal
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://authentication/health"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
+    environment:
+      - JWT_SECRET="Some secret"
+      - NODE_ENV=development
+      - USER_SERVICE_URL=http://user_service:8080/users
+    env_file:
+      - .env
     depends_on:
-      - routing
-  routing:
+      - routing_service
+  routing_service:
     container_name: transcendence_routing
     restart: always
     build:
@@ -44,9 +55,27 @@ services:
       timeout: 5s
       retries: 10
     depends_on:
-      - matchmaking
-      - game
-  matchmaking:
+      - matchmaking_service
+      - game_service
+      - user_service
+  user_service:
+    container_name: transcendence_user
+    restart: always
+    build: ./backend/userManagement
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/users/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - user_data:/app/data
+    networks:
+      - internal
+    environment:
+      - AUTH_SERVICE_URL=http://auth_service:8080/auth
+    env_file:
+      - .env
+  matchmaking_service:
     container_name: transcendence_matchmaking
     restart: always
     build:
@@ -60,8 +89,8 @@ services:
       timeout: 5s
       retries: 10
     depends_on:
-      - game
-  game:
+      - game_service
+  game_service:
     container_name: transcendence_game
     restart: always
     build:
@@ -80,3 +109,22 @@ networks:
 
 volumes:
   auth_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/authentication/data
+      o: bind
+  user_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/userManagement/data
+      o: bind
+  user_avatars:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./frontend/src/public/assets/avatars/user
+      o: bind
+
+    # Comment out to NOT have database and user uploads available on host TODO

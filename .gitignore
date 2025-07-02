@@ -1,5 +1,23 @@
-node_modules
+# database
 *.sqlite3
-.idea
-.vscode
-*.js
+
+# folders
+dist/
+
+# container data
+data/
+
+# user uploads
+user/
+
+# environment
+.env
+
+# vscode extensions
+.vscode/
+
+# idea
+.idea/
+
+# modules
+node_modules/
