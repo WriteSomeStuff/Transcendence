@@ -86,7 +86,7 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 				success: true,
 				twoFA: true,
 				message: "Two-factor authentication is enabled for this user. Please verify your token.",
-				next: "/verify2FA",
+				next: "/verify2fa",
 				// userId: result.userId, //for testing purposes
 				username: username
 			});
