@@ -21,6 +21,7 @@ COPY package-lock.json .
 COPY src ./src
 
 RUN mkdir -p /data
+RUN mkdir -p /app/data/avatars/user_uploads
 
 RUN npm run build
 

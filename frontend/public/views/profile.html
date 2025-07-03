@@ -1,6 +1,6 @@
 <div class="fixed top-0 left-0 w-full overflow-hidden pointer-events-none h-20 z-50">
   <div class="w-full animate-scrollLeft">
-    <img src="../assets/gifs/ufo.gif" alt="scrolling gif" class="h-full"/>
+    <img src="/assets/gifs/ufo.gif" alt="scrolling gif" class="h-full"/>
   </div>
 </div>
 
@@ -18,12 +18,29 @@
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 p-6 sm:p-10">
       <div class="grid grid-cols-2 items-center p-8">
-        <h1 class="text-base sm:text-lg">Username here</h1>
-        <button onclick="" class="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6"> <!-- make functionality work -->
-          <img class="w-full h-full object-contain" src="../assets/gifs/pencil.gif" alt="Edit username, avatar or password"/>
-        </button>
-        <img class="w-full max-w-xs h-auto" src="../assets/gifs/aggretsuko.gif" alt="Aggretsuko gif"/> <!-- placeholder avatar -->
-      </div>
+      	<h1 id="username" class="text-base sm:text-lg"></h1>
+				<button id="openUserInfoEditor" class="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6">
+					<img class="w-full h-full object-contain" src="./public/assets/gifs/pencil.gif" alt="Edit username or password"/>
+				</button>
+				<dialog class="modal" id="modal"> <!-- Edit user info -->
+					<h2>Update username, password or avatar</h2>
+					<form id="avatarForm" enctype="multipart/form-data">
+		 				<input type="file" id="avatarInput" accept="image/*" name="avatar">
+						<button type="submit">Upload</button>
+					</form>
+					<form id="usernameForm">
+						<label>New username<input type="text" id="newUsername"></label>
+						<button type="submit">Submit</button>
+					</form>
+					<form id="passwordForm">
+						<label>New password<input type="text" id="newPassword"></label>
+						<button type="submit">Submit</button>
+					</form>
+					<button id="closeUserInfoEditor">Close</button>
+				</dialog>
+				<script type="module" src="./public/js/profile.js"></script>
+        <img class="w-full max-w-xs h-auto" src="/api/user/avatar?ts=TIMESTAMP" alt="User Avatar"/>
+      	</div>
       <div class="flex flex-col items-center border-8 animate-rainbow p-4">
         <h1>Friends</h1>
       </div>
@@ -35,6 +52,6 @@
       </div>
     </div>
   </div>
-  <img class="fixed bottom-4 left-4 w-[20vw] max-w-[120px] h-auto z-40" src="../assets/gifs/hellokitty.gif" alt="Patrick star gif"/>
-  <img class="fixed bottom-4 right-4 w-[20vw] max-w-[120px] h-auto z-40" src="../assets/gifs/eevee.gif" alt="Gloomy bear gif"/>
+  <img class="fixed bottom-4 left-4 w-[20vw] max-w-[120px] h-auto z-40" src="/assets/gifs/hellokitty.gif" alt="Patrick star gif"/>
+  <img class="fixed bottom-4 right-4 w-[20vw] max-w-[120px] h-auto z-40" src="/assets/gifs/eevee.gif" alt="Gloomy bear gif"/>
 </div>

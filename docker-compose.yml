@@ -30,13 +30,14 @@ services:
       timeout: 5s
       retries: 10
     volumes:
-      - auth_data:/var/authentication
+      - auth_db:/app/data/database
     networks:
       - internal
     environment:
       - JWT_SECRET="Some secret"
       - NODE_ENV=development
       - USER_SERVICE_URL=http://user_service:8080/users
+      - AUTH_DB_PATH=/app/data/database/auth_db.sqlite3
     env_file:
       - .env
     depends_on:
@@ -68,11 +69,14 @@ services:
       timeout: 5s
       retries: 10
     volumes:
-      - user_data:/app/data
+      - user_db:/app/data/database
+      - avatars:/app/data/avatars
     networks:
       - internal
     environment:
       - AUTH_SERVICE_URL=http://auth_service:8080/auth
+      - USER_DB_PATH=/app/data/database/user_db.sqlite3
+      - AVATAR_DIR_PATH=/app/data/avatars/
     env_file:
       - .env
   matchmaking_service:
@@ -106,25 +110,26 @@ services:
 
 networks:
   internal:
+    driver: bridge
 
 volumes:
-  auth_data:
+  auth_db:
     driver: local
     driver_opts:
       type: none
-      device: ./backend/authentication/data
+      device: ./backend/authentication/data/database
       o: bind
-  user_data:
+  user_db:
     driver: local
     driver_opts:
       type: none
-      device: ./backend/userManagement/data
+      device: ./backend/userManagement/data/database
       o: bind
-  user_avatars:
+  avatars:
     driver: local
     driver_opts:
       type: none
-      device: ./frontend/src/public/assets/avatars/user
+      device: ./backend/userManagement/data/avatars
       o: bind
 
     # Comment out to NOT have database and user uploads available on host TODO

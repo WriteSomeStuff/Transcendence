@@ -1,4 +1,5 @@
-# database
+# databases
+database/
 *.sqlite3
 
 # folders
@@ -8,7 +9,7 @@ dist/
 data/
 
 # user uploads
-user/
+user_uploads/
 
 # environment
 .env
