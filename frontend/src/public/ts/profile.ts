@@ -47,7 +47,7 @@ async function fetchFriendList(): Promise<Friend[] | string> {
 		const response: Response = await fetch('/api/user/friends/list', { method: 'GET' });
 
 		if (!response.ok) {
-			throw new Error("Error fetching friend list");
+			throw new Error(response.statusText);
 		}
 
 		const parsedResponse: FriendListResponse = await response.json();
@@ -86,5 +86,24 @@ export async function displayFriendList() {
 		}
 
 		if (i === "4") break;
+	}
+}
+
+export async function displayAvatar() {
+	try {
+		const response: Response = await fetch('/api/user/avatar', { method: 'GET' });
+
+		if (!response.ok) {
+			throw new Error(response.statusText);
+		}
+
+		const blob = await response.blob();
+		const url = URL.createObjectURL(blob);
+		const avatarImg = document.getElementById('avatarImg') as HTMLImageElement;
+		if (avatarImg) {
+			avatarImg.src = url;
+		}
+	} catch (e: any) {
+		console.error("Error displaying avatar:" + e.message);
 	}
 }
