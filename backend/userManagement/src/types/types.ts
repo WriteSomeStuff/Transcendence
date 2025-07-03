@@ -1,5 +1,3 @@
-import { acceptFriendRequestHandler } from "../userController";
-
 export interface UserObj {
 	user_id: number;
 	username: string;
@@ -14,4 +12,10 @@ export interface FriendRequest {
 	user_id:		number;
 	friend_id:		number;
 	accepted:		boolean;
+}
+
+export interface Friend {
+	friendshipId:	number;
+	friendId:		number;
+	accountStatus:	string;
 }

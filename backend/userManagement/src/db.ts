@@ -54,7 +54,6 @@ const sql = `
 
 	PRAGMA foreign_keys = ON;
 `;
-// TODO if request from (e.g) user 1 to 2 already exist, 2 cant make request to 1
 
 try {
 	console.log("[user-mgmt-db init] Initialising user management database:");

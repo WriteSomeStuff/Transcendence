@@ -2,7 +2,7 @@ import { FastifyRequest, FastifyReply } from "fastify";
 import { promises as fs } from "fs";
 import path from 'path';
 
-import { FriendRequest } from "./types/types";
+import { FriendRequest, Friend } from "./types/types";
 import {
 	insertUser,
 	getUserDataFromDb,
@@ -14,7 +14,10 @@ import {
 	updateAvatar,
 
 	createFriendRequest,
-	getFriendRequests
+	getFriendRequests,
+	getFriendList,
+	acceptFriendRequest,
+	removeFriend
 } from "./userService";
 
 export const insertUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -304,9 +307,15 @@ export const acceptFriendRequestHandler = async (request: FastifyRequest, reply:
 		 * Button is pressed in frontend.
 		 * Button pressed by request.user.user_id.
 		 * Request sent with user id of user that made request in body.
-		 * Query on friendship row with user_id and friend_id.
 		 * Change status to accepted.
 		 */
+
+		const { userIdSender } = request.body as { userIdSender: number };
+
+		console.log(`[User Controller] Accepting friend request for ${request.user.userId} of ${userIdSender}`);
+		await acceptFriendRequest(request.user.userId, userIdSender);
+		console.log(`[User Controller] Accepting friend request for ${request.user.userId} of ${userIdSender} successful`);
+
 	} catch (e) {
 		console.error('Error:', e);
 		reply.status(500).send({
@@ -322,9 +331,14 @@ export const rejectFriendRequestHandler = async (request: FastifyRequest, reply:
 		 * Button is pressed in frontend.
 		 * Button pressed by request.user.user_id.
 		 * Request sent with user id of user that made request in body.
-		 * Query on friendship row with user_id and friend_id.
-		 * Change status to rejected.
 		 */
+
+		const { userIdSender } = request.body as { userIdSender: number };
+
+		console.log(`[User Controller] Removing friend request for ${request.user.userId} of ${userIdSender}`);
+		await removeFriend(request.user.userId, userIdSender);
+		console.log(`[User Controller] Removing friend request for ${request.user.userId} of ${userIdSender} successful`);
+
 	} catch (e) {
 		console.error('Error:', e);
 		reply.status(500).send({
@@ -337,7 +351,6 @@ export const rejectFriendRequestHandler = async (request: FastifyRequest, reply:
 export const getFriendRequestsHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
 		/**
-		 * query on all 'pending' requests
 		 * send back in s certain data structure list {
 		 * 	friendship_id
 		 * 	user_id (made request)
@@ -368,6 +381,15 @@ export const getFriendRequestsHandler = async (request: FastifyRequest, reply: F
 
 export const getFriendsHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
+		console.log(`[User Controller] Getting friend list for user ${request.user.userId}`);
+		const friends: Friend[] = await getFriendList(request.user.userId);
+		console.log(`[User Controller] Getting friend list for user ${request.user.userId} successful`);
+
+
+		reply.status(200).send({
+			success: true,
+			data: friends
+		});
 
 	} catch (e) {
 		console.error('Error:', e);
@@ -380,6 +402,11 @@ export const getFriendsHandler = async (request: FastifyRequest, reply: FastifyR
 
 export const removeFriendHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
+		const { userIdToUnfriend } = request.body as { userIdToUnfriend: number };
+
+		console.log(`[User Controller] Removing friend ${userIdToUnfriend} of ${request.user.userId}`);
+		await removeFriend(request.user.userId, userIdToUnfriend);
+		console.log(`[User Controller] Removing friend ${userIdToUnfriend} for ${request.user.userId}successful`);
 
 	} catch (e) {
 		console.error('Error:', e);
@@ -389,8 +416,3 @@ export const removeFriendHandler = async (request: FastifyRequest, reply: Fastif
 		})
 	}	
 }
-
-// const array: type[] = [
-// 	{ value1, value2 },
-// 	{ value1, value2 }
-// ];

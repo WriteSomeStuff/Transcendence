@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
 import db, { runTransaction } from "./db";
-import { UserObj, FriendRequest } from "./types/types";
+import { UserObj, FriendRequest, Friend } from "./types/types";
 
 export const insertUser = async (username: string, userId: number) => {
 	try {
@@ -167,24 +167,24 @@ export const updateAvatar = async (userId: number, filePath: string, newAvatar: 
 export const createFriendRequest = async (userId: number, friendId: number) => {
 	try {
 		runTransaction((db) => {
-			const stmt1 = db.prepare(`
+			const checkStmt = db.prepare(`
 				SELECT 1
 				FROM friendship
 				WHERE user_id = ? AND friend_id = ?
 			`);
 
-			const row = stmt1.get(friendId, userId);
+			const row = checkStmt.get(friendId, userId);
 
 			if (row) {
 				throw new Error("REQUEST_ALREADY_RECEIVED");
 			}
 
-			const stmt2 = db.prepare(`
+			const insertStmt = db.prepare(`
 				INSERT INTO friendship (user_id, friend_id)
 				VALUES (?, ?)
 			`);
 
-			stmt2.run(userId, friendId);
+			insertStmt.run(userId, friendId);
 		});
 	} catch (e) {
 		throw e;
@@ -205,6 +205,78 @@ export const getFriendRequests = async (userId: number): Promise<FriendRequest[]
 		})
 
 		return requests;
+	} catch (e) {
+		throw e;
+	}
+}
+
+export const getFriendList = async (userId: number): Promise<Friend[]> => {
+	try {
+		const friendList = runTransaction((db) => {
+			const getFriendsStmt = db.prepare(`
+				SELECT
+					friendship_id,
+					user_id,
+					friend_id
+				FROM friendship
+				WHERE (user_id = ? OR friend_id = ?) AND status = 'accepted'
+			`);
+
+			const rows = getFriendsStmt.all(userId, userId) as { friendship_id: number, user_id: number, friend_id: number }[];			
+			let friendsPartial: Partial<Friend>[] = rows.map(row => ({
+				friendshipId: row.friendship_id,
+				friendId: row.user_id === userId ? row.friend_id : row.user_id
+			}));
+
+			for (let friend of friendsPartial) {
+				const getStatusStmt = db.prepare(`
+					SELECT account_status
+					FROM user
+					WHERE user_id = ?
+				`);
+
+				friend.accountStatus = (getStatusStmt.get(friend.friendId) as { account_status: string }).account_status;
+			}
+
+			return friendsPartial as Friend[];
+		});
+
+		return friendList;
+	} catch (e) {
+		throw e;
+	}
+}
+
+export const acceptFriendRequest = async (userIdRequested: number, userIdSender: number) => {
+	try {
+		runTransaction((db) => {
+			const stmt = db.prepare(`
+				UPDATE friendship
+				SET status = 'accepted'
+				WHERE
+					user_id = ? AND friend_id = ?
+			`);
+
+			stmt.run(userIdSender, userIdRequested);
+		});
+	} catch (e) {
+		throw e;
+	}
+}
+
+export const removeFriend = async (userIdRequested: number, userIdSender: number) => {
+	try {
+		runTransaction((db) => {
+			const stmt = db.prepare(`
+				DELETE FROM friendship
+				WHERE
+					(user_id = ? AND friend_id = ?)
+					OR
+					(user_id = ? AND friend_id = ?)
+			`);
+
+			stmt.run(userIdSender, userIdRequested, userIdRequested, userIdSender);
+		});
 	} catch (e) {
 		throw e;
 	}
