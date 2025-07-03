@@ -23,7 +23,7 @@ const sql = `
 	CREATE TABLE IF NOT EXISTS user (
 		user_id			INTEGER PRIMARY KEY,
 		username		TEXT	NOT NULL	UNIQUE,
-		created_at		TEXT	DEFAULT (datetime('now', '+2 hour')),
+		created_at		TEXT	DEFAULT (datetime('now')),
 		last_login		TEXT,
 		avatar_path		TEXT	DEFAULT ('${DEFAULT_AVATAR_PATH}'),
 		account_status	TEXT	DEFAULT ('offline')	CHECK(account_status IN ('online', 'offline'))
@@ -47,7 +47,7 @@ const sql = `
 	WHEN NEW.account_status = 'online'
 	BEGIN
 		UPDATE user
-		SET last_login = (datetime('now', '+2 hour'))
+		SET last_login = (datetime('now'))
 		WHERE rowid = NEW.rowid;
 	END;
 
