@@ -57,14 +57,6 @@ function selectView(page: string, push: boolean)
 			} else if (page === 'profile') {
 				bindProfileViewElements();
 			}
-			if (page === "leaderboard") {
-				import("./pullUsername.js").then((module) => {
-					// Optional: call a specific function if needed
-					if (module.displayLeaderboardData) {
-						module.displayLeaderboardData();
-					}
-				});
-			}
 		}
 		else {
 			console.error("Element spa not found.");
@@ -76,10 +68,10 @@ function selectView(page: string, push: boolean)
 	});
 }
 
-selectView("homeDEV", false);
+selectView("home", false);
 
 window.addEventListener("popstate", (event) => {
-	const page: string = location.pathname.slice(1) || "homeDEV";
+	const page: string = location.pathname.slice(1) || "home";
 	selectView(page, false);
 });
 

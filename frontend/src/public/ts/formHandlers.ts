@@ -36,7 +36,11 @@ export function bindCredentialsForm(formBinding: formBinding) {
 				console.log(`${formBinding.serviceName} successful: ${data}`);
 				alert(`${formBinding.serviceName} successful!`);
 
-				// TODO further handling, for registration to login page? for login to homepage?
+				if (formBinding.serviceName === "Login")
+					(window as any).selectView?.("profile", false);
+				if (formBinding.serviceName === "Registration")
+					(window as any).selectView?.("login", false);
+
 			} catch (e) {
 				console.error(`${formBinding.serviceName} failed: ${e}`);
 				alert(`${formBinding.serviceName} failed: ${e}`);
