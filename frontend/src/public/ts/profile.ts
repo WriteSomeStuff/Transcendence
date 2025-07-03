@@ -66,6 +66,7 @@ async function fetchFriendList(): Promise<Friend[] | string> {
 
 export async function displayFriendList() {
 	const list: Friend[] | string = await fetchFriendList();
+	
 	if (typeof list === "string") { // something went wrong
 		const docUser = document.getElementById(`friend0`) as HTMLSpanElement;
 		docUser.textContent = 'Something went wrong:' + list;
@@ -77,11 +78,11 @@ export async function displayFriendList() {
 	}
 
 	for (const i in list) { // display up to 5 friends
-		console.log(`Friend ${i}: ${String(list[i].friendId)} ${list[i].accountStatus}`)
+		console.log(`Friend ${i}: ${String(list[i].userId)} ${list[i].username} ${list[i].accountStatus}`)
 		const docUser = document.getElementById(`friend${i}`) as HTMLSpanElement;
 		const docStatus = document.getElementById(`status${i}`) as HTMLSpanElement;
 		if (docUser && docStatus) {
-			docUser.textContent = String(list[i].friendId);
+			docUser.textContent = list[i].username;
 			docStatus.textContent = list[i].accountStatus;
 		}
 

@@ -16,6 +16,7 @@ export interface FriendRequest {
 
 export interface Friend {
 	friendshipId:	number;
-	friendId:		number;
+	userId:			number;
+	username:		string;
 	accountStatus:	string;
 }

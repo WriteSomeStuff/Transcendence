@@ -225,17 +225,21 @@ export const getFriendList = async (userId: number): Promise<Friend[]> => {
 			const rows = getFriendsStmt.all(userId, userId) as { friendship_id: number, user_id: number, friend_id: number }[];			
 			let friendsPartial: Partial<Friend>[] = rows.map(row => ({
 				friendshipId: row.friendship_id,
-				friendId: row.user_id === userId ? row.friend_id : row.user_id
+				userId: row.user_id === userId ? row.friend_id : row.user_id
 			}));
 
 			for (let friend of friendsPartial) {
-				const getStatusStmt = db.prepare(`
-					SELECT account_status
+				const getFriendInfoStmt = db.prepare(`
+					SELECT 
+						account_status,
+						username
 					FROM user
 					WHERE user_id = ?
 				`);
 
-				friend.accountStatus = (getStatusStmt.get(friend.friendId) as { account_status: string }).account_status;
+				const { account_status, username } = getFriendInfoStmt.get(friend.userId) as { account_status: string, username: string };
+				friend.accountStatus = account_status;
+				friend.username = username;
 			}
 
 			return friendsPartial as Friend[];
