@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
 import db, { runTransaction } from "./db";
-import { UserObj } from "./types/types";
+import { UserObj, FriendRequest } from "./types/types";
 
 export const insertUser = async (username: string, userId: number) => {
 	try {
@@ -167,13 +167,44 @@ export const updateAvatar = async (userId: number, filePath: string, newAvatar: 
 export const createFriendRequest = async (userId: number, friendId: number) => {
 	try {
 		runTransaction((db) => {
-			const stmt = db.prepare(`
+			const stmt1 = db.prepare(`
+				SELECT 1
+				FROM friendship
+				WHERE user_id = ? AND friend_id = ?
+			`);
+
+			const row = stmt1.get(friendId, userId);
+
+			if (row) {
+				throw new Error("REQUEST_ALREADY_RECEIVED");
+			}
+
+			const stmt2 = db.prepare(`
 				INSERT INTO friendship (user_id, friend_id)
 				VALUES (?, ?)
 			`);
 
-			stmt.run(userId, friendId);
+			stmt2.run(userId, friendId);
 		});
+	} catch (e) {
+		throw e;
+	}
+}
+
+export const getFriendRequests = async (userId: number): Promise<FriendRequest[]> => {
+	try {
+		const requests = runTransaction((db) => {
+			const stmt = db.prepare(`
+				SELECT * FROM friendship
+				WHERE friend_id = ? AND status = 'pending'
+			`);
+
+			const rows: FriendRequest[] = stmt.all(userId) as FriendRequest[];
+
+			return rows;
+		})
+
+		return requests;
 	} catch (e) {
 		throw e;
 	}

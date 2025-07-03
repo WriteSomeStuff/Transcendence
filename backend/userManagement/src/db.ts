@@ -33,9 +33,10 @@ const sql = `
 		friendship_id	INTEGER	PRIMARY KEY,
 		user_id			INTEGER	NOT NULL,
 		friend_id		INTEGER	NOT NULL,
-		status			TEXT	DEFAULT ('pending')	CHECK(status IN ('pending', 'accepted', 'rejected'))
+		status			TEXT	DEFAULT ('pending')	CHECK(status IN ('pending', 'accepted', 'rejected')),
 		created_at		TEXT	DEFAULT (datetime('now')),
 
+		CONSTRAINT unq UNIQUE (user_id, friend_id),
 		FOREIGN KEY (user_id)
 			REFERENCES user (user_id),
 		FOREIGN KEY (friend_id)
@@ -53,7 +54,7 @@ const sql = `
 
 	PRAGMA foreign_keys = ON;
 `;
-// datetime +2 hour because it returns UTC, +2 hour -> CEST
+// TODO if request from (e.g) user 1 to 2 already exist, 2 cant make request to 1
 
 try {
 	console.log("[user-mgmt-db init] Initialising user management database:");
