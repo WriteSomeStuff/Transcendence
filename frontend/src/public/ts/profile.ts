@@ -66,7 +66,7 @@ async function fetchFriendList(): Promise<Friend[] | string> {
 
 export async function displayFriendList() {
 	const list: Friend[] | string = await fetchFriendList();
-	
+
 	if (typeof list === "string") { // something went wrong
 		const docUser = document.getElementById(`friend0`) as HTMLSpanElement;
 		docUser.textContent = 'Something went wrong:' + list;
@@ -77,16 +77,24 @@ export async function displayFriendList() {
 		return;
 	}
 
-	for (const i in list) { // display up to 5 friends
-		console.log(`Friend ${i}: ${String(list[i].userId)} ${list[i].username} ${list[i].accountStatus}`)
-		const docUser = document.getElementById(`friend${i}`) as HTMLSpanElement;
-		const docStatus = document.getElementById(`status${i}`) as HTMLSpanElement;
-		if (docUser && docStatus) {
-			docUser.textContent = list[i].username;
-			docStatus.textContent = list[i].accountStatus;
-		}
+	const numFriends = 5;
+	const docFriendsList = document.getElementById('friends-list');
 
-		if (i === "4") break;
+	for (let i = 0; i < numFriends; i++) {
+		const li = document.createElement('li');
+		li.className = 'flex justify-between items-center gap-4';
+
+		const usernameSpan = document.createElement('span');
+		usernameSpan.textContent = list[i].username;
+		usernameSpan.className = 'min-w-[8rem] truncate';
+
+		const statusSpan = document.createElement('span');
+		statusSpan.textContent = list[i].accountStatus;
+		statusSpan.className = 'text-right';
+
+		li.appendChild(usernameSpan);
+		li.appendChild(statusSpan);
+		docFriendsList?.appendChild(li);
 	}
 }
 
