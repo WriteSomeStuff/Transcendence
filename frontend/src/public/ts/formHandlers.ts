@@ -1,3 +1,5 @@
+import { bindVerify2FAModal } from "./login";
+
 export const formBindings: Record<string, { formId: string; url: string; serviceName: string }> = {
 	register:	{ formId: 'registrationForm',	url: '/api/auth/register', serviceName: 'Registration' },
 	login:		{ formId: 'loginForm',		url: '/api/auth/login',	serviceName: 'Login' }
@@ -27,12 +29,17 @@ export function bindCredentialsForm(formBinding: formBinding) {
 					body: JSON.stringify({ username, password })
 				});
 
-				const data = await response.json() as { success: boolean, error?: string};
+				const data = await response.json() as { success: boolean, error?: string, twoFA?: boolean};
 
 				if (!response.ok || data.success === false) {
 					throw new Error(data.error || `HTTP error; status: ${response.status}`);
 				}
-
+				
+				if (data.twoFA === true) {
+					bindVerify2FAModal();
+					// TODO: handle 2FA verification
+					return;
+				}
 				console.log(`${formBinding.serviceName} successful: ${data}`);
 				alert(`${formBinding.serviceName} successful!`);
 
