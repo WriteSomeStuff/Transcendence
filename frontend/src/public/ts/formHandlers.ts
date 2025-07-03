@@ -87,7 +87,6 @@ export function bindAvatarForm() {
 	});
 }
 
-//TODO check if new username and password are valid, maybe do this in backend
 export function bindUserInfoUpdateForm(infoType: string) {
 	if (infoType != "username" && infoType != "password") {
 		alert("Incorrect usage of bindUserInfoUpdateForm function");

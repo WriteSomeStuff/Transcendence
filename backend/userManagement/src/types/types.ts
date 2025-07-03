@@ -3,6 +3,6 @@ export interface UserObj {
 	username: string;
 	created_at: string;
 	last_login: string;
-	// avatar
+	avatar_url: string;
 	account_status: string;
 }
