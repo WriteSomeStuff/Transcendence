@@ -4,7 +4,7 @@ WORKDIR /app
 COPY package.json ./
 COPY package-lock.json ./
 COPY tsconfig.base.json ./
-COPY services/routing ./services/routing
+COPY backend/routing ./backend/routing
 
 RUN npm install --omit=dev -w routing
 

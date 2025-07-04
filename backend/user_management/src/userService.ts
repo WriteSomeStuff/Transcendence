@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
-import db, { runTransaction } from "./db";
-import { UserObj, FriendRequest, Friend } from "./types/types";
+import { runTransaction } from "./db.js";
+import type { UserObj, FriendRequest, Friend } from "./types/types.js";
 
 export const insertUser = async (username: string, userId: number) => {
 	try {
@@ -58,7 +58,7 @@ export const updateUsername = async (userId: number, newUsername: string) => {
 
 export const updatePassword = async (userId: number, newPassword: string) => {
 	try {
-		const url = process.env.AUTH_SERVICE_URL + '/password';
+		const url = process.env["AUTH_SERVICE_URL"] + '/password';
 		const response = await fetch(url, {
 			method: 'PUT',
 			headers: {

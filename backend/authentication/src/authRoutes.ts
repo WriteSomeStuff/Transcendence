@@ -8,7 +8,7 @@ import {
 	verify2FATokenHandler,
 	enable2FAHandler,
 	disable2FAHandler
-} from "./authController";
+} from "./authController.js";
 
 const authRoutes = async (app: FastifyInstance) => {
 	app.delete('/logout',	{ preHandler: [app.authenticate] }, logoutUserHandler);

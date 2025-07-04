@@ -1,8 +1,8 @@
-import fastify, { FastifyRequest, FastifyReply } from "fastify";
+import fastify, {FastifyReply, FastifyRequest} from "fastify";
 import fastifyCookie from "@fastify/cookie";
 import fastifyJwt from "@fastify/jwt";
 
-import authRoutes from "./authRoutes";
+import authRoutes from "./authRoutes.js";
 
 const PORT: number = 8080;
 const HOST: string = '0.0.0.0';
@@ -13,7 +13,7 @@ const app = fastify({
 
 app.register(fastifyCookie);
 app.register(fastifyJwt, {
-	secret: process.env.JWT_SECRET as string
+	secret: process.env["JWT_SECRET"] as string
 });
 app.addHook('preHandler', (request, _, done) => {
 	request.jwt = app.jwt;
@@ -23,15 +23,14 @@ app.addHook('preHandler', (request, _, done) => {
 app.decorate(
 	'authenticate',
 	async function (request: FastifyRequest, reply: FastifyReply) {
-		const token = request.cookies.access_token;
+		const token = request.cookies["access_token"];
 		console.log('Token: ', token);
 		if (!token) {
 			console.error("no token");
 			reply.code(401).send({ message: 'Unauthorized' });
 		}
 		try {
-			const decoded = request.jwt.verify<{ userId: number }>(token as string);
-			request.user = decoded;
+			request.user = request.jwt.verify<{ userId: number }>(token as string);
 		} catch (err) {
 			reply.code(401).send({ message: 'Unauthorized' });
 		}

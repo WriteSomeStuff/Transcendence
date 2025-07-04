@@ -2,7 +2,7 @@ import { FastifyRequest, FastifyReply } from "fastify";
 import { promises as fs } from "fs";
 import path from 'path';
 
-import { FriendRequest, Friend } from "./types/types";
+import type { FriendRequest, Friend } from "./types/types.js";
 import {
 	insertUser,
 	getUserDataFromDb,
@@ -18,7 +18,7 @@ import {
 	getFriendList,
 	acceptFriendRequest,
 	removeFriend
-} from "./userService";
+} from "./userService.js";
 
 export const insertUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
@@ -233,7 +233,7 @@ export const updateUserAvatarHandler = async (request: FastifyRequest, reply: Fa
 		
 		const ext = file.mimetype.split('/')[1];
 		const filename = `user_${request.user.userId}.${ext}`;
-		const filePath = path.join(process.env.AVATAR_DIR_PATH as string, 'user_uploads/', filename);
+		const filePath = path.join(process.env["AVATAR_DIR_PATH"] as string, 'user_uploads/', filename);
 		console.log(`${filePath}: ${file}`);
 		
 		const buffer = await file.toBuffer();

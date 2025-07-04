@@ -4,7 +4,7 @@ WORKDIR /app
 COPY package.json ./
 COPY package-lock.json ./
 COPY tsconfig.base.json ./
-COPY services/matchmaking ./services/matchmaking
+COPY backend/matchmaking ./backend/matchmaking
 
 RUN npm install --omit=dev -w matchmaking
 

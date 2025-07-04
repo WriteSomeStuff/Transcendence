@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { setStatusInUserService, removeUser } from "../authService";
+import { setStatusInUserService, removeUser } from "../authService.ts";
 
 
 export const handleUserDbError = async (response: Response, userId: number, reply: FastifyReply) => {
@@ -19,12 +19,13 @@ export const handleUserDbError = async (response: Response, userId: number, repl
     });
 };
 
+// @ts-ignore
 export const handleSuccessfulLogin = async (request: FastifyRequest, reply: FastifyReply, userId: number, username: string) => {
 	try {
 		const token = request.jwt.sign({ userId: userId }, { expiresIn: "1d" });
 		console.log(`[Auth Controller] JWT signed for '${userId}'`);
 		
-		const isProduction = process.env.NODE_ENV === 'production'; // TODO because testing with http requests, set in docker-compose.yml
+		const isProduction = process.env["NODE_ENV"] === 'production'; // TODO because testing with http requests, set in docker-compose.yml
 		reply.setCookie('access_token', token, {
 			path: '/',
 			httpOnly: true,
@@ -47,7 +48,7 @@ export const handleSuccessfulLogin = async (request: FastifyRequest, reply: Fast
 		console.error();
 		reply.status(500).send({
 			success: false,
-			error: 'An error occured handling the login: ' + e
+			error: 'An error occurred handling the login: ' + e
 		});
 	}
 }

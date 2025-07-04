@@ -2,7 +2,9 @@
   "name": "transcendence",
   "version": "1.0.0",
   "description": "the pong game",
-  "keywords": ["-"],
+  "keywords": [
+    "-"
+  ],
   "repository": {
     "type": "git",
     "url": "-"
@@ -17,10 +19,11 @@
   "workspaces": [
     "frontend",
     "shared/*",
-    "services/authentication",
-    "services/routing",
-    "services/matchmaking",
-    "services/game"
+    "backend/authentication",
+    "backend/routing",
+    "backend/matchmaking",
+    "backend/game",
+    "backend/user_management"
   ],
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",

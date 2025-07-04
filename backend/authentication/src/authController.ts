@@ -9,8 +9,8 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { z } from "zod";
 
-import { registerSchema, loginSchema } from "./schemas/authSchemas";
-import { handleUserDbError, handleSuccessfulLogin } from "./helpers/authControllerHelpers";
+import { registerSchema, loginSchema } from "./schemas/authSchemas.ts";
+import { handleUserDbError, handleSuccessfulLogin } from "./helpers/authControllerHelpers.ts";
 
 import {
 	register,
@@ -21,7 +21,7 @@ import {
 	verify2FA,
 	enable2FA,
 	disable2FA
-} from "./authService";
+} from "./authService.ts";
 
 export const registerUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {

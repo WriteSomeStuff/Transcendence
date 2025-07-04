@@ -16,7 +16,7 @@ import {
 	getFriendRequestsHandler,
 	getFriendsHandler,
 	removeFriendHandler,
-} from "./userController";
+} from "./userController.js";
 
 // prefix: /users
 export const userRoutes = async (app: FastifyInstance) => {

@@ -3,7 +3,7 @@ import fastifyCookie from "@fastify/cookie";
 import fastifyJwt from "@fastify/jwt";
 import fastifyMultipart from '@fastify/multipart';
 
-import { userRoutes, friendRoutes } from "./userRoutes";
+import { userRoutes, friendRoutes } from "./userRoutes.js";
 
 const PORT: number = 8080;
 const HOST: string = '0.0.0.0';
@@ -18,14 +18,14 @@ app.addHook('preHandler', (request, _, done) => {
 });
 app.register(fastifyCookie);
 app.register(fastifyJwt, {
-	secret: process.env.JWT_SECRET as string
+	secret: process.env["JWT_SECRET"] as string
 });
 app.register(fastifyMultipart);
 
 app.decorate(
 	'authenticate',
 	async function (request: FastifyRequest, reply: FastifyReply) {
-		const token = request.cookies.access_token;
+		const token = request.cookies["access_token"];
 		console.log('Token: ', token);
 		if (!token) {
 			console.error("no token");
