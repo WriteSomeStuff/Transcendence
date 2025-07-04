@@ -8,10 +8,18 @@ import {
 	getUserAvatarHandler,
 	insertUserHandler,
 	setStatusHandler,
-	getUserIdByUsernameHandler
+	getUserIdByUsernameHandler,
+
+	friendRequestHandler,
+	acceptFriendRequestHandler,
+	rejectFriendRequestHandler,
+	getFriendRequestsHandler,
+	getFriendsHandler,
+	removeFriendHandler,
 } from "./userController";
 
-const userRoutes = async (app: FastifyInstance) => {
+// prefix: /users
+export const userRoutes = async (app: FastifyInstance) => {
 	app.get('/profile',		{ preHandler: [app.authenticate] },	getUserDataHandler);
 	app.put('/username',	{ preHandler: [app.authenticate] },	updateUsernameHandler);
 	app.put('/password',	{ preHandler: [app.authenticate] },	updatePasswordHandler);
@@ -23,4 +31,14 @@ const userRoutes = async (app: FastifyInstance) => {
 	app.get('/get-username',	getUserIdByUsernameHandler);
 };
 
-export default userRoutes;
+// prefix: /users/friends
+export const friendRoutes = async (app: FastifyInstance) => {
+	app.post('/request',	{ preHandler: [app.authenticate] }, friendRequestHandler);
+	app.put('/accept',		{ preHandler: [app.authenticate] }, acceptFriendRequestHandler);
+	app.put('/reject',		{ preHandler: [app.authenticate] }, rejectFriendRequestHandler);
+	
+	app.get('/requests',	{ preHandler: [app.authenticate] }, getFriendRequestsHandler);
+	app.get('/list',		{ preHandler: [app.authenticate] }, getFriendsHandler);
+	
+	app.delete('/remove',	{ preHandler: [app.authenticate] }, removeFriendHandler);
+};

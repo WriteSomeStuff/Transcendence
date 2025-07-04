@@ -1,6 +1,7 @@
 import {
 	bindProfileModal,
-	displayUsername
+	displayUsername,
+	displayFriendList
 } from "./profile.js";
 
 import {
@@ -25,6 +26,7 @@ function	bindButtons()
 
 function bindProfileViewElements() {
 	displayUsername();
+	displayFriendList();
 	bindAvatarForm();
 	bindProfileModal();
 	bindUserInfoUpdateForm("username");

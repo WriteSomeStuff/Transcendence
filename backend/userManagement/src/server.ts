@@ -3,7 +3,7 @@ import fastifyCookie from "@fastify/cookie";
 import fastifyJwt from "@fastify/jwt";
 import fastifyMultipart from '@fastify/multipart';
 
-import userRoutes from "./userRoutes";
+import { userRoutes, friendRoutes } from "./userRoutes";
 
 const PORT: number = 8080;
 const HOST: string = '0.0.0.0';
@@ -43,6 +43,10 @@ app.decorate(
 
 app.register(userRoutes, {
 	prefix: '/users'
+});
+
+app.register(friendRoutes, {
+	prefix: '/users/friends'
 });
 
 app.get('/users/health', async (_, reply) => {
