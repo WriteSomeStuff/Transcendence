@@ -100,7 +100,7 @@ const games: { [gameId: string]: Game } = {};
 
 app.get("/pong/ws", { websocket: true }, (socket: WebSocket, req) => {
   console.log("Processing ws request", req, req.headers);
-  const userId = req.headers["sec-websocket-protocol"]!.toString();
+  const userId = req.headers["cookie"]!;
   console.log("userId", userId);
   const gameId = usersToGames[userId];
   console.log("gameId", gameId);

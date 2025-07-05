@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.2",
-    "@fastify/http-proxy": "^11.2.0",
+    "@fastify/http-proxy": "^11.3.0",
     "@fastify/jwt": "^9.1.0",
     "argon2": "^0.43.0",
     "bcrypt": "^6.0.0",

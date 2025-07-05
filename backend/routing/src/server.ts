@@ -3,20 +3,32 @@ import proxy from "@fastify/http-proxy";
 
 const app = fastify();
 
-app.get("/health", (_, res) => {
+app.get("/health", async (_, res) => {
   res.send({ message: "Success" });
 });
 
+app.addHook("onRequest", async (req, res) => {
+  const allowedRoutes = ["/user/profile"];
+  (void res);
+  if (!allowedRoutes.includes(req.url)) {
+    console.log("Not allowed"); // TODO return actual error
+  }
+});
+
 app.register(proxy, {
-  upstream: "http://matchmaking",
+  upstream: "http://matchmaking_service",
   prefix: "/matchmaking",
 });
 
 app.register(proxy, {
-  upstream: "http://game",
+  upstream: "http://game_service",
   prefix: "/game",
   websocket: true,
-  internalRewriteLocationHeader: false,
+});
+
+app.register(proxy, {
+  upstream: "http://user_service",
+  prefix: "/user",
 });
 
 app.listen(

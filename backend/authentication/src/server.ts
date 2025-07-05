@@ -1,10 +1,12 @@
 import fastify, {FastifyReply, FastifyRequest} from "fastify";
 import fastifyCookie from "@fastify/cookie";
 import fastifyJwt from "@fastify/jwt";
+import proxy from "@fastify/http-proxy";
 
 import authRoutes from "./authRoutes.js";
+import { handleAuthInvalidation } from "./helpers/authControllerHelpers.js";
 
-const PORT: number = 8080;
+const PORT: number = 80;
 const HOST: string = '0.0.0.0';
 
 const app = fastify({
@@ -15,10 +17,6 @@ app.register(fastifyCookie);
 app.register(fastifyJwt, {
 	secret: process.env["JWT_SECRET"] as string
 });
-app.addHook('preHandler', (request, _, done) => {
-	request.jwt = app.jwt;
-	done();
-});
 
 app.decorate(
 	'authenticate',
@@ -27,15 +25,30 @@ app.decorate(
 		console.log('Token: ', token);
 		if (!token) {
 			console.error("no token");
-			reply.code(401).send({ message: 'Unauthorized' });
+			await handleAuthInvalidation(request, reply, -1);
 		}
 		try {
 			request.user = request.jwt.verify<{ userId: number }>(token as string);
 		} catch (err) {
-			reply.code(401).send({ message: 'Unauthorized' });
+			console.error("Failed to authenticate", err);
+			await handleAuthInvalidation(request, reply, -1);
 		}
 	}
 );
+
+app.addHook('preHandler', async (request, reply) => {
+	request.jwt = app.jwt;
+	if (request.url.startsWith("/auth/")) {
+		return;
+	}
+	console.log('Non-auth request');
+	await app.authenticate(request, reply);
+	console.log('Tried to authenticate');
+	if (reply.statusCode === 401) {
+		return;
+	}
+	request.headers.cookie = request.user.userId.toString();
+});
 
 app.register(authRoutes, {
 	prefix: '/auth'
@@ -43,6 +56,11 @@ app.register(authRoutes, {
 
 app.get('/auth/health', async (_, reply) => {
 	reply.send({ message: "Auth server is healthy" });
+});
+
+app.register(proxy, {
+	upstream: "http://routing_service/",
+	websocket: true,
 });
 
 const start = async () => {

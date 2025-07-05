@@ -65,7 +65,7 @@ services:
       context: ./
       dockerfile: backend/user_management/Dockerfile
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/users/health" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ]
       interval: 5s
       timeout: 5s
       retries: 10
