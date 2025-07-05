@@ -2,9 +2,7 @@
   "name": "frontend",
   "version": "1.0.0",
   "description": "the frontend part of transcendence",
-  "keywords": [
-    "frontend"
-  ],
+  "keywords": ["frontend"],
   "license": "MIT",
   "author": "cat",
   "type": "module",

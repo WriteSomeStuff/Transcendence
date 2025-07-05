@@ -1,10 +1,13 @@
 import { ViewStateSchema, ViewState, ViewName } from "./views/views.js";
 import { renderHomeView } from "./views/home.js";
-import {renderLoginView} from "./views/login.js";
-import {renderRegisterView} from "./views/register.js";
-import {renderDashboardView} from "./views/dashboard.js";
-import {renderProfileView} from "./views/profile.js";
-import { getFallbackGlobalAppState, GlobalAppState, navigateTo} from "./global_app_state.js";
+import { renderLoginView } from "./views/login.js";
+import { renderRegisterView } from "./views/register.js";
+import { renderProfileView } from "./views/profile.js";
+import {
+  getFallbackGlobalAppState,
+  GlobalAppState,
+  navigateTo,
+} from "./global_app_state.js";
 
 function getViewFromHref(): ViewState | null {
   const url = new URL(window.location.href);
@@ -25,7 +28,7 @@ function getGlobalState(): GlobalAppState {
   return navigateTo(view);
 }
 
-async function renderState(state: GlobalAppState, app: App) {
+async function renderState(state: GlobalAppState, app: App, push: boolean = true) {
   switch (state.viewState?.view) {
     case "home": {
       await renderHomeView(state.viewState, app);
@@ -39,14 +42,13 @@ async function renderState(state: GlobalAppState, app: App) {
       await renderRegisterView(state.viewState, app);
       break;
     }
-    case "dashboard": {
-      await renderDashboardView(state.viewState, app);
-      break;
-    }
     case "profile": {
       await renderProfileView(state.viewState, app);
+      break;
     }
   }
+  if (push)
+    window.history.pushState({}, "", "/" + state.viewState.view);
 }
 
 class App {
@@ -60,16 +62,20 @@ class App {
     }
     this.appContainer = appContainer;
     this.state = getGlobalState();
-    renderState(this.state, this).then(_ => {});
+    renderState(this.state, this).then((_) => {});
     window.addEventListener("popstate", () => {
-      this.state = getGlobalState();
-      renderState(this.state, this).then(_ => {});
+      this.resetView();
     });
   }
 
   public selectView(view: ViewState): void {
     this.state = navigateTo(view);
-    renderState(this.state, this).then(_ => {});
+    renderState(this.state, this, true).then((_) => {});
+  }
+
+  public resetView(): void {
+    this.state = getGlobalState();
+    renderState(this.state, this).then((_) => {});
   }
 }
 
