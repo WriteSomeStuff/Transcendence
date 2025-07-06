@@ -3,9 +3,7 @@ import { z } from "zod";
 import { ViewStateSchema, ViewName, ViewState } from "./views/views.js";
 
 const NotLoggedInViews: ViewName[] = ["home", "login", "register"];
-const LoggedInViews: ViewName[] = [
-  "profile",
-];
+const LoggedInViews: ViewName[] = ["profile", "matchmaking"];
 const InGameViews: ViewName[] = ["game"];
 
 const DefaultViews: Record<GlobalAppStatus, ViewState> = {
@@ -47,7 +45,7 @@ export function getFallbackGlobalAppState(): GlobalAppState {
       return {
         status: "InGame",
         viewState: DefaultViews["InGame"],
-      }
+      };
     }
     return {
       status: "LoggedIn",

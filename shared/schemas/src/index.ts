@@ -20,5 +20,7 @@ export type {
   AuthResult,
   Enable2FAResult,
 } from "./auth_schemas.js";
-export { FriendSchema, FriendListResponseSchema } from "./user_schemas.js";
-export type { Friend, FriendListResponse } from "./user_schemas.js";
+export { UserIdSchema, UserSchema, FriendSchema, FriendListResponseSchema } from "./user_schemas.js";
+export type { UserId, User, Friend, FriendListResponse } from "./user_schemas.js";
+export { RoomPermissionsSchema, RoomGameDataSchema, RoomSchema, MatchmakingMessageSchema } from "./matchmaking_schemas.js";
+export type { RoomPermissions, RoomGameData, Room, MatchmakingMessage } from "./matchmaking_schemas.js";

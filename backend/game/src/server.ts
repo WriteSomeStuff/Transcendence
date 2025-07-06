@@ -4,6 +4,8 @@ import fastifyWebsocket from "@fastify/websocket";
 import { GameController } from "./game_controllers/game_controller.js";
 import { PongController } from "./game_controllers/pong_controller.js";
 
+import { RoomSchema } from "schemas";
+
 import { WebSocket } from "ws";
 
 const app = Fastify();
@@ -127,8 +129,14 @@ setInterval(() => {
 app.post("/create", (req, res) => {
   const gameId = lastGameId.toString();
   lastGameId++;
-  // @ts-ignore
-  const { userIds }: { userIds: string[] } = JSON.parse(req.body);
+  const parsed = RoomSchema.safeParse(JSON.parse(req.body as string));
+  if (!parsed.success) {
+    res.status(400).send({
+      error: "Failed to parse",
+    });
+    return;
+  }
+  const userIds = parsed.data.joinedUsers.map((x) => x.toString());
   const controller = new PongController();
   games[gameId] = new Game(gameId, userIds, controller);
   for (const userId of userIds) {
@@ -136,6 +144,21 @@ app.post("/create", (req, res) => {
     usersToGames[userId] = gameId;
   }
   res.status(201).send(JSON.stringify({ gameId, userIds }));
+});
+
+app.get("/inGame", (req, res) => {
+  console.log("getting game", req.query);
+  const { userId } = req.query as { userId: string };
+  console.log("userId", userId);
+  if (!userId) {
+    res.send({
+      inGame: true,
+    });
+  }
+  console.log("inGame", !!usersToGames[userId]);
+  res.send({
+    inGame: !!usersToGames[userId],
+  });
 });
 
 app.get("/health", (_, res) => {

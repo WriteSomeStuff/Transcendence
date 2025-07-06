@@ -22,6 +22,11 @@ export const ProfileViewSchema = z.object({
   }),
 });
 
+export const MatchmakingViewSchema = z.object({
+  view: z.literal("matchmaking"),
+  params: z.object({}),
+});
+
 export const GameViewSchema = z.object({
   view: z.literal("game"),
   params: z.object({}),
@@ -32,6 +37,7 @@ export const ViewStateSchema = z.discriminatedUnion("view", [
   LoginViewSchema,
   RegisterViewSchema,
   ProfileViewSchema,
+  MatchmakingViewSchema,
   GameViewSchema,
 ]);
 

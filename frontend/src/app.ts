@@ -3,6 +3,8 @@ import { renderHomeView } from "./views/home.js";
 import { renderLoginView } from "./views/login.js";
 import { renderRegisterView } from "./views/register.js";
 import { renderProfileView } from "./views/profile.js";
+import { renderMatchmakingView } from "./views/matchmaking.js";
+import { renderGameView } from "./views/game.js";
 import {
   getFallbackGlobalAppState,
   GlobalAppState,
@@ -28,7 +30,11 @@ function getGlobalState(): GlobalAppState {
   return navigateTo(view);
 }
 
-async function renderState(state: GlobalAppState, app: App, push: boolean = true) {
+async function renderState(
+  state: GlobalAppState,
+  app: App,
+  push: boolean = true,
+) {
   switch (state.viewState?.view) {
     case "home": {
       await renderHomeView(state.viewState, app);
@@ -46,9 +52,15 @@ async function renderState(state: GlobalAppState, app: App, push: boolean = true
       await renderProfileView(state.viewState, app);
       break;
     }
+    case "matchmaking": {
+      await renderMatchmakingView(state.viewState, app);
+      break;
+    }
+    case "game": {
+      await renderGameView(state.viewState, app);
+    }
   }
-  if (push)
-    window.history.pushState({}, "", "/" + state.viewState.view);
+  if (push) window.history.pushState({}, "", "/" + state.viewState.view);
 }
 
 class App {

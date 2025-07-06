@@ -1,5 +1,12 @@
 import { z } from "zod";
 
+export const PongOptionsSchema = z.object({
+  paddleRatio: z.number().min(0.1).max(0.5).default(0.4),
+  gameSpeed: z.number().min(0.5).max(2).default(1),
+});
+
+export type PongOptions = z.infer<typeof PongOptionsSchema>;
+
 export const Vector2Schema = z.object({
   x: z.number(),
   y: z.number(),

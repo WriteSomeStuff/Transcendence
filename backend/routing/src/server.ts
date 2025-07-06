@@ -8,16 +8,18 @@ app.get("/health", async (_, res) => {
 });
 
 app.addHook("onRequest", async (req, res) => {
-  const allowedRoutes = ["/user/profile"];
+  const allowedRoutes = ["/user/profile", "/matchmaking/ws"];
   (void res);
   if (!allowedRoutes.includes(req.url)) {
     console.log("Not allowed"); // TODO return actual error
   }
+  console.log(req.url);
 });
 
 app.register(proxy, {
   upstream: "http://matchmaking_service",
   prefix: "/matchmaking",
+  websocket: true,
 });
 
 app.register(proxy, {

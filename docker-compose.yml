@@ -35,7 +35,7 @@ services:
       - internal
     environment:
       - NODE_ENV=development
-      - USER_SERVICE_URL=http://user_service:8080/users
+      - USER_SERVICE_URL=http://user_service
       - AUTH_DB_PATH=/app/data/database/auth_db.sqlite3
     env_file:
       - .env
@@ -75,7 +75,7 @@ services:
     networks:
       - internal
     environment:
-      - AUTH_SERVICE_URL=http://auth_service:8080/auth
+      - AUTH_SERVICE_URL=http://auth_service/auth
       - USER_DB_PATH=/app/data/database/user_db.sqlite3
       - AVATAR_DIR_PATH=/app/data/avatars/
     env_file:
