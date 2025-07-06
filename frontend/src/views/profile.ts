@@ -196,10 +196,13 @@ export async function displayFriendList() {
       `Friend: ${String(friend.userId)} ${friend.username} ${friend.accountStatus}`,
     );
     const docUser = document.createElement("span");
+    docUser.className = 'min-w-[8rem] truncate';
     const docStatus = document.createElement("span");
+    docStatus.className = 'text-right';
     docUser.textContent = friend.username;
     docStatus.textContent = friend.accountStatus;
     const listElement = document.createElement("li");
+    listElement.className = 'flex justify-between items-center gap-4';
     listElement.appendChild(docUser);
     listElement.appendChild(docStatus);
     friendsList.appendChild(listElement);
