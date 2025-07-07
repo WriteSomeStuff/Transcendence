@@ -120,27 +120,36 @@ export const verify2FATokenHandler = async (request: FastifyRequest, reply: Fast
 	try {
 		// TODO make sure this request is sent with the correct context in body
 		// also needs to include username
-		const { userId, token, username } = request.body as { userId: number, token: string, username: string };
+		console.log(`[Auth Controller] Received request to verify 2FA token`);
+		const { token, username } = request.body as { token: string, username: string };
 
-		if (!userId || !token || !username) {
-			console.error(`[Auth Controller] Missing userId, token or username in request body`);
-			reply.status(400).send({ error: 'UserId, username and token are required' });
+		console.log(`[Auth Controller] Received request to verify 2FA token for user ${username}`);
+		if (!token || !username) {
+			console.error(`[Auth Controller] Missing token or username in request body`);
+			reply.status(400).send({ error: 'Username and token are required' });
 			return;
 		}
 
-		console.log(`[Auth Controller] Verifying 2FA token for user ${userId} ${username}`);
-		const result = await verify2FA(userId, token, username);
+		console.log(`[Auth Controller] Verifying 2FA token for user ${username}`);
+		const result = await verify2FA(token, username);
 		
 		if (!result.success) {
 			reply.status(401).send({ error: result.error });
 			return;
 		}
-		
-		console.log(`[Auth Controller] User ${userId} ${username} verified 2FA token successfully`);
 
-		console.log(`[Auth Controller] Handling successful login for user ${userId} ${username}`);
+		let userId = result.userId; // Ensure userId is defined
+		if (userId === undefined) {
+			console.error(`[Auth Controller] User ID missing after 2FA verification for user ${username}`);
+			reply.status(500).send({ error: "User ID missing after 2FA verification" });
+			return;
+		}
+
+		console.log(`[Auth Controller] User ${username} verified 2FA token successfully`);
+
+		console.log(`[Auth Controller] Handling successful login for user ${username}`);
 		await handleSuccessfulLogin(request, reply, userId, username);
-		console.log(`[Auth Controller] User ${userId} ${username} logged in successfully after 2FA verification`);
+		console.log(`[Auth Controller] User ${username} logged in successfully after 2FA verification`);
 
 		reply.status(200).send({ 
 			success: true,
