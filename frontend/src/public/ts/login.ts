@@ -12,14 +12,15 @@ export function bindVerify2FAModal() {
 	}
 }
 
-export function bindVerify2FAForm() {
-	const form = document.getElementById('verify2FAForm') as HTMLFormElement;
+export function bindVerify2FAForm(username: string) {
+	const form = document.getElementById('verify-2fa-form') as HTMLFormElement;
 	if (!form) return;
+	
 	form.addEventListener('submit', async function (event: Event) {
 		event.preventDefault();
 		console.log("[formHandlers] Handling 2FA verification");
 
-		const token = (document.getElementById('2faToken') as HTMLInputElement).value;
+		const token = (document.getElementById('2fa-token') as HTMLInputElement).value;
 
 		try {
 			const response = await fetch('/api/auth/verify2fa', {
@@ -27,7 +28,7 @@ export function bindVerify2FAForm() {
 				headers: {
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({ token })
+				body: JSON.stringify({ token, username })
 			});
 
 			const data = await response.json() as { success: boolean, error?: string };
