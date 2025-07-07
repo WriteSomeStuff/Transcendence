@@ -1,4 +1,5 @@
 import { FastifyRequest, FastifyReply } from "fastify";
+import { z } from 'zod';
 import { promises as fs } from "fs";
 import path from 'path';
 
@@ -8,7 +9,21 @@ import {
 	createTournament
 } from "./matchService";
 
+// const MatchResultSchema = z.object({
+// 	participants: z.array(z.object({
+// 		user_id: z.number().int(),
+// 		score: z.number().int(),
+// 	})),
+// 	start: z.date(),
+// 	end: z.date()
+// });
+
 export const createTournamentHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+	// const parsed = MatchResultSchema.safeParse(request.body);
+	// if (!parsed.success) {
+	// 	return reply.code(400);
+	// }
+	// parsed.data.participants
 	try {
 		const { name, userId } = request.body as { name: string, userId: number  };
 
