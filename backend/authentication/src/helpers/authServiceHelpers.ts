@@ -1,5 +1,5 @@
 export const fetchUserIdByUsername = async (username: string): Promise<number> => {
-	const url = process.env.USER_SERVICE_URL + '/get-username?username=' + encodeURIComponent(username);
+	const url = process.env["USER_SERVICE_URL"] + '/get-username?username=' + encodeURIComponent(username);
 	const response = await fetch(url, {
 		method: 'GET',
 		headers: {

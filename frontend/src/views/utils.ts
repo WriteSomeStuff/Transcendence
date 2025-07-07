@@ -1,0 +1,81 @@
+import { ViewStateSchema } from "./views.js";
+import type { App } from "../app.js";
+
+export function bindNavbar(app: App) {
+  app.appContainer.querySelectorAll("button[page]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      const target: HTMLElement = event.currentTarget as HTMLElement;
+      const page: string | null = target.getAttribute("page");
+      console.log("page of a button", page);
+      const view = ViewStateSchema.safeParse({ view: page, params: {} });
+      console.log("view", view);
+      if (view.success) {
+        app.selectView(view.data);
+      }
+    });
+  });
+}
+
+export const formBindings: Record<
+  string,
+  { formId: string; url: string; serviceName: string }
+> = {
+  register: {
+    formId: "registrationForm",
+    url: "/api/auth/register",
+    serviceName: "Registration",
+  },
+  login: { formId: "loginForm", url: "/api/auth/login", serviceName: "Login" },
+};
+
+type formBinding = { formId: string; url: string; serviceName: string };
+
+export function bindCredentialsForm(formBinding: formBinding, app: App) {
+  const form = document.getElementById(
+    formBinding.formId,
+  ) as HTMLFormElement | null;
+  if (!form) {
+    return;
+  }
+
+  form.addEventListener("submit", async function (event: Event) {
+    event.preventDefault(); // prevents automatic reload and allows manual handling
+    console.log("[FRONTEND] Handling login");
+
+    const username = (document.getElementById("username") as HTMLInputElement)
+      .value;
+    const password = (document.getElementById("password") as HTMLInputElement)
+      .value;
+
+    try {
+      const response = await fetch(formBinding.url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = (await response.json()) as {
+        success: boolean;
+        error?: string;
+      };
+
+      if (!response.ok || data.success === false) {
+        throw new Error(data.error || `HTTP error; status: ${response.status}`);
+      }
+
+      console.log(`${formBinding.serviceName} successful: ${data}`);
+      if (formBinding.formId === "registrationForm") {
+        app.selectView({ view: "login", params: {} });
+      } else {
+        app.resetView();
+      }
+    } catch (e) {
+      console.error(`${formBinding.serviceName} failed: ${e}`);
+      alert(`${formBinding.serviceName} failed: ${e}`);
+      // TODO further handling
+      app.resetView();
+    }
+  });
+}

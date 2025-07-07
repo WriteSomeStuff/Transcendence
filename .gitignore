@@ -1,9 +1,12 @@
-# modules
-node_modules/
-
 # databases
 database/
 *.sqlite3
+
+# folders
+dist/
+
+# container data
+data/
 
 # user uploads
 user_uploads/
@@ -19,3 +22,8 @@ output.css
 formHandlers.js
 selectView.js
 pullUsername.js
+# idea
+.idea/
+
+# modules
+node_modules/

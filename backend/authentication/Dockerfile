@@ -1,29 +1,13 @@
-ARG NODE_VERSION=24.0.1
-
-FROM node:${NODE_VERSION}-slim
-
-RUN apt-get update && \
-	apt-get install -y curl python3 make g++ && \
-	ln -s /usr/bin/python3 /usr/bin/python && \
-	npm install -g typescript
+FROM node:20-alpine3.22
 
 WORKDIR /app
+COPY package.json ./
+COPY package-lock.json ./
+COPY tsconfig.base.json ./
+COPY shared/schemas ./shared/schemas
+COPY backend/authentication ./backend/authentication
 
-RUN --mount=type=bind,source=package.json,target=package.json \
-	--mount=type=bind,source=package-lock.json,target=package-lock.json \
-	--mount=type=cache,target=/root/.npm \
-	npm ci --verbose
+RUN npm install --omit=dev -w authentication
 
-COPY tsconfig.json .
-COPY package.json .
-COPY package-lock.json .
-
-COPY src ./src
-
-RUN mkdir -p /data
-
-RUN npm run build
-
-EXPOSE 8081
-
-CMD ["npm", "run", "start"]
+ENV JWT_SECRET="my_secret"
+CMD npm run up -w authentication

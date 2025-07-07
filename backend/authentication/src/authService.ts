@@ -1,26 +1,25 @@
 import argon2 from "argon2";
 import * as OTPAuth from "otpauth";
 import QRCode from "qrcode";
-import db, { runTransaction } from "./db";
+import db, {runTransaction} from "./db.js";
 
-import { AuthResultObj, Enable2FAResultObj } from "./types/types";
-import { fetchUserIdByUsername } from "./helpers/authServiceHelpers";
+import type {AuthResultObj, Enable2FAResultObj} from "./types/types.js";
+import {fetchUserIdByUsername} from "./helpers/authServiceHelpers.ts";
 
+// @ts-ignore
 export const register = async (username: string, password: string): Promise<number> => {
 	try {
 		const hashedPassword = await argon2.hash(password);
 
-		const newUserId = runTransaction((db) => {
+		return runTransaction((db) => {
 			const stmt = db.prepare(`
 				INSERT INTO user (password_hash) 
 				VALUES (?)
 			`);
 			const result = stmt.run(hashedPassword);
-			
+
 			return Number(result.lastInsertRowid);
 		});
-
-		return newUserId;
 	} catch (e) {
 		throw e;
 	}
@@ -28,16 +27,14 @@ export const register = async (username: string, password: string): Promise<numb
 
 export const registerUserInUserService = async (username: string, userId: number): Promise<Response> => {
 	try {
-		const url = process.env.USER_SERVICE_URL + '/new-user';
-		const response = await fetch(url, {
+		const url = process.env["USER_SERVICE_URL"] + '/new-user';
+		return await fetch(url, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
 			},
-			body: JSON.stringify({ username, userId })
+			body: JSON.stringify({username, userId})
 		});
-
-		return response;
 	} catch (e) {
 		throw e;
 	}
@@ -59,9 +56,7 @@ export const login = async (username: string, password: string): Promise<AuthRes
 				WHERE
 					user_id = ?
 			`);
-			const row = stmt.get(userId) as {password_hash: string, two_fa_enabled: boolean };
-			
-			return row;
+			return stmt.get(userId) as { password_hash: string, two_fa_enabled: boolean };
 		});
 
 		if (!userInfo) {
@@ -96,8 +91,8 @@ export const login = async (username: string, password: string): Promise<AuthRes
 
 export const setStatusInUserService = async (userId: number, status: string): Promise<Response> => {
 	try {
-		const url = process.env.USER_SERVICE_URL + '/status';
-		const response = await fetch(url, {
+		const url = process.env["USER_SERVICE_URL"] + '/status';
+		return await fetch(url, {
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json'
@@ -107,19 +102,9 @@ export const setStatusInUserService = async (userId: number, status: string): Pr
 				status: status
 			})
 		});
-
-		return response;
 	} catch (e) {
 		throw e;
 	}
-}
-
-const fetchUsernameByUserId = async (userId: number): Promise<string> => {
-	// fetch call
-	// return username
-	// only used for label, we can use differnet label maybe
-
-	return "Placeholder";
 }
 
 /**
@@ -149,7 +134,7 @@ export const verify2FA = async (userId: number, token: string): Promise<AuthResu
 		}
 
 		const totp = new OTPAuth.TOTP({
-			issuer: 'Transendence',
+			issuer: 'Transcendence',
 			label: row.username, // change this label or fetch username
 			algorithm: 'SHA1',
 			digits: 6,
@@ -164,7 +149,7 @@ export const verify2FA = async (userId: number, token: string): Promise<AuthResu
 		}
 	} catch (e) {
 		console.error('Error during 2FA verification:', e);
-		return { success: false, error: "An error occured during 2FA verification" };
+		return { success: false, error: "An error occurred during 2FA verification" };
 	}
 }
 
@@ -211,7 +196,7 @@ export const enable2FA = async (userId: number): Promise<Enable2FAResultObj> => 
 		}
 
 		const totp = new OTPAuth.TOTP({
-			issuer: 'Transendence',
+			issuer: 'Transcendence',
 			label: row.username, // change this label or fetch username
 			algorithm: 'SHA1',
 			digits: 6,
@@ -255,7 +240,7 @@ export const disable2FA = async (userId: number) => {
 		stmt.run(userId);
 
 	} catch (e) {
-		throw new Error("An error occured disabling 2FA in the authentication database");
+		throw new Error("An error occurred disabling 2FA in the authentication database");
 	}
 }
 
