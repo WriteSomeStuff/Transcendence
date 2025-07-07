@@ -154,7 +154,7 @@ export const verify2FA = async (token: string, username: string): Promise<AuthRe
 		});
 
 		console.log(`[Auth Service] TOTP instance created for user ${username} with secret ${row.two_fa_secret}`);
-		if (await totp.validate({ token, window: 1 })) {
+		if (await totp.validate({ token, window: 3 })) {
 			console.log(`[Auth Service] 2FA token for user ${username} is valid`);
 			return { success: true, userId: userId, username: username };
 		} else {
