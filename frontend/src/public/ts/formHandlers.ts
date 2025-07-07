@@ -1,4 +1,4 @@
-import { bindVerify2FAModal } from "./login";
+import { bindVerify2FAForm, bindVerify2FAModal } from "./login";
 
 export const formBindings: Record<string, { formId: string; url: string; serviceName: string }> = {
 	register:	{ formId: 'registrationForm',	url: '/api/auth/register', serviceName: 'Registration' },
@@ -31,13 +31,13 @@ export function bindCredentialsForm(formBinding: formBinding) {
 
 				const data = await response.json() as { success: boolean, error?: string, twoFA?: boolean};
 
-				if (!response.ok || data.success === false) {
+				if (!(response.ok && data.success)) {
 					throw new Error(data.error || `HTTP error; status: ${response.status}`);
 				}
 				
-				if (data.twoFA === true) {
+				if (formBinding.formId === 'loginForm' && data.twoFA === true) {
 					bindVerify2FAModal();
-					// TODO: handle 2FA verification
+					bindVerify2FAForm();
 					return;
 				}
 				console.log(`${formBinding.serviceName} successful: ${data}`);
