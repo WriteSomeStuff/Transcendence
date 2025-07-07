@@ -8,14 +8,15 @@ import {
 	createMatchState,
 	createTournament
 } from "./matchService";
+import { error } from "console";
 
 const MatchResultSchema = z.object({
 	participants: z.array(z.object({
 		user_id: z.number().int(),
 		score: z.number().int(),
 	})),
-	start: z.date(),
-	end: z.date()
+	start: z.coerce.date(),
+	end: z.coerce.date(),
 });
 
 export const createTournamentHandler = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -54,9 +55,14 @@ export const createTournamentHandler = async (request: FastifyRequest, reply: Fa
 
 export const createMatchHandler = async(request: FastifyRequest, reply:FastifyReply) => {
 	try {
+		console.log("[Match controller] received a create match request", request.body);
 		const parsed = MatchResultSchema.safeParse(request.body);
 		if (!parsed.success) {
-			return reply.code(400);
+			reply.status(400).send({
+				success: false,
+				error: parsed.error,
+			});
+			return;
 		}
 		console.log(`[Match controller] inserting match_state into db`);
 		const matchId = await createMatchState(parsed.data.start.toISOString(), parsed.data.end.toISOString());
@@ -67,6 +73,10 @@ export const createMatchHandler = async(request: FastifyRequest, reply:FastifyRe
 			await createMatchParticipant(participant.user_id, matchId, participant.score);
 			console.log(`[Match controller] Inserting match_participant into db successful`);
 		}
+		reply.status(201).send({
+			success: true,
+			matchId: matchId,
+		});
 	}
 	catch (e: any) {
 		console.error('Error inserting new match:', e);

@@ -4,6 +4,7 @@ import fastifyJwt from "@fastify/jwt";
 import fastifyMultipart from '@fastify/multipart';
 
 import userRoutes from "./userRoutes";
+import matchRoutes from "./matchRoutes";
 
 const PORT: number = 8080;
 const HOST: string = '0.0.0.0';
@@ -43,6 +44,10 @@ app.decorate(
 
 app.register(userRoutes, {
 	prefix: '/users'
+});
+
+app.register(matchRoutes, {
+	prefix: '/match'
 });
 
 app.get('/users/health', async (_, reply) => {
