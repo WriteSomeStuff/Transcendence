@@ -1,7 +1,7 @@
 all:
 	mkdir -p ./backend/authentication/data/database
-	mkdir -p ./backend/userManagement/data/database
-	mkdir -p ./backend/userManagement/data/avatars/user_uploads
+	mkdir -p ./backend/user_management/data/database
+	mkdir -p ./backend/user_management/data/avatars/user_uploads
 	docker compose up --build
 
 down:
@@ -18,7 +18,7 @@ clean_db:
 
 clean_avatars:
 	docker volume rm transcendence_git_avatars || true
-	rm -rf ./backend/userManagement/data/avatars/user_uploads
+	rm -rf ./backend/user_management/data/avatars/user_uploads
 
 clean_users: down clean_db clean_avatars
 
