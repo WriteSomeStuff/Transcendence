@@ -17,28 +17,28 @@ export const createTournament = async (name: string) => {
 	}
 }
 
-export const createMatchState = async (tournamentId?: number) => {
+export const createMatchState = async (start?: string, end?: string, tournamentId?: number) => {
 	try {
 		const stmt = db.prepare(`
-			INSERT INTO match_state (tournament_id)
-			VALUES (?)
+			INSERT INTO match_state (match_date, match_end, tournament_id)
+			VALUES (?, ?, ?)
 			`);
 
-		const info = stmt.run(tournamentId ?? null);
+		const info = stmt.run(start, end, tournamentId ?? null);
 		return Number(info.lastInsertRowid);
 	} catch (e) {
 		throw e;
 	}
 }
 
-export const createMatchParticipant = async (userId: number, matchId: number) => {
+export const createMatchParticipant = async (userId: number, matchId: number, score: number) => {
 	try {
 		const stmt = db.prepare(`
-			INSERT INTO match_participant (user_id, match_id)
-			VALUES (?, ?)
+			INSERT INTO match_participant (user_id, match_id, score)
+			VALUES (?, ?, ?)
 			`);
 
-		stmt.run(userId, matchId);
+		stmt.run(userId, matchId, score);
 	} catch (e) {
 		throw e;
 	}

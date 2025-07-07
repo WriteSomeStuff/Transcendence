@@ -33,15 +33,15 @@ const sql = `
 		tournament_id		INTEGER PRIMARY KEY,
 		tournament_name		TEXT	NOT NULL	UNIQUE,
 		created_at			TEXT	DEFAULT (datetime('now', '+2 hour')),
-		tournament_end		TEXT	DEFAULT (NULL),
+		tournament_end		TEXT,
 		tournament_status	TEXT	DEFAULT ('ongoing')	CHECK(tournament_status IN ('ongoing', 'finished'))
 	);
 
 	CREATE TABLE IF NOT EXISTS match_state (
 		match_id		INTEGER PRIMARY KEY,
-		match_date		TEXT	DEFAULT (datetime('now', '+2 hour')),
-		match_status	TEXT	DEFAULT ('ongoing')	CHECK(match_status IN ('ongoing', 'finished')),
-		match_end		TEXT	DEFAULT (NULL),
+		match_date		TEXT,
+		match_status	TEXT	DEFAULT ('finished')	CHECK(match_status IN ('ongoing', 'finished')),
+		match_end		TEXT,
 		tournament_id	INTEGER,
 		FOREIGN KEY (tournament_id)
 			REFERENCES tournament (tournament_id)
@@ -51,7 +51,7 @@ const sql = `
 		user_id		INTEGER		NOT NULL,
 		match_id	INTEGER		NOT NULL,
 		score		INTEGER		DEFAULT (0),
-		PRIMARY KEY (user_id,match_id),
+		PRIMARY KEY (user_id, match_id),
 		FOREIGN KEY (user_id)
 			REFERENCES user (user_id),
 		FOREIGN KEY (match_id)
