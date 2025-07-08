@@ -254,7 +254,7 @@ export async function logOut(app: App) {
 		console.log("User logged out successfully");
 		alert("Log out successful");
 
-		// Go back to home page
+	  app.resetView();
 	});
 	
 }
