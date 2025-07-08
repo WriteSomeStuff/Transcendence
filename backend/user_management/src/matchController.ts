@@ -1,14 +1,11 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { z } from 'zod';
-import { promises as fs } from "fs";
-import path from 'path';
 
 import {
 	createMatchParticipant,
 	createMatchState,
 	createTournament
-} from "./matchService";
-import { error } from "console";
+} from "./matchService.ts";
 
 const MatchResultSchema = z.object({
 	participants: z.array(z.object({
