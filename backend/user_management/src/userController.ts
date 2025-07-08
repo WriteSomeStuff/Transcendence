@@ -17,7 +17,8 @@ import {
 	getFriendRequests,
 	getFriendList,
 	acceptFriendRequest,
-	removeFriend
+	removeFriend,
+	getUsername
 } from "./userService.js";
 
 export const insertUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -184,6 +185,34 @@ export const getUserIdByUsernameHandler = async (request: FastifyRequest, reply:
 		}
 	}
 }
+
+export const getUsernameByUserIdHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+	try {
+		const { userId } = request.query as { userId: number };
+
+		console.log(`[User Controller] Getting corresponding username for user id '${userId}'`);
+		const username = await getUsername(userId);
+		console.log(`[User Controller] Getting corresponding username for user id '${userId}' successful: ${username}`);
+
+		reply.status(200).send({
+			success: true,
+			username: username
+		});
+	} catch (e: any) {
+		if (e.message === "User not found") {
+			reply.status(404).send({
+				success: false,
+				error: e.message
+			});
+		} else {
+			reply.status(500).send({
+				success: false,
+				error: e
+			});
+		}
+	}
+}
+
 
 export const getUserAvatarHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {

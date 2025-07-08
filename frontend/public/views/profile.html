@@ -19,24 +19,43 @@
 		<div class="grid grid-cols-1 sm:grid-cols-2 gap-6 p-6 sm:p-10">
 			<div class="grid grid-cols-2 items-center p-8">
 				<h1 id="username" class="text-base sm:text-lg"></h1>
-				<button id="openUserInfoEditor" class="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6">
-					<img class="w-full h-full object-contain" src="/assets/gifs/pencil.gif" alt="Edit username or password"/>
+				<button id="openUserInfoEditor" class="w-4 h-5 sm:w-5 sm:h-6 md:w-6 md:h-7">
+					<img class="w-full h-full object-contain" src="./public/assets/gifs/pencil.gif" alt="Edit username or password"/>
 				</button>
-				<dialog class="modal" id="modal">
+				<dialog class="modal m-2" id="modal"> <!-- Edit user info -->
 					<h2>Update username, password or avatar</h2>
 					<form id="avatarForm" enctype="multipart/form-data">
-						<input type="file" id="avatarInput" accept="image/*" name="avatar">
-						<button type="submit">Upload</button>
+		 				<input type="file" id="avatarInput" accept="image/*" name="avatar" class="sm:text-base rounded-md border-2 border-gray-300">
+						<button type="submit" class="sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 text-white mt-2">Upload</button>
 					</form>
 					<form id="usernameForm">
-						<label>New username<input type="text" id="newUsername"></label>
-						<button type="submit">Submit</button>
+						<label>New username
+							<input type="text" id="newUsername"
+								placeholder="Enter new username" required
+								class="sm:text-base rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500"></label>
+						<button type="submit" class="sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 text-white mt-2">Submit</button>
 					</form>
 					<form id="passwordForm">
-						<label>New password<input type="text" id="newPassword"></label>
-						<button type="submit">Submit</button>
-					</form>
-					<button id="closeUserInfoEditor">Close</button>
+						<label>New password
+							<input type="text" id="newPassword"
+								placeholder="Enter new password" required
+								class="sm:text-base rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500"></label>
+						<button type="submit" class="sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 text-white mt-2">Submit</button>
+					</form> 
+					<button id="enable-2fa" class="sm:text-base rounded-md border-2 border-emerald-500 bg-emerald-700 hover:border-purple-500 hover:bg-purple-950 text-white mt-2">Enable 2fa</button>
+					<button id="disable-2fa" class="sm:text-base rounded-md border-2 border-red-500 bg-red-700 hover:border-purple-500 hover:bg-purple-950 text-white mt-2">Disable 2fa</button>
+					<button id="closeUserInfoEditor" class="sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 text-white mb-2 mt-6 mx-auto">Close</button>
+				</dialog>
+				<dialog class="modal m-2" id="2FAModal">
+					<div id="2fa-instructions" class="text-left my-6 mx-auto">
+						<img id="qr-code" class="mt-4 mb-6 w-48 h-48 sm:w-64 sm:h-64 mx-auto" src="" alt="QR code for 2fa setup"/> <!-- QR code for 2FA setup -->
+						<h2 class="text-lg font-bold mb-2">2FA Setup Instructions</h2>
+						<ol class="list-decimal list-inside">
+							<li>Download an authenticator app (e.g., Google Authenticator, Authy, or Microsoft Authenticator).</li>
+							<li>Scan the QR code displayed above with your authenticator app.</li>
+						</ol>
+					</div>
+					<button id="close2FAModal" class="sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 text-white mb-2 mt-6 mx-auto">Close</button>
 				</dialog>
 				<img class="w-full max-w-xs h-auto" id="avatarImg" alt="User Avatar"/>
 			</div>

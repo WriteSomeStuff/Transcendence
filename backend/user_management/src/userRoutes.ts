@@ -9,13 +9,13 @@ import {
 	insertUserHandler,
 	setStatusHandler,
 	getUserIdByUsernameHandler,
-
+	getUsernameByUserIdHandler,
 	friendRequestHandler,
 	acceptFriendRequestHandler,
 	rejectFriendRequestHandler,
 	getFriendRequestsHandler,
 	getFriendsHandler,
-	removeFriendHandler,
+	removeFriendHandler
 } from "./userController.js";
 
 // prefix: /users
@@ -28,7 +28,8 @@ export const userRoutes = async (app: FastifyInstance) => {
 	
 	app.post('/new-user',		insertUserHandler);
 	app.put('/status',			setStatusHandler);
-	app.get('/get-username',	getUserIdByUsernameHandler);
+	app.get('/get-userid',		getUserIdByUsernameHandler);
+	app.get('/get-username',	getUsernameByUserIdHandler);
 };
 
 // prefix: /users/friends

@@ -81,11 +81,12 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 		
 		// If login is successful and 2FA is enabled, send a response indicating that 2FA verification is required
 		if (result.twoFA) {
+			console.log(`[Auth Controller] User ${result.userId} ${username} has 2FA enabled`);
 			reply.status(200).send({
 				success: true,
 				twoFA: true,
 				message: "Two-factor authentication is enabled for this user. Please verify your token.",
-				next: "/verify2FA",
+				// userId: result.userId, //for testing purposes
 				username: username
 			});
 		}
@@ -119,28 +120,42 @@ export const verify2FATokenHandler = async (request: FastifyRequest, reply: Fast
 	try {
 		// TODO make sure this request is sent with the correct context in body
 		// also needs to include username
-		const { userId, token } = request.body as { userId: number, token: string };
+		console.log(`[Auth Controller] Received request to verify 2FA token`);
+		const { token, username } = request.body as { token: string, username: string };
 
-		if (!userId || !token) {
-			reply.status(400).send({ error: 'UserId and token are required' });
+		console.log(`[Auth Controller] Received request to verify 2FA token for user ${username}`);
+		if (!token || !username) {
+			console.error(`[Auth Controller] Missing token or username in request body`);
+			reply.status(400).send({ error: 'Username and token are required' });
 			return;
 		}
 
-		const result = await verify2FA(userId, token);
-
+		console.log(`[Auth Controller] Verifying 2FA token for user ${username}`);
+		const result = await verify2FA(token, username);
+		
 		if (!result.success) {
 			reply.status(401).send({ error: result.error });
 			return;
 		}
-		if (!result.username) {
-			throw new Error("Username is missing");
+
+		let userId = result.userId; // Ensure userId is defined
+		if (userId === undefined) {
+			console.error(`[Auth Controller] User ID missing after 2FA verification for user ${username}`);
+			reply.status(500).send({ error: "User ID missing after 2FA verification" });
+			return;
 		}
-		
-		console.log('User %d verified via 2FA', result.username);
 
+		console.log(`[Auth Controller] User ${username} verified 2FA token successfully`);
+
+		console.log(`[Auth Controller] Handling successful login for user ${username}`);
 		await handleSuccessfulLogin(request, reply, userId);
+		console.log(`[Auth Controller] User ${username} logged in successfully after 2FA verification`);
 
-		reply.status(200).send({ message: "2FA verification successful" });
+		reply.status(200).send({ 
+			success: true,
+			message: "2FA token verified successfully",
+			next: "/home"
+		});
 
 	} catch (e) {
 		console.error('Error verifying 2FA token:', e);
@@ -203,14 +218,22 @@ export const updatePasswordHandler = async (request: FastifyRequest, reply: Fast
 
 export const enable2FAHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const { userId } = request.body as { userId: number };
+		if (!request.user.userId) {
+			console.error(`[Auth Controller] Missing userId in request body`);
+			reply.status(400).send({ error: 'UserId is required' });
+			return;
+		}
 
-		const result = await enable2FA(userId);
+		console.log(`[Auth Controller] Enabling 2FA for user ${request.user.userId}`);
+		const result = await enable2FA(request.user.userId);
 
 		if (!result.success) {
+			console.error(`[Auth Controller] Failed to enable 2FA for user ${request.user.userId}: ${result.error}`);
 			reply.status(400).send({ error: result.error });
 			return;
 		}
+
+		console.log(`[Auth Controller] 2FA enabled successfully for user ${request.user.userId}`);
 
 		reply.status(200).send({
 			success: true,
@@ -229,9 +252,7 @@ export const enable2FAHandler = async (request: FastifyRequest, reply: FastifyRe
 
 export const disable2FAHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const { userId } = request.body as { userId: number };
-
-		await disable2FA(userId);
+		await disable2FA(request.user.userId);
 
 		reply.status(200).send({ success: true, message: "Two-factor authentication disabled successfully" });
 

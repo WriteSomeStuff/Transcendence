@@ -5,6 +5,7 @@ import { bindNavbar } from "./utils.js";
 import type { App } from "../app.js";
 import { FriendListResponseSchema } from "schemas";
 import type { Friend } from "schemas";
+import { bind2FAButtons } from "./2faHandlers.ts";
 
 export function bindAvatarForm() {
   const form = document.getElementById("avatarForm") as HTMLFormElement;
@@ -238,6 +239,7 @@ function bindProfileViewElements() {
   bindProfileModal();
   bindUserInfoUpdateForm("username");
   bindUserInfoUpdateForm("password");
+  bind2FAButtons();
 }
 
 export async function renderProfileView(
