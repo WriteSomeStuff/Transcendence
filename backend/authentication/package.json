@@ -1,0 +1,40 @@
+{
+  "name": "authentication",
+  "version": "1.0.0",
+  "description": "the authentication service",
+  "keywords": [
+    "authentication",
+    "microservice"
+  ],
+  "license": "MIT",
+  "author": "milana",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "up": "npm exec tsx src/server.ts"
+  },
+  "dependencies": {
+    "@fastify/cookie": "^11.0.2",
+    "@fastify/http-proxy": "^11.3.0",
+    "@fastify/jwt": "^9.1.0",
+    "argon2": "^0.43.0",
+    "bcrypt": "^6.0.0",
+    "better-sqlite3": "^11.10.0",
+    "fastify": "^5.4.0",
+    "fastify-type-provider-zod": "^5.0.1",
+    "hi-base32": "^0.5.1",
+    "otpauth": "^9.4.0",
+    "qrcode": "^1.5.4",
+    "tsx": "^4.20.3",
+    "uuid": "^11.1.0",
+    "zod": "^3.25.72"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^24.0.1",
+    "@types/qrcode": "^1.5.5",
+    "@types/uuid": "^10.0.0",
+    "typescript": "^5.8.3"
+  }
+}

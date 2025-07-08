@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+@tailwind utilities;
+
+@layer utilities {
+  @keyframes rainbow {
+    0% {
+      border-color: red;
+      box-shadow: 0 0 20px red;
+    }
+    10% {
+      border-color: orange;
+      box-shadow: 0 0 20px orange;
+    }
+    20% {
+      border-color: yellow;
+      box-shadow: 0 0 20px yellow;
+    }
+    30% {
+      border-color: lime;
+      box-shadow: 0 0 20px lime;
+    }
+    40% {
+      border-color: green;
+      box-shadow: 0 0 20px green;
+    }
+    50% {
+      border-color: cyan;
+      box-shadow: 0 0 20px cyan;
+    }
+    60% {
+      border-color: blue;
+      box-shadow: 0 0 20px blue;
+    }
+    70% {
+      border-color: indigo;
+      box-shadow: 0 0 20px indigo;
+    }
+    80% {
+      border-color: violet;
+      box-shadow: 0 0 20px violet;
+    }
+    90% {
+      border-color: pink;
+      box-shadow: 0 0 20px pink;
+    }
+    100% {
+      border-color: red;
+      box-shadow: 0 0 20px red;
+    }
+  }
+
+  @keyframes scrollLeft {
+    0% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+
+  .animate-rainbow {
+    animation: rainbow 20s infinite;
+  }
+
+  .animate-scrollLeft {
+    animation: scrollLeft 20s linear infinite;
+  }
+
+  .font-comic {
+    font-family: "Comic", sans-serif;
+  }
+
+  /* Background images */
+  .bg-stars {
+    background-image: url("/assets/backgrounds/movingStars.gif"); /* Note: no /public prefix */
+  }
+
+  /* Background size */
+  .bg-size-20 {
+    background-size: 20%;
+  }
+}
+
+@font-face {
+  font-family: "Comic";
+  src: url("/assets/font/comicsans.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}

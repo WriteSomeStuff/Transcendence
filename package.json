@@ -1,0 +1,33 @@
+{
+  "name": "transcendence",
+  "version": "1.0.0",
+  "description": "the pong game",
+  "keywords": [
+    "-"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "-"
+  },
+  "license": "MIT",
+  "author": "cat",
+  "type": "module",
+  "main": "-",
+  "scripts": {
+    "test": "-"
+  },
+  "workspaces": [
+    "frontend",
+    "shared/*",
+    "backend/authentication",
+    "backend/routing",
+    "backend/matchmaking",
+    "backend/game",
+    "backend/user_management"
+  ],
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
+}

@@ -1,0 +1,136 @@
+services:
+  nginx_service:
+    container_name: transcendence_nginx
+    restart: always
+    build:
+      context: ./
+      dockerfile: frontend/Dockerfile
+    healthcheck:
+      test: [ "CMD", "curl", "-fk", "https://localhost/index.html" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "8443:443"
+    networks:
+      - internal
+    environment:
+      - AUTH_SERVICE_URL=http://auth_service:8080/auth
+    depends_on:
+      - auth_service
+  auth_service:
+    container_name: transcendence_authentication
+    restart: always
+    build:
+      context: ./
+      dockerfile: backend/authentication/Dockerfile
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/auth/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - auth_db:/app/data/database
+    networks:
+      - internal
+    environment:
+      - NODE_ENV=development
+      - USER_SERVICE_URL=http://user_service
+      - AUTH_DB_PATH=/app/data/database/auth_db.sqlite3
+    env_file:
+      - .env
+    depends_on:
+      - routing_service
+  routing_service:
+    container_name: transcendence_routing
+    restart: always
+    build:
+      context: ./
+      dockerfile: backend/routing/Dockerfile
+    networks:
+      - internal
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://routing/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      - matchmaking_service
+      - game_service
+      - user_service
+  user_service:
+    container_name: transcendence_user
+    restart: always
+    build:
+      context: ./
+      dockerfile: backend/user_management/Dockerfile
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - user_db:/app/data/database
+      - avatars:/app/data/avatars
+    networks:
+      - internal
+    environment:
+      - AUTH_SERVICE_URL=http://auth_service/auth
+      - USER_DB_PATH=/app/data/database/user_db.sqlite3
+      - AVATAR_DIR_PATH=/app/data/avatars/
+    env_file:
+      - .env
+  matchmaking_service:
+    container_name: transcendence_matchmaking
+    restart: always
+    build:
+      context: ./
+      dockerfile: backend/matchmaking/Dockerfile
+    networks:
+      - internal
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://matchmaking/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      - game_service
+  game_service:
+    container_name: transcendence_game
+    restart: always
+    build:
+      context: ./
+      dockerfile: backend/game/Dockerfile
+    networks:
+      - internal
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://game/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  auth_db:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/authentication/data/database
+      o: bind
+  user_db:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/user_management/data/database
+      o: bind
+  avatars:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/user_management/data/avatars
+      o: bind
+
+    # Comment out to NOT have database and user uploads available on host TODO

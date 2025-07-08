@@ -1,0 +1,16 @@
+{
+  "name": "schemas",
+  "version": "1.0.0",
+  "description": "the shared zod  schemas to syncronize backend and frontend",
+  "keywords": ["schemas", "zod"],
+  "license": "MIT",
+  "author": "milana",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "zod": "^3.25.74"
+  }
+}
