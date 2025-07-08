@@ -7,7 +7,7 @@ import { FriendListResponseSchema } from "schemas";
 import type { Friend } from "schemas";
 import { bind2FAButtons } from "./2faHandlers.ts";
 
-export function bindAvatarForm() {
+function bindAvatarForm() {
   const form = document.getElementById("avatarForm") as HTMLFormElement;
   if (!form) return;
 
@@ -48,7 +48,7 @@ export function bindAvatarForm() {
   });
 }
 
-export function bindUserInfoUpdateForm(infoType: string) {
+function bindUserInfoUpdateForm(infoType: string) {
   if (infoType != "username" && infoType != "password") {
     alert("Incorrect usage of bindUserInfoUpdateForm function");
     // throw new Error("Incorrect usage of bindUserInfoUpdateForm function");
@@ -98,7 +98,7 @@ export function bindUserInfoUpdateForm(infoType: string) {
   });
 }
 
-export function bindProfileModal() {
+function bindProfileModal() {
   const modal = document.getElementById("modal") as HTMLDialogElement;
   const openModal = document.getElementById(
     "openUserInfoEditor",
@@ -136,7 +136,7 @@ async function fetchUserData() {
   }
 }
 
-export async function displayUsername() {
+async function displayUsername() {
   const user: any = await fetchUserData();
   if (!user) return;
   const fetchedUsername: string = user.data.username;
@@ -174,7 +174,7 @@ async function fetchFriendList(): Promise<Friend[] | string> {
   }
 }
 
-export async function displayFriendList() {
+async function displayFriendList() {
   const list: Friend[] | string = await fetchFriendList();
   const friendsList = document.getElementById(
     "friendsList",
@@ -187,7 +187,7 @@ export async function displayFriendList() {
     return;
   } else if (list.length === 0) {
     // no friends
-    friendsList.textContent = "lol no friends, loser";
+    friendsList.textContent = "You don't have any friends (yet)";
     return;
   }
 
@@ -210,7 +210,7 @@ export async function displayFriendList() {
   }
 }
 
-export async function displayAvatar() {
+async function displayAvatar() {
   try {
     const response: Response = await fetch("/api/user/avatar", {
       method: "GET",
@@ -231,6 +231,35 @@ export async function displayAvatar() {
   }
 }
 
+async function logOut() {
+	const logOutBtn = document.getElementById("logout");
+	if (!logOutBtn) return;
+	
+	logOutBtn.addEventListener("click", async (event) => {
+		event.preventDefault();
+		console.log("Logging out");
+		
+		const url = "/api/auth/logout";
+		const response = await fetch(url, { method: 'DELETE' });
+		
+		const data = (await response.json()) as {
+			  success: boolean;
+			  error?: string;
+		};
+		
+		if (!response.ok || data.success === false) {
+			console.error("Error, something went wrong logging out: " + data.error);
+			  alert(data.error || `HTTP error; status: ${response.status}`);
+		}
+
+		console.log("User logged out successfully");
+		alert("Log out successful");
+
+		// Go back to home page
+	});
+	
+}
+
 function bindProfileViewElements() {
   displayUsername();
   displayFriendList();
@@ -240,6 +269,7 @@ function bindProfileViewElements() {
   bindUserInfoUpdateForm("username");
   bindUserInfoUpdateForm("password");
   bind2FAButtons();
+  logOut();
 }
 
 export async function renderProfileView(
