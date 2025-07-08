@@ -4,6 +4,7 @@ WORKDIR /app
 COPY package.json ./
 COPY package-lock.json ./
 COPY tsconfig.base.json ./
+COPY shared/schemas ./shared/schemas
 COPY backend/user_management ./backend/user_management
 
 RUN npm install --omit=dev
