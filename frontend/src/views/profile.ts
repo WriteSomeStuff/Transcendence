@@ -88,7 +88,7 @@ function bindUserInfoUpdateForm(app: App, infoType: string) {
     if (!response.ok || data.success === false) {
       console.error(`[formHandlers] Updating ${infoType} failed`);
       alert(data.error || `HTTP error; status: ${response.status}`);
-      // throw new Error(data.error || `HTTP error; status: ${response.status}`);
+	  return;
     }
 
     console.log(`[formHandlers] Updating ${infoType} successful`);
