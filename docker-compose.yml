@@ -1,86 +1,136 @@
 services:
-  auth_service:
-    container_name: authentication
+  nginx_service:
+    container_name: transcendence_nginx
     restart: always
-    build: ./backend/authentication
+    build:
+      context: ./
+      dockerfile: frontend/Dockerfile
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/auth/health"]
+      test: [ "CMD", "curl", "-fk", "https://localhost/index.html" ]
       interval: 5s
       timeout: 5s
       retries: 10
     ports:
-      - 8081:8080
+      - "8443:443"
+    networks:
+      - internal
+    environment:
+      - AUTH_SERVICE_URL=http://auth_service:8080/auth
+    depends_on:
+      - auth_service
+  auth_service:
+    container_name: transcendence_authentication
+    restart: always
+    build:
+      context: ./
+      dockerfile: backend/authentication/Dockerfile
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/auth/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     volumes:
-      - auth_data:/app/data
+      - auth_db:/app/data/database
     networks:
       - internal
     environment:
       - NODE_ENV=development
-      - USER_SERVICE_URL=http://user_service:8080/users
+      - USER_SERVICE_URL=http://user_service
+      - AUTH_DB_PATH=/app/data/database/auth_db.sqlite3
     env_file:
       - .env
-
+    depends_on:
+      - routing_service
+  routing_service:
+    container_name: transcendence_routing
+    restart: always
+    build:
+      context: ./
+      dockerfile: backend/routing/Dockerfile
+    networks:
+      - internal
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://routing/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      - matchmaking_service
+      - game_service
+      - user_service
   user_service:
-    container_name: user_management
+    container_name: transcendence_user
     restart: always
-    build: ./backend/userManagement
+    build:
+      context: ./
+      dockerfile: backend/user_management/Dockerfile
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/users/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ]
       interval: 5s
       timeout: 5s
       retries: 10
-    ports:
-      - 8082:8080
     volumes:
-      - user_data:/app/data
+      - user_db:/app/data/database
+      - avatars:/app/data/avatars
     networks:
       - internal
     environment:
-      - AUTH_SERVICE_URL=http://auth_service:8080/auth
+      - AUTH_SERVICE_URL=http://auth_service/auth
+      - USER_DB_PATH=/app/data/database/user_db.sqlite3
+      - AVATAR_DIR_PATH=/app/data/avatars/
     env_file:
       - .env
-
-  nginx_service:
-    container_name: nginx
+  matchmaking_service:
+    container_name: transcendence_matchmaking
     restart: always
-    build: ./frontend
+    build:
+      context: ./
+      dockerfile: backend/matchmaking/Dockerfile
+    networks:
+      - internal
     healthcheck:
-      test: ["CMD", "curl", "-fk", "https://localhost/index.html"]
+      test: [ "CMD", "curl", "-f", "http://matchmaking/health" ]
       interval: 5s
       timeout: 5s
       retries: 10
-    ports:
-      - 8443:443
-    volumes:
-      - user_avatars:/etc/nginx/html/public/assets/avatars/user
+    depends_on:
+      - game_service
+  game_service:
+    container_name: transcendence_game
+    restart: always
+    build:
+      context: ./
+      dockerfile: backend/game/Dockerfile
     networks:
       - internal
-    environment:
-      - AUTH_SERVICE_URL=http://auth_service:8080/auth
-
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://game/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
 networks:
   internal:
     driver: bridge
 
 volumes:
-  auth_data:
+  auth_db:
     driver: local
     driver_opts:
       type: none
-      device: ./backend/authentication/data
+      device: ./backend/authentication/data/database
       o: bind
-  user_data:
+  user_db:
     driver: local
     driver_opts:
       type: none
-      device: ./backend/userManagement/data
+      device: ./backend/user_management/data/database
       o: bind
-  user_avatars:
+  avatars:
     driver: local
     driver_opts:
       type: none
-      device: ./frontend/src/public/assets/avatars/user
+      device: ./backend/user_management/data/avatars
       o: bind
 
     # Comment out to NOT have database and user uploads available on host TODO

@@ -1,0 +1,40 @@
+<div class="fixed top-0 left-0 w-full overflow-hidden pointer-events-none h-20 z-50">
+    <div class="w-full animate-scrollLeft">
+        <img src="/assets/gifs/ufo.gif" alt="scrolling gif" class="h-full"/>
+    </div>
+</div>
+<div class="m-0 p-0 font-comic overflow-y-hidden box-border flex h-screen w-screen items-center justify-center bg-stars bg-10% text-pink-200 relative">
+    <div class="flex flex-col w-full max-w-4xl h-[95vh] bg-black p-4 sm:p-6 md:p-8 text-center border-8 animate-rainbow overflow-y-auto">
+        <div class="flex justify-center items-center py-6">
+            <img src="https://i.picasion.com/gl/92/kjzM.gif" alt="header gif" class="w-full max-w-[750px] h-auto"/>
+        </div>
+        <div class="flex flex-col sm:flex-row sm:flex-wrap justify-center items-center gap-4 bg-purple-700 p-4">
+            <button class="px-3 py-2 text-sm sm:px-6 sm:py-4 sm:text-base rounded-md hover:bg-purple-950 w-full sm:w-auto" page="profile">Profile</button>
+            <button class="px-3 py-2 text-sm sm:px-6 sm:py-4 sm:text-base rounded-md hover:bg-purple-950 w-full sm:w-auto" page="memory">Memory</button>
+            <button class="px-3 py-2 text-sm sm:px-6 sm:py-4 sm:text-base rounded-md hover:bg-purple-950 w-full sm:w-auto">Log out</button>
+        </div>
+        <div class="flex flex-col justify-center items-center gap-12 p-6 sm:p-10 space-y-6">
+            <div class="flex flex-col sm:flex-row justify-center gap-4 mt-8 w-full max-w-2xl">
+                <button class="flex-1 px-6 py-3 bg-blue-900 hover:bg-blue-950 rounded-md text-lg" id="createRoom">
+                    Create Match
+                </button>
+                <button class="flex-1 px-6 py-3 bg-blue-900 hover:bg-blue-950 rounded-md text-lg">
+                    Create Tournament
+                </button>
+            </div>
+            <div class="flex flex-col gap-4 w-full max-w-2xl" id="availableRooms">
+                <div class="flex flex-col sm:flex-row justify-between items-center bg-purple-900/80 border border-purple-600 rounded-lg p-4 gap-4">
+                    <div class="text-left">
+                        <p class="text-lg font-semibold">Tournament #1</p> <!-- Pull data from db -->
+                        <p class="text-sm text-purple-200">Created by Chey • 3/8 players</p> <!-- Pull data from db -->
+                    </div>
+                    <button class="px-4 py-2 bg-blue-900 hover:bg-blue-950 rounded-md w-full sm:w-auto">Join</button>
+                </div>
+                <!-- Add more matches/tournaments depending on if any available -->
+            </div>
+
+        </div>
+    </div>
+    <img class="fixed bottom-4 left-4 w-[20vw] max-w-[120px] h-auto z-40" src="/assets/gifs/hellokitty.gif" alt="Hello kitty gif"/>
+    <img class="fixed bottom-4 right-4 w-[20vw] max-w-[120px] h-auto z-40" src="/assets/gifs/eevee.gif" alt="Eevee gif"/>
+</div>

@@ -1,7 +1,5 @@
-# modules
-node_modules/
-
-# database
+# databases
+database/
 *.sqlite3
 
 # folders
@@ -11,31 +9,21 @@ dist/
 data/
 
 # user uploads
-user/
+user_uploads/
 
 # environment
 .env
 
 # vscode extensions
 .vscode/
+
+# live server files
+output.css
+formHandlers.js
+selectView.js
+pullUsername.js
+# idea
+.idea/
 
 # modules
 node_modules/
-
-# database
-*.sqlite3
-
-# folders
-dist/
-
-# container data
-data/
-
-# user uploads
-user/
-
-# environment
-.env
-
-# vscode extensions
-.vscode/

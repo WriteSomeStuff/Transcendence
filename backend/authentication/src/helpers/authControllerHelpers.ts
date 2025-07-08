@@ -1,6 +1,5 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { setStatusInUserService, removeUser } from "../authService";
-
+import { setStatusInUserService, removeUser } from "../authService.ts";
 
 export const handleUserDbError = async (response: Response, userId: number, reply: FastifyReply) => {
     console.error('Error registering the user:', response.statusText);
@@ -19,16 +18,23 @@ export const handleUserDbError = async (response: Response, userId: number, repl
     });
 };
 
-export const handleSuccessfulLogin = async (request: FastifyRequest, reply: FastifyReply, userId: number, username: string) => {
+export const handleSuccessfulLogin = async (request: FastifyRequest, reply: FastifyReply, userId: number) => {
 	try {
 		const token = request.jwt.sign({ userId: userId }, { expiresIn: "1d" });
 		console.log(`[Auth Controller] JWT signed for '${userId}'`);
 		
-		const isProduction = process.env.NODE_ENV === 'production'; // TODO because testing with http requests, can also be set to "auto" maybe?
+		const isProduction = process.env["NODE_ENV"] === 'production'; // TODO because testing with http requests, set in docker-compose.yml
 		reply.setCookie('access_token', token, {
 			path: '/',
 			httpOnly: true,
 			secure: isProduction,
+			sameSite: "strict"
+		});
+		reply.setCookie("logged_in", "true", {
+			path: '/',
+			httpOnly: false,
+			secure: isProduction,
+			sameSite: "strict"
 		});
 		console.log(`[Auth Controller] Cookie set for user '${userId}'`);
 
@@ -47,7 +53,44 @@ export const handleSuccessfulLogin = async (request: FastifyRequest, reply: Fast
 		console.error();
 		reply.status(500).send({
 			success: false,
-			error: 'An error occured handling the login: ' + e
+			error: 'An error occurred handling the login: ' + e
+		});
+	}
+}
+
+export const handleAuthInvalidation = async (_request: FastifyRequest, reply: FastifyReply, userId: number) => {
+	try {
+		const isProduction = process.env["NODE_ENV"] === 'production'; // TODO because testing with http requests, set in docker-compose.yml
+		reply.clearCookie('access_token', {
+			path: '/',
+			httpOnly: true,
+			secure: isProduction,
+			sameSite: "strict"
+		});
+		reply.clearCookie("logged_in", {
+			path: '/',
+			httpOnly: false,
+			secure: isProduction,
+			sameSite: "strict"
+		});
+		console.log(`[Auth Controller] Cookie erased for user '${userId}'`);
+
+		console.log(`[Auth Controller] Setting status to 'offline' for user '${userId}'`);
+		const response = await setStatusInUserService(userId, 'offline');
+
+		if (!response.ok) {
+			reply.status(response.status).send({
+				success: false,
+				error: response.statusText
+			});
+		}
+		console.log(`[Auth Controller] Set status to 'offline' for user '${userId}'`);
+
+	} catch (e) {
+		console.error();
+		reply.status(500).send({
+			success: false,
+			error: 'An error occurred handling the auth invalidation: ' + e
 		});
 	}
 }
