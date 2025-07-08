@@ -7,7 +7,7 @@ import { FriendListResponseSchema } from "schemas";
 import type { Friend } from "schemas";
 import { bind2FAButtons } from "./2faHandlers.ts";
 
-function bindAvatarForm() {
+function bindAvatarForm(app: App) {
   const form = document.getElementById("avatarForm") as HTMLFormElement;
   if (!form) return;
 
@@ -44,11 +44,11 @@ function bindAvatarForm() {
     console.log("[formHandlers] Uploading new avatar successful");
     alert(`Avatar successfully uploaded!`);
 
-    (window as any).selectView?.("profile", false);
+    app.resetView();
   });
 }
 
-function bindUserInfoUpdateForm(infoType: string) {
+function bindUserInfoUpdateForm(app: App, infoType: string) {
   if (infoType != "username" && infoType != "password") {
     alert("Incorrect usage of bindUserInfoUpdateForm function");
     // throw new Error("Incorrect usage of bindUserInfoUpdateForm function");
@@ -94,7 +94,7 @@ function bindUserInfoUpdateForm(infoType: string) {
     console.log(`[formHandlers] Updating ${infoType} successful`);
     alert(`${infoTypeCapitalized} successfully updated!`);
 
-    (window as any).selectView?.("profile", false);
+    app.resetView();
   });
 }
 
@@ -264,11 +264,11 @@ function bindProfileViewElements(app: App) {
   displayUsername();
   displayFriendList();
   displayAvatar();
-  bindAvatarForm();
+  bindAvatarForm(app);
   bindProfileModal();
-  bindUserInfoUpdateForm("username");
-  bindUserInfoUpdateForm("password");
-  bind2FAButtons();
+  bindUserInfoUpdateForm(app, "username");
+  bindUserInfoUpdateForm(app, "password");
+  bind2FAButtons(app);
   logOut(app);
 }
 

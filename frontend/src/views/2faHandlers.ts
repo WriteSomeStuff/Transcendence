@@ -1,4 +1,4 @@
-export function bind2FAButtons() {
+export function bind2FAButtons(app: App) {
 	const enable2FAButton = document.getElementById('enable-2fa') as HTMLButtonElement;
 	const disable2FAButton = document.getElementById('disable-2fa') as HTMLButtonElement;
 	const qrCodeImage = document.getElementById('qr-code') as HTMLImageElement;
@@ -56,7 +56,7 @@ export function bind2FAButtons() {
 				}
 				alert('2FA disabled successfully!');
 
-				(window as any).selectView?.("profile", false);
+				app.resetView();
 			} catch (error) {
 				console.error('Error disabling 2FA:', error);
 				const message = error instanceof Error ? error.message : String(error);
