@@ -124,8 +124,10 @@ export function bindCredentialsForm(formBinding: formBinding, app: App) {
 
       console.log(`${formBinding.serviceName} successful: ${data}`);
       if (formBinding.formId === "registrationForm") {
+		alert("Registration successful!");
         app.selectView({ view: "login", params: {} });
       } else {
+		alert("Login successful!");
         app.resetView();
       }
     } catch (e) {
