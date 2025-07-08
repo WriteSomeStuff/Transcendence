@@ -3,9 +3,11 @@ import { z } from "zod";
 import { MatchmakingViewSchema } from "./views.js";
 import { bindNavbar } from "./utils.js";
 import type { App } from "../app.js";
+import { logOut } from "./profile.js";
 
 import { RoomSchema } from "schemas";
 import type { MatchmakingMessage, Room } from "schemas";
+import { log } from "console";
 
 const MatchmakingServerMessage = z.discriminatedUnion("action", [
   z.object({
@@ -89,6 +91,7 @@ export async function renderMatchmakingView(
     (res) => res.text(),
   );
   bindNavbar(app);
+  await logOut(app);
   const createButton = document.getElementById("createRoom");
   if (!createButton) {
     console.error("Couldn't find a button!");
