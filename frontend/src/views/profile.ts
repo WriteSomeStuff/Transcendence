@@ -230,7 +230,7 @@ async function displayAvatar() {
   }
 }
 
-async function logOut() {
+export async function logOut(app: App) {
 	const logOutBtn = document.getElementById("logout");
 	if (!logOutBtn) return;
 	
@@ -327,7 +327,7 @@ export function bind2FAButtons() {
 	}
 }
 
-function bindProfileViewElements() {
+function bindProfileViewElements(app: App) {
   displayUsername();
   displayFriendList();
   displayAvatar();
@@ -336,7 +336,7 @@ function bindProfileViewElements() {
   bindUserInfoUpdateForm("username");
   bindUserInfoUpdateForm("password");
   bind2FAButtons();
-  logOut();
+  logOut(app);
 }
 
 export async function renderProfileView(
@@ -347,6 +347,6 @@ export async function renderProfileView(
     res.text(),
   );
   bindNavbar(app);
-  bindProfileViewElements();
+  bindProfileViewElements(app);
   void view;
 }
