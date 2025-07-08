@@ -5,7 +5,7 @@ import { bindNavbar } from "./utils.js";
 import type { App } from "../app.js";
 
 import { RoomSchema } from "schemas";
-import type { MatchmakingMessage } from "schemas";
+import type { MatchmakingMessage, Room } from "schemas";
 
 const MatchmakingServerMessage = z.discriminatedUnion("action", [
   z.object({
@@ -17,6 +17,64 @@ const MatchmakingServerMessage = z.discriminatedUnion("action", [
     gameId: z.string(),
   }),
 ]);
+
+function createRoomElement(room: Room, socket: WebSocket): HTMLElement {
+  const roomDiv = document.createElement("div");
+  roomDiv.classList.add("flex");
+  roomDiv.classList.add("flex-col");
+  roomDiv.classList.add("sm:flex-row");
+  roomDiv.classList.add("justify-between");
+  roomDiv.classList.add("items-center");
+  roomDiv.classList.add("bg-purple-900/80");
+  roomDiv.classList.add("border");
+  roomDiv.classList.add("border-purple-600");
+  roomDiv.classList.add("rounded-lg");
+  roomDiv.classList.add("p-4");
+  roomDiv.classList.add("gap-4");
+  const infoDiv = document.createElement("div");
+  infoDiv.classList.add("text-left");
+  const gameType = document.createElement("p");
+  gameType.classList.add("text-lg");
+  gameType.classList.add("font-semibold");
+  gameType.textContent = room.gameData.game;
+  infoDiv.appendChild(gameType);
+  const playersAmount = document.createElement("p");
+  playersAmount.classList.add("text-sm");
+  playersAmount.classList.add("text-purple-200");
+  playersAmount.textContent = `${room.joinedUsers.length}/${room.size} players`;
+  infoDiv.appendChild(playersAmount);
+  roomDiv.appendChild(infoDiv);
+  const button = document.createElement("button");
+  button.classList.add("px-4");
+  button.classList.add("py-2");
+  button.classList.add("bg-blue-900");
+  button.classList.add("hover:bg-blue-950");
+  button.classList.add("rounded-md");
+  button.classList.add("w-full");
+  button.classList.add("sm:w-auto");
+  button.textContent = "Join";
+  button.onclick = () => {
+    const message: MatchmakingMessage = {
+      action: "joinRoom",
+      roomId: room.id,
+    };
+    socket.send(JSON.stringify(message));
+  };
+  roomDiv.appendChild(button);
+  return roomDiv;
+}
+
+function fillAvailableRooms(rooms: Room[], docRooms: HTMLElement, userId: number, socket: WebSocket) {
+  docRooms.innerHTML = "";
+  for (const room of rooms) {
+    if (
+      room.permissions.type === "public" ||
+      room.permissions.allowedUsers.includes(userId)
+    ) {
+      docRooms.appendChild(createRoomElement(room, socket));
+    }
+  }
+}
 
 export async function renderMatchmakingView(
   view: z.infer<typeof MatchmakingViewSchema>,
@@ -37,7 +95,7 @@ export async function renderMatchmakingView(
     app.selectView({ view: "profile", params: {} });
     return;
   }
-  const docRooms = document.getElementById("roomsGrid");
+  const docRooms = document.getElementById("availableRooms");
   if (!docRooms) {
     console.error("Couldn't find rooms grid!");
     app.selectView({ view: "profile", params: {} });
@@ -69,38 +127,7 @@ export async function renderMatchmakingView(
     }
     switch (parsed.data.action) {
       case "update": {
-        while (docRooms.children.length > 1) {
-          if (docRooms.lastChild) docRooms.removeChild(docRooms.lastChild);
-        }
-        for (const room of parsed.data.rooms) {
-          if (
-            room.permissions.type === "public" ||
-            room.permissions.allowedUsers.includes(userId)
-          ) {
-            const roomUl = document.createElement("ul");
-            for (let i = 0; i < room.size; i++) {
-              const li = document.createElement("li");
-              const userId = room.joinedUsers[i];
-              if (userId !== undefined) {
-                li.textContent = userId.toString(); // TODO proper display of s username
-              }
-              roomUl.appendChild(li);
-            }
-            const li = document.createElement("li");
-            const button = document.createElement("button");
-            button.textContent = "Join";
-            button.onclick = () => {
-              const message: MatchmakingMessage = {
-                action: "joinRoom",
-                roomId: room.id,
-              };
-              socket.send(JSON.stringify(message));
-            };
-            li.appendChild(button);
-            roomUl.appendChild(li);
-            docRooms.appendChild(roomUl);
-          }
-        }
+        fillAvailableRooms(parsed.data.rooms, docRooms, userId, socket);
         break;
       }
       case "started": {
