@@ -1,11 +1,13 @@
-import { Court, initCourt } from "./court.ts";
-import { CourtState, updateCourtState } from "./court_state.ts";
+import type { Court, CourtState } from "schemas";
+
+import { initCourt } from "./court.ts";
+import { initCourtState, updateCourtState } from "./court_state.ts";
 import { PlayerInput } from "./player_input.ts";
 import { ScoreController } from "./score_controller.ts";
+import { vec2 } from "./vector2.js";
 
 export class CourtController {
   private readonly court: Court;
-  private lastTouch: number | null = null;
   private scoreController: ScoreController;
 
   public constructor(scoreController: ScoreController) {
@@ -32,17 +34,24 @@ export class CourtController {
   }
 
   public update(delta: number): void {
-    const [bouncedIndex, state] = updateCourtState(
+    const updateResult = updateCourtState(
       this.getState(),
       this.court.geometry,
       delta,
     );
-    this.court.state = state;
-    if (this.court.state.ballPosition.length() === 0) {
-      // the court was reset
-      this.scoreController.onBallMissed(this.lastTouch, bouncedIndex);
-    } else if (bouncedIndex != -1) {
-      this.lastTouch = bouncedIndex;
+    if (typeof updateResult === "number") {
+      this.scoreController.onBallMissed(
+        this.court.state.lastBouncedIndex,
+        updateResult,
+      );
+      this.court.state = initCourtState(
+        this.court.geometry,
+        vec2.length(this.court.state.ballVelocity),
+        this.court.state.paddles.map((paddle) => paddle.edgeRatio),
+        updateResult,
+      );
+    } else {
+      this.court.state = updateResult;
     }
   }
 }

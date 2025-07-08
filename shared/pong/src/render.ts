@@ -1,5 +1,10 @@
-import { Court } from "./court.ts";
-import { Vector2 } from "./vector2.ts";
+import type { Vector2, Court } from "schemas";
+
+import { vec2 } from "./vector2.js";
+import {
+  getPaddleQuadrilateral,
+  getWallQuadrilateral,
+} from "./court_geometry.js";
 
 function translatePoint(
   court: Court,
@@ -8,7 +13,7 @@ function translatePoint(
 ): Vector2 {
   const widthRatio = ctx.canvas.width / court.geometry.frameWidth;
   const heightRatio = ctx.canvas.height / court.geometry.frameHeight;
-  return new Vector2(
+  return vec2.create(
     p.x * widthRatio + ctx.canvas.width / 2,
     p.y * heightRatio + ctx.canvas.height / 2,
   );
@@ -20,10 +25,10 @@ function addQuadrilateral(
   points: [Vector2, Vector2, Vector2, Vector2],
 ) {
   ctx.beginPath();
-  ctx.moveTo(...translatePoint(court, ctx, points[0]).toTuple());
-  ctx.lineTo(...translatePoint(court, ctx, points[1]).toTuple());
-  ctx.lineTo(...translatePoint(court, ctx, points[2]).toTuple());
-  ctx.lineTo(...translatePoint(court, ctx, points[3]).toTuple());
+  ctx.moveTo(...vec2.toTuple(translatePoint(court, ctx, points[0])));
+  ctx.lineTo(...vec2.toTuple(translatePoint(court, ctx, points[1])));
+  ctx.lineTo(...vec2.toTuple(translatePoint(court, ctx, points[2])));
+  ctx.lineTo(...vec2.toTuple(translatePoint(court, ctx, points[3])));
   ctx.closePath();
   ctx.fillStyle = "black";
   ctx.fill();
@@ -32,18 +37,18 @@ function addQuadrilateral(
 export function render(court: Court, ctx: CanvasRenderingContext2D) {
   ctx.reset();
   for (let i = 0; i < court.geometry.playerCount; i++) {
-    addQuadrilateral(court, ctx, court.geometry.getWallQuadrilateral(i));
+    addQuadrilateral(court, ctx, getWallQuadrilateral(court.geometry, i));
     addQuadrilateral(
       court,
       ctx,
-      court.geometry.getPaddleQuadrilateral(i, court.state.paddles[i]!),
+      getPaddleQuadrilateral(court.geometry, i, court.state.paddles[i]!),
     );
   }
   const widthRatio = ctx.canvas.width / court.geometry.frameWidth;
   const heightRatio = ctx.canvas.height / court.geometry.frameHeight;
   ctx.beginPath();
   ctx.ellipse(
-    ...translatePoint(court, ctx, court.state.ballPosition).toTuple(),
+    ...vec2.toTuple(translatePoint(court, ctx, court.state.ballPosition)),
     court.geometry.ballRadius * widthRatio,
     court.geometry.ballRadius * heightRatio,
     0,
