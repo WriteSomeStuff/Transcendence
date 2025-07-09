@@ -1,32 +1,34 @@
-<div class="m-0 p-0 font-comic overflow-y-hidden box-border flex h-screen w-screen items-center justify-center bg-stars bg-10% text-pink-200">
-	<div class="flex flex-col w-1/2 h-full bg-black p-5 text-center border-8 animate-rainbow">
-		<div class="flex justify-center items-center p-16">
-			<img src="https://i.picasion.com/gl/92/kjzM.gif" width="750" height="80">
-		</div>
-		<div class="gap-4 bg-purple-700">
-			<button class="px-6 py-4 rounded-md hover:bg-purple-950" page="home">Home</button>
-			<button class="px-6 py-4 rounded-md hover:bg-purple-950" page="login">Log in</button>
-		</div>
-		<div>
-			<p class="p-16">Register here! ʕ◉ᴥ◉ʔ</p>
+<div class="fixed top-0 left-0 w-full overflow-hidden pointer-events-none h-20 z-50">
+  <div class="w-full animate-scrollLeft">
+    <img src="/assets/gifs/ufo.gif" alt="scrolling gif" class="h-full"/>
+  </div>
+</div>
+<div class="m-0 p-0 font-comic overflow-y-hidden box-border flex h-screen w-screen items-center justify-center bg-stars bg-10% text-pink-200 relative">
+  <div class="flex flex-col w-full max-w-4xl h-[95vh] bg-black p-4 sm:p-6 md:p-8 text-center border-8 animate-rainbow overflow-y-auto">
+    <div class="flex justify-center items-center py-6">
+      <img src="https://i.picasion.com/gl/92/kjzM.gif" alt="header gif" class="w-full max-w-[750px] h-auto"/>
+    </div>
+    <div class="flex flex-col sm:flex-row sm:flex-wrap justify-center items-center gap-4 bg-purple-700 p-4">
+	    <button class="px-3 py-2 text-sm sm:px-6 sm:py-4 sm:text-base rounded-md hover:bg-purple-950 w-full sm:w-auto" page="home">Home</button>
+	    <button class="px-3 py-2 text-sm sm:px-6 sm:py-4 sm:text-base rounded-md hover:bg-purple-950 w-full sm:w-auto" page="login">Log in</button>
+	  </div>
+		<div class="flex flex-col justify-center items-center gap-12 p-6 sm:p-10 space-y-6">
+			<p class="text-base sm:text-lg">Register here! ʕ◉ᴥ◉ʔ</p>
 		</div>
 		<div>
 			<form id="registrationForm">
 				<div>
 					<label for="username">Username:</label>
-					<input type="text" id="username" name="username" required>
+					<input class="bg-white text-black" type="text" id="username" name="username" required>
 				</div>
 				<div>
 					<label for="password">Password:</label>
-					<input type="text" id="password" name="password" required>
+					<input class="bg-white text-black" type="text" id="password" name="password" required>
 				</div>
 				<input type="submit" value="Submit">
 			</form>
 		</div>
 	</div>
-</div>
-<div class="fixed bottom-0 left-0 w-full overflow-hidden pointer-events-none h-20">
-	<div class="w-[100%] animate-scrollLeft">
-		<img src="../assets/gifs/ufo.gif" alt="scrolling gif" class="h-full" />
-	</div>
+  <img class="fixed bottom-4 left-4 w-[20vw] max-w-[120px] h-auto z-40" src="/assets/gifs/hellokitty.gif" alt="Hello kitty gif"/>
+	<img class="fixed bottom-4 right-4 w-[20vw] max-w-[120px] h-auto z-40" src="/assets/gifs/eevee.gif" alt="Eevee gif"/>
 </div>

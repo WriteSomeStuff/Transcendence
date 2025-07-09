@@ -1,8 +1,9 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { promises as fs } from "fs";
-import path from 'path';
+import path, { parse } from 'path';
 
 import type { FriendRequest, Friend } from "./types/types.js";
+import { CredentialsSchema } from "schemas";
 import {
 	insertUser,
 	getUserDataFromDb,
@@ -17,7 +18,8 @@ import {
 	getFriendRequests,
 	getFriendList,
 	acceptFriendRequest,
-	removeFriend
+	removeFriend,
+	getUsername
 } from "./userService.js";
 
 export const insertUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -61,7 +63,7 @@ export const getUserDataHandler = async (request: FastifyRequest, reply: Fastify
 		console.error('Error ugetting user data:', e);
 		reply.status(500).send({
 			success: false,
-			error: 'An error occured getting the user data: '+ e
+			error: 'An error occured getting the user data: ' + e
 		});
 	}
 };
@@ -69,11 +71,13 @@ export const getUserDataHandler = async (request: FastifyRequest, reply: Fastify
 export const updateUsernameHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
 		const { newValue } = request.body as { newValue: string };
-
-		if (newValue.length < 3) {
-			throw new Error("Username too short");
-		} else if (newValue.length > 32) {
-			throw new Error("Username too long");
+		const parseResult = CredentialsSchema.shape.username.safeParse(newValue);
+		if (!parseResult.success) {
+			reply.status(400).send({
+				success: false,
+				error: parseResult.error.errors.map((err) => err.message).join(", ")
+			});
+			return;
 		}
 
 		console.log(`[User Controller] Updating username in db for user ${request.user.userId} to '${newValue}'`);
@@ -92,28 +96,25 @@ export const updateUsernameHandler = async (request: FastifyRequest, reply: Fast
 				success: false,
 				error: "Username already exists"
 			})
-		} else if (e.message === "Username too short" || e.message === "Username too long") {
-			reply.status(400).send({
-				success: false,
-				error: e.message
-			});
 		} else {
 			reply.status(500).send({
 				success: false,
 				error: 'An error occured updating the username:' + e
 			});
-		}		
+		}
 	}
 };
 
 export const updatePasswordHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
 		const { newValue } = request.body as { newValue: string };
-
-		if (newValue.length < 6) {
-			throw new Error("Password too short");
-		} else if (newValue.length > 64) {
-			throw new Error("Password too long");
+		const parseResult = CredentialsSchema.shape.password.safeParse(newValue);
+		if (!parseResult.success) {
+			reply.status(400).send({
+				success: false,
+				error: parseResult.error.errors.map((err) => err.message).join(", ")
+			});
+			return;
 		}
 
 		console.log(`[User Controller] Updating password in auth db for user ${request.user.userId}`);
@@ -126,17 +127,10 @@ export const updatePasswordHandler = async (request: FastifyRequest, reply: Fast
 		});
 	} catch (e: any) {
 		console.error('Error updating password:', e);
-		if (e.message === "Password too short" || e.message === "Password too long") {
-			reply.status(400).send({
-				success: false,
-				error: e.message
-			});
-		} else {
-			reply.status(500).send({
-				success: false,
-				error: 'An error occured updating the password:' + e
-			});
-		}
+		reply.status(500).send({
+			success: false,
+			error: 'An error occured updating the password:' + e
+		});
 	}
 }
 
@@ -185,6 +179,34 @@ export const getUserIdByUsernameHandler = async (request: FastifyRequest, reply:
 	}
 }
 
+export const getUsernameByUserIdHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+	try {
+		const { userId } = request.query as { userId: number };
+
+		console.log(`[User Controller] Getting corresponding username for user id '${userId}'`);
+		const username = await getUsername(userId);
+		console.log(`[User Controller] Getting corresponding username for user id '${userId}' successful: ${username}`);
+
+		reply.status(200).send({
+			success: true,
+			username: username
+		});
+	} catch (e: any) {
+		if (e.message === "User not found") {
+			reply.status(404).send({
+				success: false,
+				error: e.message
+			});
+		} else {
+			reply.status(500).send({
+				success: false,
+				error: e
+			});
+		}
+	}
+}
+
+
 export const getUserAvatarHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
 		console.log('[User Controller] Getting user avatar from user db for:', request.user.userId);
@@ -197,19 +219,19 @@ export const getUserAvatarHandler = async (request: FastifyRequest, reply: Fasti
 				error: "Avatar not found"
 			});
 		}
-		
+
 		console.log('[User Controller] Reading from file', avatarPath);
 		const data = await fs.readFile(avatarPath);
 		console.log('[User Controller] Sending avatar data', data);
-		
+
 		reply.type('image/jpg').send(data);
 	} catch (e: any) {
 		if (e.code === "ENOENT") {
 			console.error('[User Controller] Error getting the avatar:', e);
 			reply.status(404).send({
-                success: false,
-                error: "Avatar file not found"
-            });
+				success: false,
+				error: "Avatar file not found"
+			});
 		} else {
 			console.error('[User Controller] Error getting the avatar:', e);
 			reply.status(500).send({
@@ -230,12 +252,12 @@ export const updateUserAvatarHandler = async (request: FastifyRequest, reply: Fa
 			});
 			return;
 		}
-		
+
 		const ext = file.mimetype.split('/')[1];
 		const filename = `user_${request.user.userId}.${ext}`;
 		const filePath = path.join(process.env["AVATAR_DIR_PATH"] as string, 'user_uploads/', filename);
 		console.log(`${filePath}: ${file}`);
-		
+
 		const buffer = await file.toBuffer();
 
 		console.log(`[User Controller] Updating avatar in db for user ${request.user.userId}`);
@@ -414,5 +436,5 @@ export const removeFriendHandler = async (request: FastifyRequest, reply: Fastif
 			success: false,
 			error: 'Error: ' + e
 		})
-	}	
+	}
 }

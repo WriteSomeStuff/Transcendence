@@ -6,7 +6,7 @@ import type { App } from "../app.js";
 import { FriendListResponseSchema } from "schemas";
 import type { Friend } from "schemas";
 
-export function bindAvatarForm() {
+function bindAvatarForm(app: App) {
   const form = document.getElementById("avatarForm") as HTMLFormElement;
   if (!form) return;
 
@@ -43,11 +43,11 @@ export function bindAvatarForm() {
     console.log("[formHandlers] Uploading new avatar successful");
     alert(`Avatar successfully uploaded!`);
 
-    (window as any).selectView?.("profile", false);
+    app.resetView();
   });
 }
 
-export function bindUserInfoUpdateForm(infoType: string) {
+function bindUserInfoUpdateForm(app: App, infoType: string) {
   if (infoType != "username" && infoType != "password") {
     alert("Incorrect usage of bindUserInfoUpdateForm function");
     // throw new Error("Incorrect usage of bindUserInfoUpdateForm function");
@@ -87,17 +87,17 @@ export function bindUserInfoUpdateForm(infoType: string) {
     if (!response.ok || data.success === false) {
       console.error(`[formHandlers] Updating ${infoType} failed`);
       alert(data.error || `HTTP error; status: ${response.status}`);
-      // throw new Error(data.error || `HTTP error; status: ${response.status}`);
+	  return;
     }
 
     console.log(`[formHandlers] Updating ${infoType} successful`);
     alert(`${infoTypeCapitalized} successfully updated!`);
 
-    (window as any).selectView?.("profile", false);
+    app.resetView();
   });
 }
 
-export function bindProfileModal() {
+function bindProfileModal() {
   const modal = document.getElementById("modal") as HTMLDialogElement;
   const openModal = document.getElementById(
     "openUserInfoEditor",
@@ -135,7 +135,7 @@ async function fetchUserData() {
   }
 }
 
-export async function displayUsername() {
+async function displayUsername() {
   const user: any = await fetchUserData();
   if (!user) return;
   const fetchedUsername: string = user.data.username;
@@ -173,7 +173,7 @@ async function fetchFriendList(): Promise<Friend[] | string> {
   }
 }
 
-export async function displayFriendList() {
+async function displayFriendList() {
   const list: Friend[] | string = await fetchFriendList();
   const friendsList = document.getElementById(
     "friendsList",
@@ -186,7 +186,7 @@ export async function displayFriendList() {
     return;
   } else if (list.length === 0) {
     // no friends
-    friendsList.textContent = "lol no friends, loser";
+    friendsList.textContent = "You don't have any friends (yet)";
     return;
   }
 
@@ -209,7 +209,7 @@ export async function displayFriendList() {
   }
 }
 
-export async function displayAvatar() {
+async function displayAvatar() {
   try {
     const response: Response = await fetch("/api/user/avatar", {
       method: "GET",
@@ -230,14 +230,113 @@ export async function displayAvatar() {
   }
 }
 
-function bindProfileViewElements() {
+export async function logOut(app: App) {
+	const logOutBtn = document.getElementById("logout");
+	if (!logOutBtn) return;
+	
+	logOutBtn.addEventListener("click", async (event) => {
+		event.preventDefault();
+		console.log("Logging out");
+		
+		const url = "/api/auth/logout";
+		const response = await fetch(url, { method: 'DELETE' });
+		
+		const data = (await response.json()) as {
+			  success: boolean;
+			  error?: string;
+		};
+		
+		if (!response.ok || data.success === false) {
+			console.error("Error, something went wrong logging out: " + data.error);
+			  alert(data.error || `HTTP error; status: ${response.status}`);
+		}
+
+		console.log("User logged out successfully");
+		alert("Log out successful");
+
+	  app.resetView();
+	});
+	
+}
+
+export function bind2FAButtons(app: App) {
+	const enable2FAButton = document.getElementById('enable-2fa') as HTMLButtonElement;
+	const disable2FAButton = document.getElementById('disable-2fa') as HTMLButtonElement;
+	const qrCodeImage = document.getElementById('qr-code') as HTMLImageElement;
+	const twoFAModal = document.getElementById('2FAModal') as HTMLDialogElement;
+	const close2FAModal = document.getElementById('close2FAModal') as HTMLButtonElement;
+
+	if (enable2FAButton) {
+		enable2FAButton.addEventListener('click', async () => {
+			enable2FAButton.disabled = true;
+			disable2FAButton?.removeAttribute('disabled');
+			try {
+				const response = await fetch('/api/auth/enable2fa', {
+					method: 'POST'
+				});
+				const data = await response.json();
+				if (!response.ok || !data.success) {
+					throw new Error(data.error || `HTTP error; status: ${response.status}`);
+				}
+
+				// Set QR code and open modal
+				if (qrCodeImage && data.qrCode) {
+					qrCodeImage.src = data.qrCode;
+				}
+				if (twoFAModal) {
+					twoFAModal.showModal();
+				}
+
+				alert('2FA enabled successfully!');
+
+			} catch (error) {
+				console.error('Error enabling 2FA:', error);
+				const message = error instanceof Error ? error.message : String(error);
+				alert(`Failed to enable 2FA: ${message}`);
+			}
+		});
+	}
+
+	if (close2FAModal && twoFAModal) {
+		close2FAModal.addEventListener('click', () => {
+			twoFAModal.close();
+		});
+	}
+
+	if (disable2FAButton) {
+		disable2FAButton.addEventListener('click', async () => {
+			disable2FAButton.disabled = true;
+			enable2FAButton?.removeAttribute('disabled');
+			try {
+				const response = await fetch('/api/auth/disable2fa', {
+					method: 'POST'
+				});
+				const data = await response.json();
+				if (!response.ok || !data.success) {
+					throw new Error(data.error || `HTTP error; status: ${response.status}`);
+				}
+				alert('2FA disabled successfully!');
+
+				app.resetView();
+			} catch (error) {
+				console.error('Error disabling 2FA:', error);
+				const message = error instanceof Error ? error.message : String(error);
+				alert(`Failed to disable 2FA: ${message}`);
+			}
+		});
+	}
+}
+
+function bindProfileViewElements(app: App) {
   displayUsername();
   displayFriendList();
   displayAvatar();
-  bindAvatarForm();
+  bindAvatarForm(app);
   bindProfileModal();
-  bindUserInfoUpdateForm("username");
-  bindUserInfoUpdateForm("password");
+  bindUserInfoUpdateForm(app, "username");
+  bindUserInfoUpdateForm(app, "password");
+  bind2FAButtons(app);
+  logOut(app);
 }
 
 export async function renderProfileView(
@@ -248,6 +347,6 @@ export async function renderProfileView(
     res.text(),
   );
   bindNavbar(app);
-  bindProfileViewElements();
+  bindProfileViewElements(app);
   void view;
 }

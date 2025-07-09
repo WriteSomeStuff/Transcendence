@@ -1,7 +1,4 @@
-import fs from 'fs/promises';
-
-import db from "./db";
-import { UserObj } from "./types/types";
+import db from "./db.js";
 
 export const createTournament = async (name: string) => {
 	try {

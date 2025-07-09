@@ -1,8 +1,7 @@
 import { z } from "zod";
 
 const usernameRegex = /^[a-zA-Z][a-zA-Z0-9]*$/;
-const passwordRegex =
-  /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[^a-zA-Z0-9])[a-zA-Z\d[^a-zA-Z0-9]]+$/;
+const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*\W)[^\s]+$/;
 
 export const CredentialsSchema = z.object({
   username: z

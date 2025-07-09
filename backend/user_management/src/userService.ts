@@ -121,6 +121,30 @@ export const getUserId = async (username: string): Promise<number> => {
 	}
 }
 
+export const getUsername = async (userId: number): Promise<string> => {
+	try {
+			const username = runTransaction((db) => {
+			const stmt = db.prepare(`
+				SELECT 
+					username
+				FROM
+					user
+				WHERE
+					user_id = ?	
+			`)
+
+			const row = stmt.get(userId) as { username: string } | undefined;
+			if (!row) { // user not found
+				throw new Error("User not found");
+			}
+			return row.username;
+		});
+		return username;
+	} catch (e) {
+		throw e;
+	}
+}
+
 export const getUserAvatarPath = async (userId: number): Promise<string> => {
 	try {
 			const avatarPath = runTransaction((db) => {

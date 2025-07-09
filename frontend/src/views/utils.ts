@@ -1,5 +1,6 @@
 import { ViewStateSchema } from "./views.js";
 import type { App } from "../app.js";
+import { bindVerify2FAForm, bindVerify2FAModal } from "./login.ts";
 
 export function bindNavbar(app: App) {
   app.appContainer.querySelectorAll("button[page]").forEach((button) => {
@@ -59,16 +60,25 @@ export function bindCredentialsForm(formBinding: formBinding, app: App) {
       const data = (await response.json()) as {
         success: boolean;
         error?: string;
+        twoFA?: boolean;
       };
 
       if (!response.ok || data.success === false) {
         throw new Error(data.error || `HTTP error; status: ${response.status}`);
       }
 
+      if (formBinding.formId === 'loginForm' && data.twoFA === true) {
+        bindVerify2FAModal();
+        bindVerify2FAForm(username, app);
+        return;
+      }
+
       console.log(`${formBinding.serviceName} successful: ${data}`);
       if (formBinding.formId === "registrationForm") {
+		alert("Registration successful!");
         app.selectView({ view: "login", params: {} });
       } else {
+		alert("Login successful!");
         app.resetView();
       }
     } catch (e) {
