@@ -7,6 +7,7 @@ COPY tsconfig.base.json ./
 COPY shared/schemas ./shared/schemas
 COPY backend/authentication ./backend/authentication
 
+RUN npm install --omit=dev
 RUN npm install --omit=dev -w authentication
 
 ENV JWT_SECRET="my_secret"
