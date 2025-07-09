@@ -9,7 +9,7 @@ const db = new Database(DB_PATH, {
 	verbose: console.log,
 });
 
-export function runTransaction<T>(fn: (db: Database.Database) => T): T {
+function runTransaction<T>(fn: (db: Database.Database) => T): T {
 	const transaction = db.transaction(fn);
 	return transaction(db);
 }
@@ -35,4 +35,4 @@ try {
 	process.exit(1);
 }
 
-export default db;
+export default runTransaction;

@@ -1,4 +1,6 @@
-import db from "./db.js";
+// TODO use runTransaction for all db operations
+// import runTransaction from "./db.ts";
+import db from "./db.ts";
 
 export const createTournament = async (name: string) => {
 	try {

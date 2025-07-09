@@ -1,10 +1,10 @@
 import argon2 from "argon2";
 import * as OTPAuth from "otpauth";
 import QRCode from "qrcode";
-import db, {runTransaction} from "./db.js";
+import runTransaction from "./db.ts";
 
-import type {AuthResultObj, Enable2FAResultObj} from "./types/types.js";
-import {fetchUserIdByUsername} from "./helpers/authServiceHelpers.ts";
+import type { AuthResultObj, Enable2FAResultObj } from "./types/types.ts";
+import { fetchUserIdByUsername } from "./helpers/authServiceHelpers.ts";
 import { fetchUsernameByUserId } from "./helpers/authServiceHelpers.ts";
 
 // @ts-ignore

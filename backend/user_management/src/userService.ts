@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { runTransaction } from "./db.js";
+import { runTransaction } from "./db.ts";
 import type { User, Friend, Friendship } from "schemas";
 
 export const insertUser = async (username: string, userId: number) => {
