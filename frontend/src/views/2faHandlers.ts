@@ -13,7 +13,11 @@ export function bind2FAButtons(app: App) {
 				const response = await fetch('/api/auth/enable2fa', {
 					method: 'POST'
 				});
-				const data = await response.json();
+				const data = await response.json() as {
+					success: boolean;
+					error?: string,
+					qrCode?: string
+				};
 				if (!response.ok || !data.success) {
 					throw new Error(data.error || `HTTP error; status: ${response.status}`);
 				}
