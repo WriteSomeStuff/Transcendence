@@ -108,14 +108,6 @@ export const setStatusInUserService = async (userId: number, status: string): Pr
 	}
 }
 
-/**
- * Verifies the 2FA token for a given user.
- * @param userId - The ID of the user for whom to verify the 2FA token.
- * @param token - The 2FA token to verify.
- * @returns An object containing the success status and username if successful, or an error message if not.
- *          If an error occurs, it returns { success: false, error: <error_message> }.
- */	
-// TODO get username from request
 export const verify2FA = async (token: string, username: string): Promise<AuthResultObj> => {
 	try {
 		console.log(`[Auth Service] Fetching to get corresponding user id for '${username}'`);
@@ -154,7 +146,9 @@ export const verify2FA = async (token: string, username: string): Promise<AuthRe
 		});
 
 		console.log(`[Auth Service] TOTP instance created for user ${username} with secret ${row.two_fa_secret}`);
-		if (await totp.validate({ token, window: 3 })) {
+		
+		var res = totp.validate({ token, window: 1 });
+		if (res !== null) {
 			console.log(`[Auth Service] 2FA token for user ${username} is valid`);
 			return { success: true, userId: userId, username: username };
 		} else {
