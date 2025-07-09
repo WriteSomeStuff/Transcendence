@@ -26,7 +26,11 @@ export const formBindings: Record<
     url: "/api/auth/register",
     serviceName: "Registration",
   },
-  login: { formId: "loginForm", url: "/api/auth/login", serviceName: "Login" },
+  login: {
+		formId: "loginForm",
+		url: "/api/auth/login",
+		serviceName: "Login",
+	},
 };
 
 type formBinding = { formId: string; url: string; serviceName: string };

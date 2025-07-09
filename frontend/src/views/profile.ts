@@ -191,18 +191,20 @@ async function displayFriendList() {
   }
 
   for (const friend of list) {
-    // display up to 5 friends
     console.log(
       `Friend: ${String(friend.userId)} ${friend.username} ${friend.accountStatus}`,
     );
     const docUser = document.createElement("span");
     docUser.className = "min-w-[8rem] truncate";
-    const docStatus = document.createElement("span");
+	docUser.textContent = friend.username;
+    
+	const docStatus = document.createElement("span");
     docStatus.className = "text-right";
-    docUser.textContent = friend.username;
     docStatus.textContent = friend.accountStatus;
-    const listElement = document.createElement("li");
-    listElement.className = "flex justify-between items-center gap-4";
+    
+	const listElement = document.createElement("li");
+    
+	listElement.className = "flex justify-between items-center gap-4";
     listElement.appendChild(docUser);
     listElement.appendChild(docStatus);
     friendsList.appendChild(listElement);
@@ -274,7 +276,11 @@ export function bind2FAButtons(app: App) {
 				const response = await fetch('/api/auth/enable2fa', {
 					method: 'POST'
 				});
-				const data = await response.json();
+				const data = await response.json() as {
+					success: boolean;
+					error?: string,
+					qrCode?: string
+				};
 				if (!response.ok || !data.success) {
 					throw new Error(data.error || `HTTP error; status: ${response.status}`);
 				}
