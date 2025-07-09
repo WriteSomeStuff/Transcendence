@@ -54,6 +54,47 @@ export function bindVerify2FAForm(username: string, app: App) {
   });
 }
 
+function bindOAuthButton(app: App) {
+  const oauthButton = document.getElementById('oauth') as HTMLButtonElement;
+  if (!oauthButton) {
+    throw new Error("OAuth button not found");
+  }
+  oauthButton.addEventListener('click', async () => {
+    try {
+      console.log("[Frontend] Initiating OAuth login");
+      const response = await fetch('/api/auth/oauth42', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error; status: ${response.status}`);
+      }
+
+      const data = await response.json() as { success: boolean, redirectUrl?: string, error?: string };
+      if (!data.success) {
+        throw new Error(data.error || "OAuth login failed");
+      }
+
+      console.log("[Frontend] Redirecting to:", data.redirectUrl);
+      if (data.redirectUrl) {
+        window.location.href = data.redirectUrl;
+      } else {
+        throw new Error("No redirect URL provided");
+      }
+
+      console.log("[Frontend] OAuth Login successful");
+      alert("Login successful!");
+      app.resetView();
+    } catch (e) {
+      console.error("[Frontend] OAuth Login failed:", e);
+      alert(`OAuth login failed: ${e}`);
+    }
+  });
+}
+
 export async function renderLoginView(
   view: z.infer<typeof LoginViewSchema>,
   app: App,
@@ -63,5 +104,6 @@ export async function renderLoginView(
   );
   bindNavbar(app);
   bindCredentialsForm(formBindings["login"]!, app);
+  bindOAuthButton(app);
   void view;
 }
