@@ -1,9 +1,15 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { promises as fs } from "fs";
-import path, { parse } from 'path';
+import path from 'path';
 
-import type { FriendRequest, Friend } from "./types/types.js";
-import { CredentialsSchema } from "schemas";
+import type { Friend } from "./types/types.js";
+import {
+	CredentialsSchema,
+	User,
+	Friendship,
+	FriendRequestListResponseSchema,
+	FriendListResponseSchema
+} from "schemas";
 import {
 	insertUser,
 	getUserDataFromDb,
@@ -51,7 +57,7 @@ export const insertUserHandler = async (request: FastifyRequest, reply: FastifyR
 export const getUserDataHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
 		console.log('[User Controller] Getting user data from user db for:', request.user.userId);
-		const userData = await getUserDataFromDb(request.user.userId);
+		const userData = await getUserDataFromDb(request.user.userId) as User;
 		console.log('[User Controller] Getting user data successful:', userData);
 
 		reply.status(200).send({
@@ -162,7 +168,7 @@ export const getUserIdByUsernameHandler = async (request: FastifyRequest, reply:
 
 		reply.status(200).send({
 			success: true,
-			user_id: userId
+			userId: userId
 		});
 	} catch (e: any) {
 		if (e.message === "User not found") {
@@ -205,7 +211,6 @@ export const getUsernameByUserIdHandler = async (request: FastifyRequest, reply:
 		}
 	}
 }
-
 
 export const getUserAvatarHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
@@ -383,42 +388,34 @@ export const getFriendRequestsHandler = async (request: FastifyRequest, reply: F
 		*/
 
 		console.log(`[User Controller] Getting pending friend requests for user ${request.user.userId}`);
-		const friendRequests: FriendRequest[] = await getFriendRequests(request.user.userId);
+		const friendRequests: Friendship[] = await getFriendRequests(request.user.userId);
 		console.log(`[User Controller] Getting pending friend requests for user ${request.user.userId} successful`);
 		console.log(friendRequests);
 
-		reply.status(200).send({
-			success: true,
-			data: friendRequests
-		});
+		const successPayload = { success: true, data: friendRequests };
+		reply.status(200).send(FriendRequestListResponseSchema.parse(successPayload));
 
 	} catch (e) {
 		console.error('Error:', e);
-		reply.status(500).send({
-			success: false,
-			error: 'Error: ' + e
-		})
+		const errorPayload = { success: false, error: 'Error: ' + e };
+		reply.status(500).send(FriendRequestListResponseSchema.parse(errorPayload));
 	}
 }
 
+// TODO use Friend schema from shared schemas instead of interface
 export const getFriendsHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
 		console.log(`[User Controller] Getting friend list for user ${request.user.userId}`);
 		const friends: Friend[] = await getFriendList(request.user.userId);
 		console.log(`[User Controller] Getting friend list for user ${request.user.userId} successful`);
 
-
-		reply.status(200).send({
-			success: true,
-			data: friends
-		});
+		const successPayload = { success: true, data: friends };
+		reply.status(200).send(FriendListResponseSchema.parse(successPayload));
 
 	} catch (e) {
 		console.error('Error:', e);
-		reply.status(500).send({
-			success: false,
-			error: 'Error: ' + e
-		})
+		const errorPayload = { success: false, error: 'Error: ' + e };
+		reply.status(500).send(FriendListResponseSchema.parse(errorPayload));
 	}
 }
 
@@ -435,6 +432,6 @@ export const removeFriendHandler = async (request: FastifyRequest, reply: Fastif
 		reply.status(500).send({
 			success: false,
 			error: 'Error: ' + e
-		})
+		});
 	}
 }
