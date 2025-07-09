@@ -8,8 +8,16 @@
 
 import { FastifyRequest, FastifyReply } from "fastify";
 
-import { CredentialsSchema } from "schemas";
-import { handleUserDbError, handleSuccessfulLogin, handleAuthInvalidation } from "./helpers/authControllerHelpers.ts";
+import {
+	CredentialsSchema,
+	AuthResultSchema,
+	Enable2FAResultSchema
+} from "schemas";
+import {
+	handleUserDbError,
+	handleSuccessfulLogin,
+	handleAuthInvalidation
+} from "./helpers/authControllerHelpers.ts";
 
 import {
 	register,
@@ -65,10 +73,11 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 	try {
 		const parseResult = CredentialsSchema.safeParse(request.body);
 		if (!parseResult.success) {
-			reply.status(400).send({
+			const badRequestPayload = {
 				success: false,
 				error: parseResult.error.errors.map((err) => err.message).join(", ")
-			});
+			};
+			reply.status(400).send(AuthResultSchema.parse(badRequestPayload));
 			return;
 		}
 		const { username, password } = parseResult.data;
@@ -78,38 +87,39 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 		console.log(`[Auth Controller] Logging in user '${username}' successful`);
 
 		if (!result.success) {
-			reply.status(401).send({
-				success: false,
-				error: result.error
-			});
+			const errorPayload = { success: false, error: result.error };
+			reply.status(401).send(AuthResultSchema.parse(errorPayload));
 		}
 		
 		// If login is successful and 2FA is enabled, send a response indicating that 2FA verification is required
 		if (result.twoFA) {
 			console.log(`[Auth Controller] User ${result.userId} ${username} has 2FA enabled`);
-			reply.status(200).send({
+			const twoFAPayload = {
 				success: true,
+				userId: result.userId,
+				username: username,
 				twoFA: true,
 				message: "Two-factor authentication is enabled for this user. Please verify your token.",
-				// userId: result.userId, //for testing purposes
-				username: username
-			});
+			};
+			reply.status(200).send(AuthResultSchema.parse(twoFAPayload));
 		}
 
 		console.log(`[Auth Controller] Handling successful login for user ${result.userId} ${username}`);
 		await handleSuccessfulLogin(request, reply, Number(result.userId));
 		console.log(`[Auth Controller] User ${result.userId} ${username} logged in successfully`);
 
-		reply.status(200).send({ 
+		const successPayload = {
 			success: true,
+			userId: result.userId,
+			username: username,
+			twoFA: false,
 			message: "User logged in successfully"
-		});
+		}
+		reply.status(200).send(AuthResultSchema.parse(successPayload));
 
 	} catch (e) {
-		reply.status(500).send({
-			success: false,
-			error: 'An error occurred during login: ' + e
-		});
+		const errorPayload = { success: false, error: 'An error occurred during login: ' + e };
+		reply.status(500).send(AuthResultSchema.parse(errorPayload));
 	}
 };
 
@@ -175,7 +185,10 @@ export const logoutUserHandler = async (request: FastifyRequest, reply: FastifyR
 		
 		if (!response.ok) {
 			console.error('Failed to update user service database:', response.statusText);
-			reply.status(response.status).send("Failed to update user service database");
+			reply.status(response.status).send({
+				success: false,
+				error: "Failed to update user service database"
+			});
 			return;
 		}
 		console.log(`[Auth Controller] Set status to 'offline' for user ${request.user.userId}`);
@@ -217,7 +230,8 @@ export const enable2FAHandler = async (request: FastifyRequest, reply: FastifyRe
 	try {
 		if (!request.user.userId) {
 			console.error(`[Auth Controller] Missing userId in request body`);
-			reply.status(400).send({ error: 'UserId is required' });
+			const badRequestPayload = { success: false, error: 'UserId is required' };
+			reply.status(400).send(Enable2FAResultSchema.parse(badRequestPayload));
 			return;
 		}
 
@@ -226,24 +240,23 @@ export const enable2FAHandler = async (request: FastifyRequest, reply: FastifyRe
 
 		if (!result.success) {
 			console.error(`[Auth Controller] Failed to enable 2FA for user ${request.user.userId}: ${result.error}`);
-			reply.status(400).send({ error: result.error });
+			const badRequestPayload = { success: false, error: result.error };
+			reply.status(400).send(Enable2FAResultSchema.parse(badRequestPayload));
 			return;
 		}
 
 		console.log(`[Auth Controller] 2FA enabled successfully for user ${request.user.userId}`);
 
-		reply.status(200).send({
+		const successPayload = {
 			success: true,
-			twoFASecret: result.twoFASecret,
 			qrCode: result.qrCode,
 			message: "Two-factor authentication enabled successfully"
-		});
+		};
+		reply.status(200).send(Enable2FAResultSchema.parse(successPayload));
 
 	} catch (e) {
-		reply.status(500).send({
-			success: false,
-			error: 'An error occurred enabling 2FA' 
-		});
+		const errorPayload = { success: false, error: 'An error occurred enabling 2FA' };
+		reply.status(500).send(AuthResultSchema.parse(errorPayload));
 	}
 }
 
@@ -251,7 +264,10 @@ export const disable2FAHandler = async (request: FastifyRequest, reply: FastifyR
 	try {
 		await disable2FA(request.user.userId);
 
-		reply.status(200).send({ success: true, message: "Two-factor authentication disabled successfully" });
+		reply.status(200).send({ 
+			success: true,
+			message: "Two-factor authentication disabled successfully"
+		});
 
 	} catch (e) {
 		reply.status(500).send({
