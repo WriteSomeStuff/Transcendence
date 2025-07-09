@@ -186,8 +186,6 @@ export const updatePassword = async (newPassword: string, userId: number) => {
  * @returns An object containing the success status, 2FA secret, and QR code data URL.
  *          If an error occurs, it returns { success: false, error: <error_message> }.
  */
-// TODO dont use username
-// TODO use runTransaction
 export const enable2FA = async (userId: number): Promise<Enable2FAResultObj> => {
 	try {
 		console.log(`[Auth Service] Enabling 2FA for user ID ${userId}`);
@@ -233,7 +231,6 @@ export const enable2FA = async (userId: number): Promise<Enable2FAResultObj> => 
 	}
 };
 
-// TODO use runTransaction
 export const disable2FA = async (userId: number) => {
 	try {
 		runTransaction((db) => {
