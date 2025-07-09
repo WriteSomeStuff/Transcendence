@@ -7,9 +7,8 @@
  */
 
 import { FastifyRequest, FastifyReply } from "fastify";
-import { z } from "zod";
 
-import { registerSchema, loginSchema } from "./schemas/authSchemas.ts";
+import { CredentialsSchema } from "schemas";
 import { handleUserDbError, handleSuccessfulLogin, handleAuthInvalidation } from "./helpers/authControllerHelpers.ts";
 
 import {
@@ -25,8 +24,15 @@ import {
 
 export const registerUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const parsedData = registerSchema.parse(request.body);
-		const { username, password } = parsedData;
+		const parseResult = CredentialsSchema.safeParse(request.body);
+		if (!parseResult.success) {
+			reply.status(400).send({
+				success: false,
+				error: parseResult.error.errors.map((err) => err.message).join(", ")
+			});
+			return;
+		}
+		const { username, password } = parseResult.data;
 
 		console.log(`[Auth Controller] Registering user '${username}'`);
 		const userId = await register(username, password);
@@ -48,25 +54,24 @@ export const registerUserHandler = async (request: FastifyRequest, reply: Fastif
 	
 	} catch (e) {
 		console.error('Error registering the user:', e);
-		if (e instanceof z.ZodError) { // Schema error (e.g. password too short)
-			reply.status(400).send({
-				success: false,
-				error: e.errors.map((err) => err.message).join(", ")
-			});
-		} else {
-			reply.status(500).send({
-				success: false,
-				error: 'An error occurred registering the user: ' + e
-			});
-		}
-		
+		reply.status(500).send({
+			success: false,
+			error: 'An error occurred registering the user: ' + e
+		});
 	}
 };
 
 export const loginUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const parsedData = loginSchema.parse(request.body);
-		const { username, password } = parsedData;
+		const parseResult = CredentialsSchema.safeParse(request.body);
+		if (!parseResult.success) {
+			reply.status(400).send({
+				success: false,
+				error: parseResult.error.errors.map((err) => err.message).join(", ")
+			});
+			return;
+		}
+		const { username, password } = parseResult.data;
 
 		console.log(`[Auth Controller] Logging in user '${username}'`);
 		const result = await login(username, password);
@@ -101,18 +106,10 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 		});
 
 	} catch (e) {
-		console.error('Error logging in the user:', e);
-		if (e instanceof z.ZodError) {
-			reply.status(400).send({ 
-				success: false,
-				error: e.errors.map((err) => err.message).join(", ")
-			});
-		} else {
-			reply.status(500).send({
-				success: false,
-				error: 'An error occurred during login: ' + e
-			});
-		}
+		reply.status(500).send({
+			success: false,
+			error: 'An error occurred during login: ' + e
+		});
 	}
 };
 

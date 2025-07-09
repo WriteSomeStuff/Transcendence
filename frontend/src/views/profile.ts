@@ -6,7 +6,7 @@ import type { App } from "../app.js";
 import { FriendListResponseSchema } from "schemas";
 import type { Friend } from "schemas";
 
-function bindAvatarForm() {
+function bindAvatarForm(app: App) {
   const form = document.getElementById("avatarForm") as HTMLFormElement;
   if (!form) return;
 
@@ -43,11 +43,11 @@ function bindAvatarForm() {
     console.log("[formHandlers] Uploading new avatar successful");
     alert(`Avatar successfully uploaded!`);
 
-    (window as any).selectView?.("profile", false);
+    app.resetView();
   });
 }
 
-function bindUserInfoUpdateForm(infoType: string) {
+function bindUserInfoUpdateForm(app: App, infoType: string) {
   if (infoType != "username" && infoType != "password") {
     alert("Incorrect usage of bindUserInfoUpdateForm function");
     // throw new Error("Incorrect usage of bindUserInfoUpdateForm function");
@@ -87,13 +87,13 @@ function bindUserInfoUpdateForm(infoType: string) {
     if (!response.ok || data.success === false) {
       console.error(`[formHandlers] Updating ${infoType} failed`);
       alert(data.error || `HTTP error; status: ${response.status}`);
-      // throw new Error(data.error || `HTTP error; status: ${response.status}`);
+	  return;
     }
 
     console.log(`[formHandlers] Updating ${infoType} successful`);
     alert(`${infoTypeCapitalized} successfully updated!`);
 
-    (window as any).selectView?.("profile", false);
+    app.resetView();
   });
 }
 
@@ -259,7 +259,7 @@ export async function logOut(app: App) {
 	
 }
 
-export function bind2FAButtons() {
+export function bind2FAButtons(app: App) {
 	const enable2FAButton = document.getElementById('enable-2fa') as HTMLButtonElement;
 	const disable2FAButton = document.getElementById('disable-2fa') as HTMLButtonElement;
 	const qrCodeImage = document.getElementById('qr-code') as HTMLImageElement;
@@ -317,7 +317,7 @@ export function bind2FAButtons() {
 				}
 				alert('2FA disabled successfully!');
 
-				(window as any).selectView?.("profile", false);
+				app.resetView();
 			} catch (error) {
 				console.error('Error disabling 2FA:', error);
 				const message = error instanceof Error ? error.message : String(error);
@@ -331,11 +331,11 @@ function bindProfileViewElements(app: App) {
   displayUsername();
   displayFriendList();
   displayAvatar();
-  bindAvatarForm();
+  bindAvatarForm(app);
   bindProfileModal();
-  bindUserInfoUpdateForm("username");
-  bindUserInfoUpdateForm("password");
-  bind2FAButtons();
+  bindUserInfoUpdateForm(app, "username");
+  bindUserInfoUpdateForm(app, "password");
+  bind2FAButtons(app);
   logOut(app);
 }
 
