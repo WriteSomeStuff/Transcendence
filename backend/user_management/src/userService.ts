@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
 import { runTransaction } from "./db.js";
-import type { UserObj, FriendRequest, Friend } from "./types/types.js";
+import type { User, Friend, Friendship } from "schemas";
 
 export const insertUser = async (username: string, userId: number) => {
 	try {
@@ -17,15 +17,17 @@ export const insertUser = async (username: string, userId: number) => {
 	}
 };
 
-export const getUserDataFromDb = async (userId: number): Promise<UserObj> => {
+export const getUserDataFromDb = async (userId: number): Promise<User> => {
 	try {
 		const user = runTransaction((db) => {
 			const stmt = db.prepare(`
-				SELECT * FROM user
+				SELECT	user_id AS id,
+						username
+				FROM user
 				WHERE user_id = ?
 			`);
 	
-			const row = stmt.get(userId) as UserObj;
+			const row = stmt.get(userId) as User;
 			if (!row) {
 				throw new Error("User not found");
 			}
@@ -215,18 +217,26 @@ export const createFriendRequest = async (userId: number, friendId: number) => {
 	}
 }
 
-export const getFriendRequests = async (userId: number): Promise<FriendRequest[]> => {
+export const getFriendRequests = async (userId: number): Promise<Friendship[]> => {
 	try {
-		const requests = runTransaction((db) => {
+		const requests: Friendship[] = runTransaction((db) => {
 			const stmt = db.prepare(`
 				SELECT * FROM friendship
 				WHERE friend_id = ? AND status = 'pending'
 			`);
 
-			const rows: FriendRequest[] = stmt.all(userId) as FriendRequest[];
-
-			return rows;
-		})
+			const rows = stmt.all(userId) as any[];
+			if (!rows || rows.length === 0) {
+				return [];
+			}
+			
+			return rows.map(row => ({
+				friendshipId: row.friendship_id,
+				userId: row.user_id,
+				friendId: row.friend_id,
+				accepted: row.status === 'accepted'
+			})) as Friendship[];
+		});
 
 		return requests;
 	} catch (e) {

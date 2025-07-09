@@ -3,8 +3,14 @@ import { z } from "zod";
 import { ProfileViewSchema } from "./views.js";
 import { bindNavbar } from "./utils.js";
 import type { App } from "../app.js";
-import { FriendListResponseSchema } from "schemas";
-import type { Friend } from "schemas";
+import {
+	FriendListResponseSchema,
+	FriendRequestListResponseSchema
+} from "schemas";
+import type {
+	Friend,
+	Friendship
+} from "schemas";
 
 function bindAvatarForm(app: App) {
   const form = document.getElementById("avatarForm") as HTMLFormElement;
@@ -146,46 +152,38 @@ async function displayUsername() {
 }
 
 async function fetchFriendList(): Promise<Friend[] | string> {
-  try {
-    const response: Response = await fetch("/api/user/friends/list", {
-      method: "GET",
-    });
+  	try {
+		const response: Response = await fetch("/api/user/friends/list", { method: "GET" });
 
-    if (!response.ok) {
-      return response.statusText;
-    }
+		if (!response.ok) {
+			return response.statusText;
+		}
 
-    const parsedResponse = FriendListResponseSchema.safeParse(
-      await response.json(),
-    );
-    console.log(parsedResponse);
+		const parsedResponse = FriendListResponseSchema.safeParse(await response.json());
+		console.log(parsedResponse);
 
-    if (!parsedResponse.success) {
-      return parsedResponse.error.toString();
-    }
-    if (!parsedResponse.data.success) {
-      return parsedResponse.data.error;
-    }
-    return parsedResponse.data.data;
-  } catch (e: any) {
-    console.error("Error fetching user data:", e);
-    return e.message;
-  }
+		if (!parsedResponse.success) {
+			return parsedResponse.error.toString();
+		}
+		if (!parsedResponse.data.success) {
+			return parsedResponse.data.error;
+		}
+		return parsedResponse.data.data;
+  	} catch (e: any) {
+    	console.error("Error fetching user data:", e);
+    	return e.message;
+  	}
 }
 
 async function displayFriendList() {
   const list: Friend[] | string = await fetchFriendList();
-  const friendsList = document.getElementById(
-    "friendsList",
-  ) as HTMLUListElement;
+  const friendsList = document.getElementById("friendsList") as HTMLUListElement;
   if (!friendsList) return;
 
   if (typeof list === "string") {
-    // something went wrong
     friendsList.textContent = "Something went wrong:" + list;
     return;
   } else if (list.length === 0) {
-    // no friends
     friendsList.textContent = "You don't have any friends (yet)";
     return;
   }
@@ -209,6 +207,63 @@ async function displayFriendList() {
     listElement.appendChild(docStatus);
     friendsList.appendChild(listElement);
   }
+}
+
+async function fetchRequestList(): Promise<Friendship[] | string> {
+	try {
+		const response: Response = await fetch("/api/user/friends/requests", { method: "GET" });
+		
+		const data = await response.json() as {
+			success: boolean;
+			error?: string;
+			data?: Friendship[];
+		};
+
+		console.log(`data: ${JSON.stringify(data)}`);
+		if (!response.ok || data.success === false) {
+			return data.error || response.statusText;
+		}
+
+		const parsedResponse = FriendRequestListResponseSchema.safeParse(data);
+		console.log(`parsedResponse: ${JSON.stringify(parsedResponse)}`);
+		if (!parsedResponse.success) {
+			return parsedResponse.error.toString();
+		}
+		if (!parsedResponse.data.success) {
+			return parsedResponse.data.error;
+		}
+		return parsedResponse.data.data;
+	} catch (e: any) {
+		console.error("Error fetching friend requests:", e);
+		return e.message;
+	}
+}
+
+async function displayFriendRequestList() {
+	const list: Friendship[] | string = await fetchRequestList();
+	const requestList = document.getElementById("requests") as HTMLUListElement;
+	if (!requestList) return;
+
+	if (typeof list === "string") {
+		requestList.textContent = "Something went wrong:" + list;
+		return;
+	} else if (list.length === 0) {
+		requestList.textContent = "You don't have any friend requests (yet)";
+		return;
+	}
+
+	for (const request of list) {
+		console.log(`Request ${String(request.friendshipId)} from ${String(request.userId)} to ${String(request.friendId)}`);
+		const docSender = document.createElement("span");
+		docSender.className = "min-w-[8rem] truncate";
+		docSender.textContent = String(request.userId); // TODO show username and button to accept/reject1
+
+		const listElement = document.createElement("li");
+
+		listElement.className = "flex justify-between items-center gap-4";
+		listElement.appendChild(docSender);
+		requestList.appendChild(listElement);
+	}
 }
 
 async function displayAvatar() {
@@ -261,7 +316,7 @@ export async function logOut(app: App) {
 	
 }
 
-export function bind2FAButtons(app: App) {
+function bind2FAButtons(app: App) {
 	const enable2FAButton = document.getElementById('enable-2fa') as HTMLButtonElement;
 	const disable2FAButton = document.getElementById('disable-2fa') as HTMLButtonElement;
 	const qrCodeImage = document.getElementById('qr-code') as HTMLImageElement;
@@ -333,26 +388,83 @@ export function bind2FAButtons(app: App) {
 	}
 }
 
-function bindProfileViewElements(app: App) {
-  displayUsername();
-  displayFriendList();
-  displayAvatar();
-  bindAvatarForm(app);
-  bindProfileModal();
-  bindUserInfoUpdateForm(app, "username");
-  bindUserInfoUpdateForm(app, "password");
-  bind2FAButtons(app);
-  logOut(app);
+async function sendRequest(username: string) {
+	try {
+		// get the user id corresponding to the username
+		const userIdResponse: Response = await fetch(`/api/user/get-userid?username=${username}`);
+		const userIdData = await userIdResponse.json() as {
+			success: boolean;
+			error?: string;
+			userId?: number;
+		};
+
+		if (!userIdResponse || userIdData.success === false) {
+			console.error(`[Profile] Sending request not possible: ${userIdData.error}`);
+			alert('Sending request failed: ' + userIdData.error || `HTTP error; status: ${userIdResponse.status}`);
+			return;
+		}
+
+		// send the request to the user id
+		const userId = userIdData.userId;
+		console.log(`[FRIEND REQUEST] Sending request to ${userId}`)
+		const friendRequestResponse: Response = await fetch("/api/user/friends/request", {
+			method: "POST",
+			headers: {
+        		"Content-Type": "application/json",
+      		},
+      		body: JSON.stringify({ friendId: userId })
+		});
+
+		const data = await friendRequestResponse.json() as {
+			success: boolean;
+			error?: string;
+		};
+
+		if (!friendRequestResponse.ok || data.success === false) {
+			console.error(`[profile] Sending request failed`);
+      		alert('Sending request failed: ' + data.error || `HTTP error; status: ${friendRequestResponse.status}`);
+	  		return;
+		}
+
+		console.log(`[profile] Sending friend request to ${username} successful`);
+		alert(`Friend request sent to ${username}`);
+	} catch (e) {
+		console.error(`Error sending friend request: ${e}`);
+		alert(`Friend request could not be sent: ${e}`);
+	}
 }
 
-export async function renderProfileView(
-  view: z.infer<typeof ProfileViewSchema>,
-  app: App,
-): Promise<void> {
-  app.appContainer.innerHTML = await fetch("/views/profile.html").then((res) =>
-    res.text(),
-  );
-  bindNavbar(app);
-  bindProfileViewElements(app);
-  void view;
+async function sendFriendRequest() {
+	const sendRequestBtn = document.getElementById("search-button") as HTMLButtonElement;
+	if (!sendRequestBtn) return;
+
+	sendRequestBtn.addEventListener('click', () => {
+		const searchInput = document.getElementById('search-input') as HTMLInputElement;
+		if (!searchInput) return;
+		const usernameInput = searchInput.value;
+		sendRequest(usernameInput);
+	});
+}
+
+function bindProfileViewElements(app: App) {
+	displayUsername();
+	displayFriendList();
+	displayFriendRequestList();
+	sendFriendRequest();
+	displayAvatar();
+	bindAvatarForm(app);
+	bindProfileModal();
+	bindUserInfoUpdateForm(app, "username");
+	bindUserInfoUpdateForm(app, "password");
+	bind2FAButtons(app);
+	logOut(app);
+}
+
+export async function renderProfileView(view: z.infer<typeof ProfileViewSchema>, app: App): Promise<void> {
+	app.appContainer.innerHTML = await fetch("/views/profile.html").then((res) =>
+		res.text(),
+	);
+	bindNavbar(app);
+	bindProfileViewElements(app);
+	void view;
 }
