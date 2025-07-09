@@ -67,7 +67,6 @@ export const login = async (username: string, password: string): Promise<AuthRes
 				error: "User not found"
 			};
 		}
-		
 		const verified = await argon2.verify(userInfo.password_hash, password);
 		if (!verified) {
 			console.log(`[Auth Service] Incorrect password for user '${username}'`);
@@ -108,37 +107,31 @@ export const setStatusInUserService = async (userId: number, status: string): Pr
 	}
 }
 
-/**
- * Verifies the 2FA token for a given user.
- * @param userId - The ID of the user for whom to verify the 2FA token.
- * @param token - The 2FA token to verify.
- * @returns An object containing the success status and username if successful, or an error message if not.
- *          If an error occurs, it returns { success: false, error: <error_message> }.
- */	
-// TODO get username from request
 export const verify2FA = async (token: string, username: string): Promise<AuthResultObj> => {
 	try {
 		console.log(`[Auth Service] Fetching to get corresponding user id for '${username}'`);
 		const userId = await fetchUserIdByUsername(username);
 		console.log(`[Auth Service] Fetching to get corresponding user id for '${username}' successful: ${userId}`);
 
-		const stmt = db.prepare(`
-			SELECT 
-				two_fa_secret,
-				two_fa_enabled
-			FROM
-				user
-			WHERE
-				user_id = ?
-		`);
-		const row = stmt.get(userId) as {two_fa_secret: string, two_fa_enabled: number};
+		const userInfo = runTransaction((db) => {
+			const stmt = db.prepare(`
+				SELECT 
+					two_fa_secret,
+					two_fa_enabled
+				FROM
+					user
+				WHERE
+					user_id = ?
+			`);
+			return stmt.get(userId) as {two_fa_secret: string, two_fa_enabled: number};
+		});
 
-		if (!row) {
+		if (!userInfo) {
 			console.error(`[Auth Service] User with username ${username} not found for 2FA verification`);
 			return { success: false, error: "User not found" };
 		}
 
-		if (!row.two_fa_secret || row.two_fa_enabled !== 1) {
+		if (!userInfo.two_fa_secret || userInfo.two_fa_enabled !== 1) {
 			console.error(`[Auth Service] User with username ${username} does not have 2FA enabled`);
 			return { success: false, error: "2FA is not enabled for this user" };
 		}
@@ -150,11 +143,13 @@ export const verify2FA = async (token: string, username: string): Promise<AuthRe
 			algorithm: 'SHA1',
 			digits: 6,
 			period: 30,
-			secret: OTPAuth.Secret.fromBase32(row.two_fa_secret)
+			secret: OTPAuth.Secret.fromBase32(userInfo.two_fa_secret)
 		});
 
-		console.log(`[Auth Service] TOTP instance created for user ${username} with secret ${row.two_fa_secret}`);
-		if (await totp.validate({ token, window: 3 })) {
+		console.log(`[Auth Service] TOTP instance created for user ${username} with secret ${userInfo.two_fa_secret}`);
+		
+		var res = totp.validate({ token, window: 1 });
+		if (res !== null) {
 			console.log(`[Auth Service] 2FA token for user ${username} is valid`);
 			return { success: true, userId: userId, username: username };
 		} else {
@@ -217,17 +212,19 @@ export const enable2FA = async (userId: number): Promise<Enable2FAResultObj> => 
 		const qrCodeDataUrl = await QRCode.toDataURL(otpAuthUrl);
 
 		console.log(`[Auth Service] 2FA enabled for user ${username} with secret ${secret}`);
-		const updateStmt = db.prepare(`
-			UPDATE user
-			SET 
-				two_fa_enabled = 1,
-				two_fa_secret = ?
-			WHERE
-				user_id = ?
-		`);
+		runTransaction((db) => {
+			const updateStmt = db.prepare(`
+				UPDATE user
+				SET 
+					two_fa_enabled = 1,
+					two_fa_secret = ?
+				WHERE
+					user_id = ?
+			`);
 
-		console.log(`[Auth Service] Updating user entry ${userId} to enable 2FA`);
-		updateStmt.run(secret, userId);
+			console.log(`[Auth Service] Updating user entry ${userId} to enable 2FA`);
+			updateStmt.run(secret, userId);
+		});
 
 		return { success: true, twoFASecret: secret, qrCode: qrCodeDataUrl };
 	} catch (e) {
@@ -239,17 +236,17 @@ export const enable2FA = async (userId: number): Promise<Enable2FAResultObj> => 
 // TODO use runTransaction
 export const disable2FA = async (userId: number) => {
 	try {
-		const stmt = db.prepare(`
-			UPDATE user
-			SET 
-				two_fa_enabled = 0,
-				two_fa_secret = NULL
-			WHERE
-				user_id = ?
-		`);
-
-		stmt.run(userId);
-
+		runTransaction((db) => {
+			const stmt = db.prepare(`
+				UPDATE user
+				SET 
+					two_fa_enabled = 0,
+					two_fa_secret = NULL
+				WHERE
+					user_id = ?
+			`);
+			stmt.run(userId);
+		});
 	} catch (e) {
 		throw new Error("An error occurred disabling 2FA in the authentication database");
 	}
