@@ -2,13 +2,9 @@ import { FastifyRequest, FastifyReply } from "fastify";
 import { promises as fs } from "fs";
 import path from 'path';
 
-import type { Friend } from "./types/types.js";
 import {
 	CredentialsSchema,
-	User,
-	Friendship,
-	FriendRequestListResponseSchema,
-	FriendListResponseSchema
+	User
 } from "schemas";
 import {
 	insertUser,
