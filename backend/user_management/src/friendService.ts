@@ -32,18 +32,30 @@ export const getFriendRequests = async (userId: number): Promise<Friendship[]> =
 	try {
 		const requests: Friendship[] = runTransaction((db) => {
 			const stmt = db.prepare(`
-				SELECT * FROM friendship
+				SELECT
+					f.friendship_id,
+					f.user_id,
+					f.friend_id,
+					f.status,
+					u.username
+				FROM friendship f
+				JOIN user u ON u.user_id = f.user_id
 				WHERE friend_id = ? AND status = 'pending'
 			`);
 
-			const rows = stmt.all(userId) as any[];
-			if (!rows || rows.length === 0) {
-				return [];
-			}
+			const rows = stmt.all(userId) as {
+				friendship_id: number,
+				user_id: number,
+				friend_id: number,
+				status: string,
+				username: string
+			}[];
+			if (!rows || rows.length === 0) return [];
 			
 			return rows.map(row => ({
 				friendshipId: row.friendship_id,
 				userId: row.user_id,
+				usernameSender: row.username,
 				friendId: row.friend_id,
 				accepted: row.status === 'accepted'
 			})) as Friendship[];
@@ -60,38 +72,44 @@ export const getFriendList = async (userId: number): Promise<Friend[]> => {
 		const friendList = runTransaction((db) => {
 			const getFriendsStmt = db.prepare(`
 				SELECT
-					friendship_id,
-					user_id,
-					friend_id
-				FROM friendship
-				WHERE (user_id = ? OR friend_id = ?) AND status = 'accepted'
+					f.friendship_id,
+					CASE
+						WHEN f.user_id = ? THEN f.friend_id
+						ELSE f.user_id
+					END AS friend_id,
+					u.username,
+					u.account_status
+				FROM friendship f
+				JOIN user u ON u.user_id = (
+					CASE
+						WHEN f.user_id = ? THEN f.friend_id
+						ELSE f.user_id
+					END
+				)
+				WHERE (f.user_id = ? OR f.friend_id = ?) AND f.status = 'accepted'
 			`);
 
-			const rows = getFriendsStmt.all(userId, userId) as { friendship_id: number, user_id: number, friend_id: number }[];			
-			let friendsPartial: Partial<Friend>[] = rows.map(row => ({
+			const rows = getFriendsStmt.all(userId, userId, userId, userId) as {
+				friendship_id: number,
+				friend_id: number,
+				username: string,
+				account_status: string
+			}[];
+			if (!rows || rows.length === 0) return [];
+
+			const friends: Friend[] = rows.map(row => ({
 				friendshipId: row.friendship_id,
-				userId: row.user_id === userId ? row.friend_id : row.user_id
+				userId: row.friend_id,
+				username: row.username,
+				accountStatus: row.account_status
 			}));
 
-			for (let friend of friendsPartial) {
-				const getFriendInfoStmt = db.prepare(`
-					SELECT 
-						account_status,
-						username
-					FROM user
-					WHERE user_id = ?
-				`);
-
-				const { account_status, username } = getFriendInfoStmt.get(friend.userId) as { account_status: string, username: string };
-				friend.accountStatus = account_status;
-				friend.username = username;
-			}
-
-			return friendsPartial as Friend[];
+			return friends;
 		});
 
 		return friendList;
 	} catch (e) {
+		console.error(`Error: ${e}`);
 		throw e;
 	}
 }
