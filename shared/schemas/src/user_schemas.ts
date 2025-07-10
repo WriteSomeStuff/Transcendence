@@ -36,6 +36,7 @@ export type FriendListResponse = z.infer<typeof FriendListResponseSchema>;
 export const FriendshipSchema = z.object({
 	friendshipId: z.number(),
 	userId: z.number(),
+	usernameSender: z.string(),
 	friendId: z.number(),
 	accepted: z.boolean(),
 });

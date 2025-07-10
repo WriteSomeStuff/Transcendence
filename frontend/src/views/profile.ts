@@ -42,6 +42,7 @@ function bindAvatarForm(app: App) {
     if (!response.ok || data.success === false) {
       console.error("[formHandlers] Uploading new avatar failed");
       alert(data.error || `HTTP error; status: ${response.status}`);
+	  return;
       // further handling
       // throw new Error(data.error || `HTTP error; status: ${response.status}`);
     }
@@ -239,7 +240,7 @@ async function fetchRequestList(): Promise<Friendship[] | string> {
 	}
 }
 
-async function displayFriendRequestList() {
+async function displayFriendRequestList(app: App) {
 	const list: Friendship[] | string = await fetchRequestList();
 	const requestList = document.getElementById("requests") as HTMLUListElement;
 	if (!requestList) return;
@@ -254,14 +255,67 @@ async function displayFriendRequestList() {
 
 	for (const request of list) {
 		console.log(`Request ${String(request.friendshipId)} from ${String(request.userId)} to ${String(request.friendId)}`);
+
+		// user
 		const docSender = document.createElement("span");
 		docSender.className = "min-w-[8rem] truncate";
-		docSender.textContent = String(request.userId); // TODO show username and button to accept/reject1
+		docSender.textContent = String(request.usernameSender);
+
+		// buttons
+		const acceptBtn: HTMLButtonElement = document.createElement("button");
+		acceptBtn.className = "sm:text-base rounded-md border-2 border-emerald-500 bg-emerald-700 hover:border-purple-500 hover:bg-purple-950 text-white mt-2";
+		acceptBtn.textContent = "Accept";
+		acceptBtn.addEventListener('click', async function () {
+			const response: Response = await fetch("/api/user/friends/accept", {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ userIdSender: request.userId })
+			});
+
+			const data = await response.json() as { success: boolean, error?: string };
+			if (!response.ok || !data.success) {
+				console.log("Could not accept friend request: " 
+					+ data.error || `HTTP error; status: ${response.status}`);
+				alert("Something went wrong accepting the friend request");
+				return;
+			}
+
+			console.log("Friend request accepted");
+			app.resetView();
+		});
+
+		const rejectBtn: HTMLButtonElement = document.createElement("button");
+		rejectBtn.className = "sm:text-base rounded-md border-2 border-red-500 bg-red-700 hover:border-purple-500 hover:bg-purple-950 text-white mt-2";
+		rejectBtn.textContent = "Reject";
+		rejectBtn.addEventListener('click', async function () {
+			const response: Response = await fetch("/api/user/friends/reject", {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ userIdSender: request.userId })
+			});
+
+			const data = await response.json() as { success: boolean, error?: string };
+			if (!response.ok || !data.success) {
+				console.log("Could not reject friend request: " 
+					+ data.error || `HTTP error; status: ${response.status}`);
+				alert("Something went wrong rejecting the friend request");
+				return;
+			}
+
+			console.log("Friend request rejected");
+			app.resetView();
+		});
 
 		const listElement = document.createElement("li");
 
 		listElement.className = "flex justify-between items-center gap-4";
 		listElement.appendChild(docSender);
+		listElement.appendChild(acceptBtn);
+		listElement.appendChild(rejectBtn);
 		requestList.appendChild(listElement);
 	}
 }
@@ -442,6 +496,7 @@ async function sendFriendRequest() {
 		const searchInput = document.getElementById('search-input') as HTMLInputElement;
 		if (!searchInput) return;
 		const usernameInput = searchInput.value;
+		if (usernameInput.length === 0) return;
 		sendRequest(usernameInput);
 	});
 }
@@ -449,7 +504,7 @@ async function sendFriendRequest() {
 function bindProfileViewElements(app: App) {
 	displayUsername();
 	displayFriendList();
-	displayFriendRequestList();
+	displayFriendRequestList(app);
 	sendFriendRequest();
 	displayAvatar();
 	bindAvatarForm(app);
