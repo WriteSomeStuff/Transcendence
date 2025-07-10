@@ -1,8 +1,10 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 
-import type { Friend } from "./types/types.js";
+import type {
+	Friend,
+	Friendship
+} from "schemas";
 import {
-	Friendship,
 	FriendRequestListResponseSchema,
 	FriendListResponseSchema
 } from "schemas";
@@ -15,6 +17,29 @@ import {
 } from "./friendService.js";
 
 // FRIENDS FEATURE
+
+const handleFriendRequestError = (reply: FastifyReply, error: string) => {
+	const errorResponses: Record<string, { status: number; message: string }> = {
+		"SQLITE_CONSTRAINT_UNIQUE":		{ status: 409, message: "Request already sent" },
+		"REQUEST_ALREADY_RECEIVED":		{ status: 409, message: "User requested you already, check Requests" },
+		"CANNOT_FRIEND_SELF":			{ status: 400, message: "Cannot send friend request to yourself" },
+		"SQLITE_CONSTRAINT_FOREIGNKEY":	{ status: 400, message: "User not found" }
+	};
+
+	const response = errorResponses[error];
+	if (response) {
+		reply.status(response.status).send({
+			success: false,
+			error: response.message
+		});
+	} else {
+		reply.status(500).send({
+			success: false,
+			error: 'Error creating friend request: ' + error
+		});
+	}
+}
+
 export const friendRequestHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
 		const { friendId } = request.body as { friendId: number };
@@ -30,33 +55,7 @@ export const friendRequestHandler = async (request: FastifyRequest, reply: Fasti
 		reply.status(201).send({ success: true });
 	} catch (e: any) {
 		console.error('Error creating a friend request:', e);
-		if (e && e.code === "SQLITE_CONSTRAINT_UNIQUE") {
-			reply.status(409).send({ // Conflict
-				success: false,
-				error: 'Request already sent'
-			});
-		} else if (e && e.message === "REQUEST_ALREADY_RECEIVED") {
-			reply.status(409).send({ // Conflict
-				success: false,
-				error: 'User requested you already, check Requests'
-			});
-		} else if (e && e.message === "CANNOT_FRIEND_SELF") {
-			reply.status(400).send({ // Bad Request
-				success: false,
-				error: 'Cannot send friend request to yourself'
-			});
-		} else if (e && e.code === "SQLITE_CONSTRAINT_FOREIGNKEY") {
-			reply.status(400).send({ // Bad Request
-				success: false,
-				error: 'User not found'
-			});
-		} else {
-			reply.status(500).send({ // Internal Server Error
-				success: false,
-				error: 'Error creating friend request: ' + e
-			});
-		}
-		// TODO clean up errors
+		handleFriendRequestError(reply, (e.code || e.message) as string);
 	}
 }
 
@@ -136,7 +135,6 @@ export const getFriendRequestsHandler = async (request: FastifyRequest, reply: F
 	}
 }
 
-// TODO use Friend schema from shared schemas instead of interface
 export const getFriendsHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
 		console.log(`[User Controller] Getting friend list for user ${request.user.userId}`);
