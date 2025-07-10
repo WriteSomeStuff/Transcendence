@@ -75,12 +75,13 @@ export const acceptFriendRequestHandler = async (request: FastifyRequest, reply:
 		await acceptFriendRequest(request.user.userId, userIdSender);
 		console.log(`[User Controller] Accepting friend request for ${request.user.userId} of ${userIdSender} successful`);
 
+		reply.status(200).send({ success: true });
 	} catch (e) {
 		console.error('Error:', e);
 		reply.status(500).send({
 			success: false,
 			error: 'Error: ' + e
-		})
+		});
 	}
 }
 
@@ -98,6 +99,7 @@ export const rejectFriendRequestHandler = async (request: FastifyRequest, reply:
 		await removeFriend(request.user.userId, userIdSender);
 		console.log(`[User Controller] Removing friend request for ${request.user.userId} of ${userIdSender} successful`);
 
+		reply.status(200).send({ success: true });
 	} catch (e) {
 		console.error('Error:', e);
 		reply.status(500).send({
