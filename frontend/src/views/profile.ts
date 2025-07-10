@@ -176,7 +176,7 @@ async function fetchFriendList(): Promise<Friend[] | string> {
   	}
 }
 
-async function displayFriendList() {
+async function displayFriendList(app: App) {
   const list: Friend[] | string = await fetchFriendList();
   const friendsList = document.getElementById("friendsList") as HTMLUListElement;
   if (!friendsList) return;
@@ -200,12 +200,36 @@ async function displayFriendList() {
 	const docStatus = document.createElement("span");
     docStatus.className = "text-right";
     docStatus.textContent = friend.accountStatus;
+
+	// button to remove friend
+	const removeBtn: HTMLButtonElement = document.createElement("button");
+	removeBtn.className = "sm:text-base rounded-md border-2 border-red-500 bg-red-700 hover:border-purple-500 hover:bg-purple-950 text-white mt-2";
+	removeBtn.textContent = "Remove";
+	removeBtn.addEventListener('click', async function () {
+		try {
+			const response: Response = await fetch(`/api/user/friends/remove?userIdToRemove=${friend.userId}`, { method: 'DELETE' });
+	
+			const data = await response.json() as { success: boolean, error?: string };
+			if (!response.ok || !data.success) {
+				console.log("Could not remove friend: " 
+					+ data.error || `HTTP error; status: ${response.status}`);
+				alert("Something went wrong removing the friend");
+				return;
+			}
+	
+			console.log("Friend removed");
+			app.resetView();
+		} catch (e) {
+			console.error("YOOOOOOOOOOOOOOOO");
+		}
+	});
     
 	const listElement = document.createElement("li");
     
 	listElement.className = "flex justify-between items-center gap-4";
     listElement.appendChild(docUser);
     listElement.appendChild(docStatus);
+	listElement.appendChild(removeBtn);
     friendsList.appendChild(listElement);
   }
 }
@@ -503,7 +527,7 @@ async function sendFriendRequest() {
 
 function bindProfileViewElements(app: App) {
 	displayUsername();
-	displayFriendList();
+	displayFriendList(app);
 	displayFriendRequestList(app);
 	sendFriendRequest();
 	displayAvatar();

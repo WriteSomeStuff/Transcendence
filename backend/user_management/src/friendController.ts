@@ -153,12 +153,13 @@ export const getFriendsHandler = async (request: FastifyRequest, reply: FastifyR
 
 export const removeFriendHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const { userIdToUnfriend } = request.body as { userIdToUnfriend: number };
+		const { userIdToRemove } = request.query as { userIdToRemove: number };
 
-		console.log(`[User Controller] Removing friend ${userIdToUnfriend} of ${request.user.userId}`);
-		await removeFriend(request.user.userId, userIdToUnfriend);
-		console.log(`[User Controller] Removing friend ${userIdToUnfriend} for ${request.user.userId}successful`);
+		console.log(`[User Controller] Removing friend ${userIdToRemove} of ${request.user.userId}`);
+		await removeFriend(request.user.userId, userIdToRemove);
+		console.log(`[User Controller] Removing friend ${userIdToRemove} for ${request.user.userId} successful`);
 
+		reply.status(200).send({ success: true });
 	} catch (e) {
 		console.error('Error:', e);
 		reply.status(500).send({
