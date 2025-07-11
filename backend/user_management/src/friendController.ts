@@ -16,8 +16,6 @@ import {
 	removeFriend
 } from "./friendService.js";
 
-// FRIENDS FEATURE
-
 const handleFriendRequestError = (reply: FastifyReply, error: string) => {
 	const errorResponses: Record<string, { status: number; message: string }> = {
 		"SQLITE_CONSTRAINT_UNIQUE":		{ status: 409, message: "Request already sent" },
@@ -61,13 +59,6 @@ export const friendRequestHandler = async (request: FastifyRequest, reply: Fasti
 
 export const acceptFriendRequestHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		/**
-		 * Button is pressed in frontend.
-		 * Button pressed by request.user.user_id.
-		 * Request sent with user id of user that made request in body.
-		 * Change status to accepted.
-		 */
-
 		const { userIdSender } = request.body as { userIdSender: number };
 
 		console.log(`[User Controller] Accepting friend request for ${request.user.userId} of ${userIdSender}`);
@@ -86,12 +77,6 @@ export const acceptFriendRequestHandler = async (request: FastifyRequest, reply:
 
 export const rejectFriendRequestHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		/**
-		 * Button is pressed in frontend.
-		 * Button pressed by request.user.user_id.
-		 * Request sent with user id of user that made request in body.
-		 */
-
 		const { userIdSender } = request.body as { userIdSender: number };
 
 		console.log(`[User Controller] Removing friend request for ${request.user.userId} of ${userIdSender}`);
@@ -110,16 +95,6 @@ export const rejectFriendRequestHandler = async (request: FastifyRequest, reply:
 
 export const getFriendRequestsHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		/**
-		 * send back in s certain data structure list {
-		 * 	friendship_id
-		 * 	user_id (made request)
-		 * 	friend_id (accepted or rejected request)
-		 * 	accepted (boolean)
-		 * }
-		 * handle in frontend to show with buttons accept and reject
-		*/
-
 		console.log(`[User Controller] Getting pending friend requests for user ${request.user.userId}`);
 		const friendRequests: Friendship[] = await getFriendRequests(request.user.userId);
 		console.log(`[User Controller] Getting pending friend requests for user ${request.user.userId} successful`);
@@ -127,7 +102,6 @@ export const getFriendRequestsHandler = async (request: FastifyRequest, reply: F
 
 		const successPayload = { success: true, data: friendRequests };
 		reply.status(200).send(FriendRequestListResponseSchema.parse(successPayload));
-
 	} catch (e) {
 		console.error('Error:', e);
 		const errorPayload = { success: false, error: 'Error: ' + e };
@@ -143,7 +117,6 @@ export const getFriendsHandler = async (request: FastifyRequest, reply: FastifyR
 
 		const successPayload = { success: true, data: friends };
 		reply.status(200).send(FriendListResponseSchema.parse(successPayload));
-
 	} catch (e) {
 		console.error('Error:', e);
 		const errorPayload = { success: false, error: 'Error: ' + e };
