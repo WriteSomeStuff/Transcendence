@@ -58,7 +58,6 @@ export type Court = z.infer<typeof CourtSchema>;
 export const PongPlayerInputSchema = z.object({
   upPressed: z.boolean().default(false),
   downPressed: z.boolean().default(false),
-  wasUpdated: z.boolean().default(false),
 });
 
 export type PongPlayerInput = z.infer<typeof PongPlayerInputSchema>;

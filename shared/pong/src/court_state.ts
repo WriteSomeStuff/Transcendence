@@ -46,7 +46,7 @@ export function initCourtState(
     vec2.scale(vec2.add(a, b), 0.5),
     vec2.scale(
       getPlayerLineNormal(geometry, initialIndex),
-      geometry.ballRadius,
+      geometry.ballRadius + geometry.paddleThickness,
     ),
   );
   return {
@@ -74,6 +74,9 @@ function doesBounce(
   ) {
     return Number.POSITIVE_INFINITY;
   }
+  if (vec2.dot(vec2.subtract(ballPosition, surfaceStart), normal) < 0) {
+    return Number.NEGATIVE_INFINITY;
+  }
   const center = vec2.scale(vec2.add(surfaceStart, surfaceEnd), 0.5);
   const length = vec2.length(vec2.subtract(surfaceStart, surfaceEnd));
   if (
@@ -99,7 +102,7 @@ export function updateCourtState(
 ): CourtState | number {
   state.ballPosition = vec2.add(
     state.ballPosition,
-    vec2.scale(state.ballPosition, delta),
+    vec2.scale(state.ballVelocity, delta),
   );
   state.paddles = state.paddles.map(function (paddle) {
     return updatePaddle(paddle, delta);
@@ -117,13 +120,33 @@ export function updateCourtState(
       sidelineEnd,
       getWallNormal(geometry, i),
     );
-    if (sidelineDistance < minDistance) {
+    if (Number.isFinite(sidelineDistance) && sidelineDistance < minDistance) {
       bouncedPaddleIndex = -1;
       newDirection = vec2.reflect(
         state.ballVelocity,
         getWallNormal(geometry, i),
       );
       minDistance = sidelineDistance;
+    } else if (sidelineDistance === Number.NEGATIVE_INFINITY) {
+      bouncedPaddleIndex = -1;
+      state.ballPosition = vec2.add(
+        vec2.add(
+          sidelineStart,
+          vec2.scale(
+            vec2.normalize(vec2.subtract(sidelineEnd, sidelineStart)),
+            vec2.dot(
+              vec2.subtract(sidelineEnd, sidelineStart),
+              vec2.subtract(state.ballPosition, sidelineStart),
+            ),
+          ),
+        ),
+        vec2.scale(getWallNormal(geometry, i), geometry.ballRadius),
+      );
+      newDirection = vec2.reflect(
+        state.ballVelocity,
+        getWallNormal(geometry, i),
+      );
+      break;
     }
     const [paddleStart, paddleEnd] = getPaddleSurface(
       geometry,
@@ -137,12 +160,14 @@ export function updateCourtState(
       paddleEnd,
       getPlayerLineNormal(geometry, i),
     );
-    if (paddleDistance < minDistance) {
+    if (Number.isFinite(paddleDistance) && paddleDistance < minDistance) {
       bouncedPaddleIndex = i;
-      newDirection = vec2.reflect(
-        state.ballVelocity,
-        getWallNormal(geometry, i),
-      );
+      if (vec2.dot(getPlayerLineNormal(geometry, i), state.ballVelocity) < 0) {
+        newDirection = vec2.reflect(
+          state.ballVelocity,
+          getPlayerLineNormal(geometry, i),
+        );
+      }
       minDistance = paddleDistance;
     }
     if (

@@ -2,8 +2,9 @@ import type { Court, CourtState } from "schemas";
 
 import { initCourt } from "./court.ts";
 import { initCourtState, updateCourtState } from "./court_state.ts";
-import { PlayerInput } from "./player_input.ts";
 import { ScoreController } from "./score_controller.ts";
+import type { PongPlayerInput } from "schemas";
+import { getDirection } from "./player_input.js";
 import { vec2 } from "./vector2.js";
 
 export class CourtController {
@@ -27,10 +28,9 @@ export class CourtController {
     this.court.state = state;
   }
 
-  public updateInput(playerIndex: number, playerInput: PlayerInput): void {
+  public updateInput(playerIndex: number, playerInput: PongPlayerInput): void {
     console.log("new input", playerIndex, playerInput);
-    this.court.state.paddles[playerIndex]!.velocity =
-      playerInput.getDirection();
+    this.court.state.paddles[playerIndex]!.velocity = getDirection(playerInput);
   }
 
   public update(delta: number): void {

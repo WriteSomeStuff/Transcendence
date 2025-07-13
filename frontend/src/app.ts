@@ -58,6 +58,7 @@ async function renderState(
     }
     case "game": {
       await renderGameView(state.viewState, app);
+      break;
     }
   }
   if (push) window.history.pushState({}, "", "/" + state.viewState.view);

@@ -100,7 +100,7 @@ class Game {
 const usersToGames: { [userId: string]: string } = {};
 const games: { [gameId: string]: Game } = {};
 
-app.get("/pong/ws", { websocket: true }, (socket: WebSocket, req) => {
+app.get("/ws", { websocket: true }, (socket: WebSocket, req) => {
   console.log("Processing ws request", req, req.headers);
   const userId = req.headers["cookie"]!;
   console.log("userId", userId);

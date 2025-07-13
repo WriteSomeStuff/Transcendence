@@ -48,3 +48,5 @@ export type {
   Room,
   MatchmakingMessage,
 } from "./matchmaking_schemas.js";
+export { GameInputMessageSchema, GameUpdateMessageSchema } from "./game.js";
+export type { GameInputMessage, GameUpdateMessage } from "./game.js";

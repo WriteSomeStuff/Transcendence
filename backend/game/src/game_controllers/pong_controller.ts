@@ -1,14 +1,17 @@
+import { GameInputMessageSchema } from "schemas";
+import type { GameUpdateMessage } from "schemas";
+
 import { GameController } from "./game_controller.js";
 
-import { CourtController, PlayerInput, ScoreController } from "pong";
+import { CourtController, ScoreController } from "pong";
 import { Pong2PlayersScoreController } from "../score/pong_2_players_score_controller.js";
 import { PlayerScore } from "../score/player_score.js";
 
 export class PongController extends GameController {
   private courtController: CourtController;
   private readonly scoreController: ScoreController;
-  private readonly playerMessages: object[][];
-  private broadcastMessages: object[] = [];
+  private readonly playerMessages: GameUpdateMessage[][];
+  private broadcastMessages: GameUpdateMessage[] = [];
 
   public constructor() {
     super(2);
@@ -31,31 +34,51 @@ export class PongController extends GameController {
   }
 
   onPlayerAction(index: number, action: object): void {
-    this.courtController.updateInput(
-      index,
-      Object.assign(new PlayerInput(), action),
-    );
-    this.broadcastMessages.push({
-      type: "stateSet",
-      payload: this.courtController.getState(),
-    });
+    const parsed = GameInputMessageSchema.safeParse(action);
+    if (!parsed.success) {
+      return;
+    }
+    switch (parsed.data.type) {
+      case "pongInputUpdate": {
+        if (
+          this.courtController.getCourt().geometry.playerCount === 2 &&
+          index === 0
+        ) {
+          parsed.data.payload.upPressed = !parsed.data.payload.upPressed;
+          parsed.data.payload.downPressed = !parsed.data.payload.downPressed;
+        }
+        this.courtController.updateInput(index, parsed.data.payload);
+        this.broadcastMessages.push({
+          type: "pongUpdate",
+          payload: this.courtController.getCourt(),
+        });
+        break;
+      }
+      // potentially expand with other inputs
+    }
   }
 
   onPlayerJoin(index: number): void {
-    this.courtController.updateInput(index, new PlayerInput());
+    this.courtController.updateInput(index, {
+      upPressed: false,
+      downPressed: false,
+    });
     this.playerMessages[index]!.push({
-      type: "courtSet",
+      type: "pongInit",
       payload: this.courtController.getCourt(),
     });
   }
 
   onPlayerLeave(index: number): void {
-    this.courtController.updateInput(index, new PlayerInput());
+    this.courtController.updateInput(index, {
+      upPressed: false,
+      downPressed: false,
+    });
   }
 
   start(): void {
     this.broadcastMessages.push({
-      type: "courtSet",
+      type: "pongInit",
       payload: this.courtController.getCourt(),
     });
   }
@@ -63,8 +86,8 @@ export class PongController extends GameController {
   update(delta: number): void {
     this.courtController.update(delta);
     this.broadcastMessages.push({
-      type: "stateSet",
-      payload: this.courtController.getState(),
+      type: "pongUpdate",
+      payload: this.courtController.getCourt(),
     });
   }
 }
