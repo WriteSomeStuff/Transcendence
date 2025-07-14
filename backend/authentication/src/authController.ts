@@ -23,6 +23,7 @@ import {
 	register,
 	registerUserInUserService,
 	login,
+	processOAuthLogin,
 	setStatusInUserService,
 	updatePassword,
 	verify2FA,
@@ -122,6 +123,67 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 		reply.status(500).send(AuthResultSchema.parse(errorPayload));
 	}
 };
+
+export const OAuthloginHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+	try {
+		//TODO: handle as registerUserInUserService
+		(void request);
+		console.log(`[Auth Controller] OAuth login initiated`);
+
+		const redirectUri = process.env['42OAUTH_REDIRECT_URI'];
+		if (!redirectUri) {
+			reply.status(500).send({
+				success: false,
+				error: 'OAuth redirect URI is not configured'
+			});
+			return;
+		}
+
+		reply.redirect('https://api.intra.42.fr/oauth/authorize?client_id=' + process.env['42OAUTH_CLIENT_ID'] +
+			'&redirect_uri=' + encodeURIComponent(redirectUri) +
+			'&response_type=code' +
+			'&scope=public');
+	} catch (e) {
+		console.error('Error during OAuth login:', e);
+		reply.status(500).send({
+			success: false,
+			error: 'An error occurred during OAuth login: ' + e
+		});
+	}
+};
+
+export const OAuthCallbackHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+	try {
+		console.log(`[Auth Controller] OAuth callback received`);
+		
+		const code = request.body as string ;
+		const result = await processOAuthLogin(code);
+		if (!result) {
+			reply.status(400).send({
+				success: false,
+				error: 'Failed to process OAuth login'
+			});
+			return;
+		}
+		// TODO: Handle the result of the OAuth login, e.g., user exists, create new user, etc.
+		// console.log(`[Auth Controller] Handling successful OAuth login for user ${result.username}`);
+		// await handleSuccessfulLogin(request, reply, result.userId);
+		// console.log(`[Auth Controller] User ${result.username} logged in successfully via OAuth`);
+
+		reply.status(200).send({
+			success: true,
+			message: "OAuth login successful",
+			next: "/home"
+		});
+
+	} catch (e) {
+		console.error('Error during OAuth callback:', e);
+		reply.status(500).send({
+			success: false,
+			error: 'An error occurred during OAuth callback: ' + e
+		});
+	}
+}
 
 export const verify2FATokenHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {

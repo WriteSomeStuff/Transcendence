@@ -89,6 +89,51 @@ export const login = async (username: string, password: string): Promise<AuthRes
 	}
 };
 
+export const processOAuthLogin = async (code: string): Promise<AuthResultObj> => {
+	try {
+		console.log(`[Auth Service] Processing OAuth login with code: ${code}`);
+		const response = await fetch('https://api.intra.42.fr/oauth/token', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				client_id: process.env["OAUTH_CLIENT_ID"],
+				client_secret: process.env["OAUTH_CLIENT_SECRET"],
+				grant_type: 'authorization_code',
+				code: code,
+				redirect_uri: process.env["OAUTH_REDIRECT_URI"]
+			})
+		});
+		if (!response.ok) {
+			throw new Error(`OAuth token exchange failed: ${response.statusText}`);
+		}
+		console.log(`[Auth Service] OAuth token exchange successful`);
+
+		const data = await response.json() as { access_token: string, token_type: string, expires_in: number };
+		const token = data.access_token;
+		console.log(`[Auth Service] OAuth access token received: ${token}`);
+
+		console.log(`[Auth Service] Fetching user info with access token`);
+		const userResponse = await fetch('https://api.intra.42.fr/v2/me', {
+			method: 'GET',
+			headers: {
+				'Authorization': `${data.token_type} ${token}`
+			}
+		});
+		if (!userResponse.ok) {
+			throw new Error(`Failed to fetch user info: ${userResponse.statusText}`);
+		}
+		console.log(`[Auth Service] User info fetched successfully`);
+		const userData = await userResponse.json() as { email: string, login: string };
+		console.log(`[Auth Service] User info: ${JSON.stringify(userData)}`);
+		
+	} catch (e) {
+		console.error('[Auth Service] Error during OAuth login:', e);
+		throw new Error("An error occurred during OAuth login");
+	}
+};
+
 export const setStatusInUserService = async (userId: number, status: string): Promise<Response> => {
 	try {
 		const url = process.env["USER_SERVICE_URL"] + '/status';

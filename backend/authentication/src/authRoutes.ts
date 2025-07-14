@@ -3,6 +3,8 @@ import { FastifyInstance } from "fastify";
 import {
 	registerUserHandler,
 	loginUserHandler,
+	OAuthloginHandler,
+	OAuthCallbackHandler,
 	logoutUserHandler,
 	updatePasswordHandler,
 	verify2FATokenHandler,
@@ -11,15 +13,17 @@ import {
 } from "./authController.js";
 
 const authRoutes = async (app: FastifyInstance) => {
-	app.delete('/logout',	{ preHandler: [app.authenticate] }, logoutUserHandler);
+	app.delete('/logout',		{ preHandler: [app.authenticate] }, logoutUserHandler);
 	
-	app.post('/register',	registerUserHandler);
-	app.post('/login',		loginUserHandler);
-	app.put('/password',	updatePasswordHandler);
+	app.post('/register',		registerUserHandler);
+	app.post('/login',			loginUserHandler);
+	app.get('/oauth/login',		OAuthloginHandler);
+	app.post('/oauth/callback',	OAuthCallbackHandler);
+	app.put('/password',		updatePasswordHandler);
 	
-	app.post('/verify2fa',	verify2FATokenHandler);
-	app.post('/enable2fa',	{ preHandler: [app.authenticate] }, enable2FAHandler);
-	app.post('/disable2fa',	{ preHandler: [app.authenticate] }, disable2FAHandler);
+	app.post('/verify2fa',		verify2FATokenHandler);
+	app.post('/enable2fa',		{ preHandler: [app.authenticate] }, enable2FAHandler);
+	app.post('/disable2fa',		{ preHandler: [app.authenticate] }, disable2FAHandler);
 };
 
 export default authRoutes;
