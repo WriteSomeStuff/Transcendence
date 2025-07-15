@@ -13,10 +13,10 @@ const app = Fastify();
 await app.register(fastifyWebsocket);
 
 class GameUser {
-  public userId: string;
+  public userId: number;
   public socket: WebSocket | null;
 
-  public constructor(userId: string) {
+  public constructor(userId: number) {
     this.userId = userId;
     this.socket = null;
   }
@@ -51,7 +51,7 @@ class Game {
 
   public constructor(
     gameId: string,
-    userIds: string[],
+    userIds: number[],
     controller: GameController,
   ) {
     this.gameId = gameId;
@@ -72,11 +72,11 @@ class Game {
     }
   }
 
-  private getUserIndex(userId: string): number {
+  private getUserIndex(userId: number): number {
     return this.users.findIndex((user) => user.userId === userId);
   }
 
-  public register(userId: string, socket: WebSocket) {
+  public register(userId: number, socket: WebSocket) {
     console.log("register", userId);
     const user = this.users.find((user) => user.userId === userId);
     if (!user) {
@@ -102,7 +102,7 @@ const games: { [gameId: string]: Game } = {};
 
 app.get("/ws", { websocket: true }, (socket: WebSocket, req) => {
   console.log("Processing ws request", req, req.headers);
-  const userId = req.headers["cookie"]!;
+  const userId = Number(req.headers["cookie"]!);
   console.log("userId", userId);
   const gameId = usersToGames[userId];
   console.log("gameId", gameId);
@@ -136,8 +136,8 @@ app.post("/create", (req, res) => {
     });
     return;
   }
-  const userIds = parsed.data.joinedUsers.map((x) => x.toString());
-  const controller = new PongController();
+  const userIds = parsed.data.joinedUsers;
+  const controller = new PongController(parsed.data);
   games[gameId] = new Game(gameId, userIds, controller);
   for (const userId of userIds) {
     console.log("adding user", userId);
