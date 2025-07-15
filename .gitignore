@@ -5,9 +5,6 @@ database/
 # folders
 dist/
 
-# container data
-data/
-
 # user uploads
 user_uploads/
 
