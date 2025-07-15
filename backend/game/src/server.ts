@@ -114,6 +114,21 @@ app.get("/ws", { websocket: true }, (socket: WebSocket, req) => {
   game.register(userId, socket);
 });
 
+app.get("/users", (req, res) => {
+  console.log("Processing users request", req, req.headers);
+  const userId = Number(req.headers["cookie"]!);
+  console.log("userId", userId);
+  const gameId = usersToGames[userId];
+  console.log("gameId", gameId);
+  if (gameId === undefined) {
+    res.status(404).send("Not found gameId");
+    return;
+  }
+  const game: Game = games[gameId]!;
+  const userIds = game.users.map(user => user.userId);
+  res.status(200).send(userIds);
+});
+
 let lastUpdate = new Date().getTime();
 let lastGameId: number = 0;
 
