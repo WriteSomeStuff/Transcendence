@@ -5,11 +5,6 @@ if (!DB_PATH) {
 	throw new Error("DB_PATH environment variable is not set");
 }
 
-const DEFAULT_AVATAR_PATH: string = `${process.env["AVATAR_DIR_PATH"] as string}default/default_avatar1.jpeg`;
-if (!DEFAULT_AVATAR_PATH) {
-	throw new Error("AVATAR_DIR_PATH environment variable is not set");
-}
-
 const db = new Database(DB_PATH, {
 	verbose: console.log,
 });
@@ -25,7 +20,7 @@ const sql = `
 		username		TEXT	NOT NULL	UNIQUE,
 		created_at		TEXT	DEFAULT (datetime('now')),
 		last_login		TEXT,
-		avatar_path		TEXT	DEFAULT ('${DEFAULT_AVATAR_PATH}'),
+		avatar_path		TEXT,
 		account_status	TEXT	DEFAULT ('offline')	CHECK(account_status IN ('online', 'offline'))
 	);
 

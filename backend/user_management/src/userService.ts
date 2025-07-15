@@ -7,10 +7,14 @@ export const insertUser = async (username: string, userId: number) => {
 	try {
 		runTransaction((db) => {
 			const stmt = db.prepare(`
-				INSERT INTO user (user_id, username)
-				VALUES (?, ?)
+				INSERT INTO user (user_id, username, avatar_path)
+				VALUES (?, ?, ?)
 			`);
-			stmt.run(userId, username);
+
+			const assignedAvatar = Math.floor(Math.random() * 4);
+			const avatarPath: string = `${process.env["AVATAR_DIR_PATH"] as string}default/default_avatar${assignedAvatar}.jpeg`;
+
+			stmt.run(userId, username, avatarPath);
 		});
 	} catch (e) {
 		throw e;
