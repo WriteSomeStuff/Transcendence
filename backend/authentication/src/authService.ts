@@ -89,7 +89,7 @@ export const login = async (username: string, password: string): Promise<AuthRes
 	}
 };
 
-export const processOAuthLogin = async (code: string): Promise<AuthResultObj> => {
+export const processOAuthLogin = async (code: string): Promise<{ token: string}> => {
 	try {
 		console.log(`[Auth Service] Processing OAuth login with code: ${code}`);
 		const response = await fetch('https://api.intra.42.fr/oauth/token', {
@@ -110,24 +110,10 @@ export const processOAuthLogin = async (code: string): Promise<AuthResultObj> =>
 		}
 		console.log(`[Auth Service] OAuth token exchange successful`);
 
-		const data = await response.json() as { access_token: string, token_type: string, expires_in: number };
-		const token = data.access_token;
-		console.log(`[Auth Service] OAuth access token received: ${token}`);
+		const data = await response.json();
+		console.log(`[Auth Service] OAuth token received: ${data.access_token}`);
+		return { token: data.access_token };
 
-		console.log(`[Auth Service] Fetching user info with access token`);
-		const userResponse = await fetch('https://api.intra.42.fr/v2/me', {
-			method: 'GET',
-			headers: {
-				'Authorization': `${data.token_type} ${token}`
-			}
-		});
-		if (!userResponse.ok) {
-			throw new Error(`Failed to fetch user info: ${userResponse.statusText}`);
-		}
-		console.log(`[Auth Service] User info fetched successfully`);
-		const userData = await userResponse.json() as { email: string, login: string };
-		console.log(`[Auth Service] User info: ${JSON.stringify(userData)}`);
-		
 	} catch (e) {
 		console.error('[Auth Service] Error during OAuth login:', e);
 		throw new Error("An error occurred during OAuth login");

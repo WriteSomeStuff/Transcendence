@@ -159,14 +159,16 @@ export const OAuthCallbackHandler = async (request: FastifyRequest, reply: Fasti
 		console.log(`[Auth Controller] OAuth callback received`);
 		
 		const code = request.body as string ;
-		const result = await processOAuthLogin(code);
-		if (!result) {
+		const token = await processOAuthLogin(code);
+		if (!token) {
 			reply.status(400).send({
 				success: false,
 				error: 'Failed to process OAuth login'
 			});
 			return;
 		}
+		console.log(`[Auth Controller] OAuth login processed successfully, token: ${token.token}`);
+		const userInfo = await fetchUserInfoFrom42(token.token); // here or in service?
 		// TODO: Handle the result of the OAuth login, e.g., user exists, create new user, etc.
 		// console.log(`[Auth Controller] Handling successful OAuth login for user ${result.username}`);
 		// await handleSuccessfulLogin(request, reply, result.userId);
