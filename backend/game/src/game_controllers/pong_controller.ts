@@ -1,11 +1,10 @@
 import { GameInputMessageSchema } from "schemas";
-import type { GameUpdateMessage } from "schemas";
+import type { GameUpdateMessage, Room } from "schemas";
 
 import { GameController } from "./game_controller.js";
 
 import { CourtController, ScoreController } from "pong";
-import { Pong2PlayersScoreController } from "../score/pong_2_players_score_controller.js";
-import { PlayerScore } from "../score/player_score.js";
+import { PongScoreController } from "../score/pong_score_controller.js";
 
 export class PongController extends GameController {
   private courtController: CourtController;
@@ -13,11 +12,15 @@ export class PongController extends GameController {
   private readonly playerMessages: GameUpdateMessage[][];
   private broadcastMessages: GameUpdateMessage[] = [];
 
-  public constructor() {
-    super(2);
-    this.playerMessages = [[], []];
-    this.scores = Array.from({ length: 2 }).map((_) => new PlayerScore());
-    this.scoreController = new Pong2PlayersScoreController(this.scores);
+  public constructor(room: Room) {
+    super(room);
+    this.playerMessages = Array.from({length: room.size}).map(_ => []);
+    this.scoreController = new PongScoreController(room.size, 10, (scores) => {
+      this.broadcastMessages.push({
+        type: "scoresUpdate",
+        payload: scores,
+      });
+    });
     this.courtController = new CourtController(this.scoreController);
   }
 
@@ -54,7 +57,10 @@ export class PongController extends GameController {
         });
         break;
       }
-      // potentially expand with other inputs
+      case "giveUp": {
+        // TODO implement a proper giveup
+        break;
+      }
     }
   }
 

@@ -7,6 +7,9 @@ export const GameInputMessageSchema = z.discriminatedUnion("type", [
     type: z.literal("pongInputUpdate"),
     payload: PongPlayerInputSchema,
   }),
+  z.object({
+    type: z.literal("giveUp"),
+  }),
 ]);
 
 export type GameInputMessage = z.infer<typeof GameInputMessageSchema>;
@@ -20,6 +23,14 @@ export const GameUpdateMessageSchema = z.discriminatedUnion("type", [
     type: z.literal("pongUpdate"),
     payload: CourtSchema,
   }),
+  z.object({
+    type: z.literal("scoresUpdate"),
+    payload: z.array(z.number().int()),
+  }),
+  z.object({
+    type: z.literal("gameEnded"),
+    matchId: z.number().int(), // TODO actually have the match id from the database
+  })
 ]);
 
 export type GameUpdateMessage = z.infer<typeof GameUpdateMessageSchema>;
