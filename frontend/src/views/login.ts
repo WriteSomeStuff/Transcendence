@@ -62,7 +62,7 @@ function bindOAuthButton(app: App) {
   oauthButton.addEventListener('click', async () => {
     try {
       console.log("[Frontend] Initiating OAuth login");
-      const response = await fetch('/api/auth/oauth42', {
+      const response = await fetch('/api/auth/oauth/login', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
