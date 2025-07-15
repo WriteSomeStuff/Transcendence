@@ -131,15 +131,17 @@ export const OAuthloginHandler = async (request: FastifyRequest, reply: FastifyR
 		console.log(`[Auth Controller] OAuth login initiated`);
 
 		const redirectUri = process.env['OAUTH_REDIRECT_URI'];
-		if (!redirectUri) {
+		const cliendID = process.env['OAUTH_CLIENT_ID'];
+		if (!redirectUri || !cliendID) {
+			console.error(`[Auth Controller] OAuth redirect URI or client ID is not configured`);
 			reply.status(500).send({
 				success: false,
-				error: 'OAuth redirect URI is not configured'
+				error: 'OAuth redirect URI or client ID is not configured'
 			});
 			return;
 		}
 
-		reply.redirect('https://api.intra.42.fr/oauth/authorize?client_id=' + process.env['OAUTH_CLIENT_ID'] +
+		reply.redirect('https://api.intra.42.fr/oauth/authorize?client_id=' + encodeURIComponent(cliendID) +
 			'&redirect_uri=' + encodeURIComponent(redirectUri) +
 			'&response_type=code' +
 			'&scope=public');
