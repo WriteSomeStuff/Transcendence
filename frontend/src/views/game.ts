@@ -67,6 +67,18 @@ function updateCourt(canvas: HTMLCanvasElement, court: Court) {
   renderCourt(court, ctx);
 }
 
+function updateScores(scoreboard: HTMLElement, usernames: string[], scores: number[]) {
+  scoreboard.innerHTML = "";
+  const elements = usernames.map((username, idx) => {
+    const p = document.createElement("p");
+    p.textContent = `${username}: ${scores[idx]}`;
+    return p;
+  });
+  for (const element of elements) {
+    scoreboard.appendChild(element);
+  }
+}
+
 export async function renderGameView(
   view: z.infer<typeof GameViewSchema>,
   app: App,
@@ -81,6 +93,13 @@ export async function renderGameView(
     app.resetView();
     return;
   }
+  const scoreboard = document.getElementById("scoreboard");
+  if (!scoreboard) {
+    console.error("Can't find a game scoreboard");
+    localStorage.removeItem("gameId");
+    app.resetView();
+    return;
+  }
   const quitButton = document.getElementById("quitButton");
   if (!quitButton || !(quitButton instanceof HTMLButtonElement)) {
     console.error("Can't find a quitButton");
@@ -88,10 +107,11 @@ export async function renderGameView(
     app.resetView();
     return;
   }
-  quitButton.addEventListener("click", async () => {
-    localStorage.removeItem("gameId");
-    app.resetView();
-  });
+  const userIds = await fetch("/api/game/users").then((res) => res.json()) as number[];
+  const usernames = await Promise.all(userIds.map(async userId => {
+    return await fetch(`/api/user/get-username?userId=${userId}`).then((res) => res.json()).then(data => data["username"] as string);
+  }));
+  updateScores(scoreboard, usernames, usernames.map(_ => 0));
   const socket = new WebSocket("/api/game/ws");
   socket.onmessage = (event: MessageEvent) => {
     const parsed = GameUpdateMessageSchema.safeParse(JSON.parse(event.data));
@@ -100,6 +120,10 @@ export async function renderGameView(
       return;
     }
     switch (parsed.data.type) {
+      case "scoresUpdate": {
+        updateScores(scoreboard, usernames, parsed.data.payload);
+        break;
+      }
       case "pongInit": {
         initCourt(canvas, socket, parsed.data.payload);
         break;
@@ -110,5 +134,13 @@ export async function renderGameView(
       }
     }
   };
+  quitButton.addEventListener("click", async () => {
+    const message: GameInputMessage = {
+      type: "giveUp"
+    };
+    socket.send(JSON.stringify(message));
+    localStorage.removeItem("gameId");
+    app.resetView();
+  });
   void view;
 }
