@@ -130,7 +130,7 @@ export const OAuthloginHandler = async (request: FastifyRequest, reply: FastifyR
 		(void request);
 		console.log(`[Auth Controller] OAuth login initiated`);
 
-		const redirectUri = process.env['42OAUTH_REDIRECT_URI'];
+		const redirectUri = process.env['OAUTH_REDIRECT_URI'];
 		if (!redirectUri) {
 			reply.status(500).send({
 				success: false,
@@ -139,7 +139,7 @@ export const OAuthloginHandler = async (request: FastifyRequest, reply: FastifyR
 			return;
 		}
 
-		reply.redirect('https://api.intra.42.fr/oauth/authorize?client_id=' + process.env['42OAUTH_CLIENT_ID'] +
+		reply.redirect('https://api.intra.42.fr/oauth/authorize?client_id=' + process.env['OAUTH_CLIENT_ID'] +
 			'&redirect_uri=' + encodeURIComponent(redirectUri) +
 			'&response_type=code' +
 			'&scope=public');
