@@ -27,7 +27,7 @@ const sql = `
 	CREATE TABLE IF NOT EXISTS tournament (
 		tournament_id		INTEGER PRIMARY KEY,
 		tournament_name		TEXT	NOT NULL	UNIQUE,
-		created_at			TEXT	DEFAULT (datetime('now', '+2 hour')),
+		created_at			TEXT	DEFAULT (datetime('now')),
 		tournament_end		TEXT,
 		tournament_status	TEXT	DEFAULT ('ongoing')	CHECK(tournament_status IN ('ongoing', 'finished'))
 	);
