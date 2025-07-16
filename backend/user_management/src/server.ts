@@ -1,7 +1,8 @@
 import fastify, { FastifyRequest, FastifyReply } from "fastify";
 import fastifyMultipart from '@fastify/multipart';
 
-import { userRoutes, friendRoutes } from "./userRoutes.js";
+import userRoutes from "./userRoutes.js";
+import friendRoutes from "./friendRoutes.js";
 import matchRoutes from "./matchRoutes.js";
 
 const PORT: number = 80;

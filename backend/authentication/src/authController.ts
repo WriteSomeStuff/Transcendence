@@ -125,8 +125,6 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 
 export const verify2FATokenHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		// TODO make sure this request is sent with the correct context in body
-		// also needs to include username
 		console.log(`[Auth Controller] Received request to verify 2FA token`);
 		const { token, username } = request.body as { token: string, username: string };
 

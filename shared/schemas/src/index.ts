@@ -29,12 +29,14 @@ export {
   UserSchema,
   FriendSchema,
   FriendListResponseSchema,
+  FriendRequestListResponseSchema
 } from "./user_schemas.js";
 export type {
   UserId,
   User,
   Friend,
   FriendListResponse,
+  Friendship
 } from "./user_schemas.js";
 export {
   RoomPermissionsSchema,

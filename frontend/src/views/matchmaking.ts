@@ -89,7 +89,7 @@ export async function renderMatchmakingView(
   const userId = await fetch("/api/user/profile")
     .then((res) => res.json())
     .then((user) => {
-      return user.user_id as number;
+      return user.id as number;
     });
   app.appContainer.innerHTML = await fetch("/views/matchmaking.html").then(
     (res) => res.text(),

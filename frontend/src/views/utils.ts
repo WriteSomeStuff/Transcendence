@@ -88,7 +88,6 @@ export function bindCredentialsForm(formBinding: formBinding, app: App) {
     } catch (e) {
       console.error(`${formBinding.serviceName} failed: ${e}`);
       alert(`${formBinding.serviceName} failed: ${e}`);
-      // TODO further handling
       app.resetView();
     }
   });
