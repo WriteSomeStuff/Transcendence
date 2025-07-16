@@ -18,7 +18,7 @@ const authRoutes = async (app: FastifyInstance) => {
 	app.post('/register',		registerUserHandler);
 	app.post('/login',			loginUserHandler);
 	app.get('/oauth/login',		OAuthloginHandler);
-	app.post('/oauth/callback',	OAuthCallbackHandler);
+	app.get('/oauth/callback',	OAuthCallbackHandler);
 	app.put('/password',		updatePasswordHandler);
 	
 	app.post('/verify2fa',		verify2FATokenHandler);
