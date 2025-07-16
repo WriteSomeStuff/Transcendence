@@ -1,4 +1,4 @@
-import { runTransaction } from "./db.ts";
+import { runTransaction } from "./db.js";
 import type { Friend, Friendship } from "schemas";
 
 export const createFriendRequest = async (userId: number, friendId: number) => {

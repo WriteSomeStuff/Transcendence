@@ -1,11 +1,11 @@
 import argon2 from "argon2";
 import * as OTPAuth from "otpauth";
 import QRCode from "qrcode";
-import runTransaction from "./db.ts";
+import runTransaction from "./db.js";
 
-import type { AuthResultObj, Enable2FAResultObj } from "./types/types.ts";
-import { fetchUserIdByUsername } from "./helpers/authServiceHelpers.ts";
-import { fetchUsernameByUserId } from "./helpers/authServiceHelpers.ts";
+import type { AuthResultObj, Enable2FAResultObj } from "./types/types.js";
+import { fetchUserIdByUsername } from "./helpers/authServiceHelpers.js";
+import { fetchUsernameByUserId } from "./helpers/authServiceHelpers.js";
 
 // @ts-ignore
 export const register = async (username: string, password: string): Promise<number> => {
