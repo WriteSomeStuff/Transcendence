@@ -41,7 +41,7 @@ export const FriendshipSchema = z.object({
 	accepted: z.boolean(),
 });
 
-export type Friendship = z.infer<typeof FriendshipSchema>
+export type Friendship = z.infer<typeof FriendshipSchema>;
 
 export const FriendRequestListResponseSchema = z.discriminatedUnion("success", [
 	z.object({
