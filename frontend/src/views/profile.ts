@@ -474,7 +474,7 @@ async function sendRequest(username: string) {
 
 		if (!userIdResponse || userIdData.success === false) {
 			console.error(`[Profile] Sending request not possible: ${userIdData.error}`);
-			alert('Sending request failed: ' + userIdData.error || `HTTP error; status: ${userIdResponse.status}`);
+			alert('Sending request failed: ' + (userIdData.error || `HTTP error; status: ${userIdResponse.status}`));
 			return;
 		}
 
@@ -496,7 +496,7 @@ async function sendRequest(username: string) {
 
 		if (!friendRequestResponse.ok || data.success === false) {
 			console.error(`[profile] Sending request failed`);
-      		alert('Sending request failed: ' + data.error || `HTTP error; status: ${friendRequestResponse.status}`);
+      		alert('Sending request failed: ' + (data.error || `HTTP error; status: ${friendRequestResponse.status}`));
 	  		return;
 		}
 
