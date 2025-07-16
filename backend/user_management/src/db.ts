@@ -5,11 +5,6 @@ if (!DB_PATH) {
 	throw new Error("DB_PATH environment variable is not set");
 }
 
-const DEFAULT_AVATAR_PATH: string = `${process.env["AVATAR_DIR_PATH"] as string}default/aggretsuko.gif`;
-if (!DEFAULT_AVATAR_PATH) {
-	throw new Error("AVATAR_DIR_PATH environment variable is not set");
-}
-
 const db = new Database(DB_PATH, {
 	verbose: console.log,
 });
@@ -25,14 +20,14 @@ const sql = `
 		username		TEXT	NOT NULL	UNIQUE,
 		created_at		TEXT	DEFAULT (datetime('now')),
 		last_login		TEXT,
-		avatar_path		TEXT	DEFAULT ('${DEFAULT_AVATAR_PATH}'),
+		avatar_path		TEXT,
 		account_status	TEXT	DEFAULT ('offline')	CHECK(account_status IN ('online', 'offline'))
 	);
 
 	CREATE TABLE IF NOT EXISTS tournament (
 		tournament_id		INTEGER PRIMARY KEY,
 		tournament_name		TEXT	NOT NULL	UNIQUE,
-		created_at			TEXT	DEFAULT (datetime('now', '+2 hour')),
+		created_at			TEXT	DEFAULT (datetime('now')),
 		tournament_end		TEXT,
 		tournament_status	TEXT	DEFAULT ('ongoing')	CHECK(tournament_status IN ('ongoing', 'finished'))
 	);
@@ -95,3 +90,4 @@ try {
 }
 
 export default db;
+// export default runTransaction;

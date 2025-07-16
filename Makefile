@@ -26,7 +26,7 @@ clean_db:
 	find ./backend -type f -name "*.sqlite3" -delete
 
 clean_avatars:
-	docker volume rm transcendence_git_avatars || true
+	docker volume rm transcendence_avatars || true
 	rm -rf ./backend/user_management/data/avatars/user_uploads
 
 clean_users: down clean_db clean_avatars

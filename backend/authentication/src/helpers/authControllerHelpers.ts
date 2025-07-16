@@ -23,17 +23,16 @@ export const handleSuccessfulLogin = async (request: FastifyRequest, reply: Fast
 		const token = request.jwt.sign({ userId: userId }, { expiresIn: "1d" });
 		console.log(`[Auth Controller] JWT signed for '${userId}'`);
 		
-		const isProduction = process.env["NODE_ENV"] === 'production'; // TODO because testing with http requests, set in docker-compose.yml
 		reply.setCookie('access_token', token, {
 			path: '/',
 			httpOnly: true,
-			secure: isProduction,
+			secure: "auto",
 			sameSite: "strict"
 		});
 		reply.setCookie("logged_in", "true", {
 			path: '/',
 			httpOnly: false,
-			secure: isProduction,
+			secure: "auto",
 			sameSite: "strict"
 		});
 		console.log(`[Auth Controller] Cookie set for user '${userId}'`);
@@ -60,17 +59,16 @@ export const handleSuccessfulLogin = async (request: FastifyRequest, reply: Fast
 
 export const handleAuthInvalidation = async (_request: FastifyRequest, reply: FastifyReply, userId: number) => {
 	try {
-		const isProduction = process.env["NODE_ENV"] === 'production'; // TODO because testing with http requests, set in docker-compose.yml
 		reply.clearCookie('access_token', {
 			path: '/',
 			httpOnly: true,
-			secure: isProduction,
+			secure: "auto",
 			sameSite: "strict"
 		});
 		reply.clearCookie("logged_in", {
 			path: '/',
 			httpOnly: false,
-			secure: isProduction,
+			secure: "auto",
 			sameSite: "strict"
 		});
 		console.log(`[Auth Controller] Cookie erased for user '${userId}'`);

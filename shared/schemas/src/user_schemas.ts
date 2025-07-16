@@ -32,3 +32,25 @@ export const FriendListResponseSchema = z.discriminatedUnion("success", [
 ]);
 
 export type FriendListResponse = z.infer<typeof FriendListResponseSchema>;
+
+export const FriendshipSchema = z.object({
+	friendshipId: z.number(),
+	userId: z.number(),
+	usernameSender: z.string(),
+	friendId: z.number(),
+	accepted: z.boolean(),
+});
+
+export type Friendship = z.infer<typeof FriendshipSchema>;
+
+export const FriendRequestListResponseSchema = z.discriminatedUnion("success", [
+	z.object({
+		success: z.literal(true),
+		data: z.array(FriendshipSchema),
+	}),
+	z.object({
+		success: z.literal(false),
+		error: z.string(),
+	}),
+]);
+
