@@ -111,8 +111,12 @@ export const processOAuthLogin = async (code: string): Promise<{ token: string}>
 		console.log(`[Auth Service] OAuth token exchange successful`);
 
 		const data = await response.json();
-		console.log(`[Auth Service] OAuth token received: ${data.access_token}`);
-		return { token: data.access_token };
+		const token = data.access_token;
+		if (!token) {
+			throw new Error("OAuth token not found in response");
+		}
+		console.log(`[Auth Service] OAuth token received: ${token}`);
+		return { token };
 
 	} catch (e) {
 		console.error('[Auth Service] Error during OAuth login:', e);
