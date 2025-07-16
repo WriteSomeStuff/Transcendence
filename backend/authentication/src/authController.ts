@@ -158,7 +158,15 @@ export const OAuthCallbackHandler = async (request: FastifyRequest, reply: Fasti
 	try {
 		console.log(`[Auth Controller] OAuth callback received`);
 		
-		const code = request.body as string ;
+		const code = request.query as string ;
+		if (!code) {
+			console.error(`[Auth Controller] OAuth callback missing code`);
+			reply.status(400).send({
+				success: false,
+				error: 'OAuth callback missing code'
+			});
+			return;
+		}
 		const token = await processOAuthLogin(code);
 		if (!token) {
 			reply.status(400).send({
