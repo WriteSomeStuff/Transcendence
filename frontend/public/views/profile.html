@@ -57,22 +57,32 @@
 				</dialog>
 				<img class="w-full max-w-xs h-auto" id="avatarImg" alt="User Avatar"/>
 			</div>
-			<div class="flex flex-col items-center border-8 animate-rainbow p-4">
-				<h1 class="text-base sm:text-lg">Friends</h1>
-				<ul id="friendsList"></ul>
+			<div class="flex flex-col items-center border-8 animate-rainbow p-6 h-32 w-full">
+				<h1 class="text-base sm:text-lg font-bold">Wins / losses</h1>
+				<div class="w-full overflow-y-auto max-h-48 mt-2">
+				<!-- Example: -->
+				<ul>
+					<li>1 - 15</li>
+					<!-- etc. -->
+				</ul>
+				</div>
 			</div>
-			<div class="flex flex-col items-center border-8 animate-rainbow p-4">
-				<h1>Wins / losses</h1>
+			<div class="flex flex-col items-center border-8 animate-rainbow p-6 h-64 sm:h-72 w-full overflow-y-auto">
+				<h1 class="text-base sm:text-lg font-bold">Match history</h1>
+				<div class="w-full overflow-y-auto max-h-48 mt-2">
+				<!-- Populate with match entries -->
+				</div>
 			</div>
-			<div class="flex flex-col items-center border-8 animate-rainbow p-4">
-				<h1>Match history</h1>
+			<div class="flex flex-col items-center border-8 animate-rainbow p-6 h-64 sm:h-72 w-full overflow-y-auto">
+				<h1 class="text-base sm:text-lg font-bold">Friends</h1>
+				<ul id="friendsList" class="w-full overflow-y-auto max-h-48 mt-2"></ul>
 			</div>
-			<div class="flex flex-col items-center border-8 animate-rainbow p-4">
-				<h1 class="text-base sm:text-lg">Friend Requests</h1>
-				<ul id="requests"></ul>
+			<div class="flex flex-col items-center border-8 animate-rainbow p-4 w-full overflow-y-auto">
+				<h1 class="text-base sm:text-lg font-bold">Friend Requests</h1>
+				<ul id="requests" class="w-full overflow-y-auto max-h-48 mt-2"></ul>
 			</div>
 			<div class="flex flex-col items-center border-8 animate-rainbow p-4" >
-				<h1 class="text-base sm:text-lg">Friend Search</h1>
+				<h1 class="text-base sm:text-lg font-bold">Friend Search</h1>
 				<div>
 					<input type="text" id="search-input" placeholder="Search for username...">
 					<button id="search-button" class="sm:text-base rounded-md border-2 border-blue-500 bg-blue-700 hover:border-purple-500 hover:bg-purple-950 text-white mt-2">Send Friend Request</button>
