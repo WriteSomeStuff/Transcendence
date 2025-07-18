@@ -4,8 +4,7 @@ import QRCode from "qrcode";
 import db, {runTransaction} from "./db.js";
 
 import type {AuthResultObj, Enable2FAResultObj} from "./types/types.js";
-import {fetchUserIdByUsername} from "./helpers/authServiceHelpers.ts";
-import { fetchUsernameByUserId } from "./helpers/authServiceHelpers.ts";
+import { fetchUserIdByUsername, fetchUsernameByUserId, processOAuthLogin, fetchUserInfoFrom42 } from "./helpers/authServiceHelpers.js";
 
 // @ts-ignore
 export const register = async (username: string, password: string): Promise<number> => {
@@ -89,40 +88,28 @@ export const login = async (username: string, password: string): Promise<AuthRes
 	}
 };
 
-export const processOAuthLogin = async (code: string): Promise<{ token: string}> => {
+export const OAuthCallback = async (code: string): Promise<{ userId: number }> => {
 	try {
-		console.log(`[Auth Service] Processing OAuth login with code: ${code}`);
-		const response = await fetch('https://api.intra.42.fr/oauth/token', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				client_id: process.env["OAUTH_CLIENT_ID"],
-				client_secret: process.env["OAUTH_CLIENT_SECRET"],
-				grant_type: 'authorization_code',
-				code: code,
-				redirect_uri: process.env["OAUTH_REDIRECT_URI"]
-			})
-		});
-		if (!response.ok) {
-			throw new Error(`OAuth token exchange failed: ${response.statusText}`);
-		}
-		console.log(`[Auth Service] OAuth token exchange successful`);
+		console.log(`[Auth Service] Processing OAuth callback with code: ${code}`);
+		const tokenResponse = await processOAuthLogin(code);
 
-		const data = await response.json();
-		const token = data.access_token;
-		if (!token) {
-			throw new Error("OAuth token not found in response");
-		}
-		console.log(`[Auth Service] OAuth token received: ${token}`);
-		return { token };
+		console.log(`[Auth Service] OAuth token received: ${tokenResponse.token}`);
+		const email = await fetchUserInfoFrom42(tokenResponse.token);
 
+		// change this to find user by email
+		console.log(`[Auth Service] User info fetched: ${JSON.stringify(email)}`);
+		const userId = await fetchUserIdByUsername(email);
+		if (!userId) {
+			throw new Error("User not found in the database");
+		}
+
+		return { userId: userId };
 	} catch (e) {
-		console.error('[Auth Service] Error during OAuth login:', e);
-		throw new Error("An error occurred during OAuth login");
+		console.error('[Auth Service] Error during OAuth callback:', e);
+		throw new Error("An error occurred during OAuth callback");
+
 	}
-};
+}
 
 export const setStatusInUserService = async (userId: number, status: string): Promise<Response> => {
 	try {

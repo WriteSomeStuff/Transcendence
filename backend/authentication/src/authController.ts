@@ -23,7 +23,7 @@ import {
 	register,
 	registerUserInUserService,
 	login,
-	processOAuthLogin,
+	OAuthCallback,
 	setStatusInUserService,
 	updatePassword,
 	verify2FA,
@@ -167,20 +167,21 @@ export const OAuthCallbackHandler = async (request: FastifyRequest, reply: Fasti
 			});
 			return;
 		}
-		const token = await processOAuthLogin(code);
-		if (!token) {
-			reply.status(400).send({
+		console.log(`[Auth Controller] OAuth callback code: ${code}`);
+
+		const { userId } = await OAuthCallback(code);
+		if (!userId) {
+			console.error(`[Auth Controller] User not found in OAuth callback`);
+			reply.status(404).send({
 				success: false,
-				error: 'Failed to process OAuth login'
+				error: 'User not found in OAuth callback'
 			});
 			return;
 		}
-		console.log(`[Auth Controller] OAuth login processed successfully, token: ${token.token}`);
-		const userInfo = await fetchUserInfoFrom42(token.token); // here or in service?
-		// TODO: Handle the result of the OAuth login, e.g., user exists, create new user, etc.
-		// console.log(`[Auth Controller] Handling successful OAuth login for user ${result.username}`);
-		// await handleSuccessfulLogin(request, reply, result.userId);
-		// console.log(`[Auth Controller] User ${result.username} logged in successfully via OAuth`);
+		
+		console.log(`[Auth Controller] User ID from OAuth callback: ${userId}`);
+		await handleSuccessfulLogin(request, reply, userId);
+		console.log(`[Auth Controller] User ${userId} logged in successfully after OAuth callback`);
 
 		reply.status(200).send({
 			success: true,
