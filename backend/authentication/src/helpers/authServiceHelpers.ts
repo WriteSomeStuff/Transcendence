@@ -60,7 +60,6 @@ export const processOAuthLogin = async (code: string): Promise<{ token: string }
 		if (!token) {
 			throw new Error("OAuth token not found in response");
 		}
-		console.log(`[Auth Service] OAuth token received: ${token}`);
 		return { token };
 
 	} catch (e) {
