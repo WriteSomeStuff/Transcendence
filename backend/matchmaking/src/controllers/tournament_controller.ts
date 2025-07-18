@@ -1,4 +1,8 @@
-import { type Tournament, type TournamentMatch, type TournamentBracket, TournamentMatchSchema } from "schemas";
+import type { 
+	Tournament,
+	TournamentMatch,
+	TournamentBracket
+} from "schemas";
 import { v4 as uuidv4 } from "uuid";
 
 // export const TournamentSchema = z.object({
