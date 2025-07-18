@@ -54,3 +54,13 @@ export const FriendRequestListResponseSchema = z.discriminatedUnion("success", [
 	}),
 ]);
 
+export const HistorySchema = z.object({
+  date: z.coerce.date(),
+  userScore: z.number(),
+  opponentInfo: z.array(z.object({
+    opponentId: z.number(),
+    opponentScore: z.number(),
+  })),
+});
+
+export type History = z.infer<typeof HistorySchema>;

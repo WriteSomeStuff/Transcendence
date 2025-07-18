@@ -1,10 +1,12 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { z } from 'zod';
+import type { History } from "schemas";
 
 import {
 	createMatchParticipant,
 	createMatchState,
-	createTournament
+	createTournament,
+	getMatchHistory
 } from "./matchService.ts";
 
 const MatchResultSchema = z.object({
@@ -88,5 +90,24 @@ export const createMatchHandler = async(request: FastifyRequest, reply:FastifyRe
 				error: "An error occured inserting a match into user_service database."
 			});
 		}
+	}
+}
+
+export const getMatchHistoryHandler = async(request: FastifyRequest, reply:FastifyReply) => {
+	try {
+		console.log(`[Match controller] getting match history`);
+		const history: History[] = await getMatchHistory(request.user.userId);
+		console.log(`[Match controller] getting match history successful`);
+
+		reply.status(200).send({
+			success: true,
+			data: history });
+	}
+	catch (e: any) {
+		console.error('Error getting match history:', e);
+		reply.status(500).send({
+			success: false,
+			error: "An error occured trying to fetch the match history."
+		});
 	}
 }
