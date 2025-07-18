@@ -1,4 +1,4 @@
-import type { Court, CourtState } from "schemas";
+import type {Court, CourtState, Room } from "schemas";
 
 import { initCourt } from "./court.ts";
 import { initCourtState, updateCourtState } from "./court_state.ts";
@@ -10,10 +10,12 @@ import { vec2 } from "./vector2.js";
 export class CourtController {
   private readonly court: Court;
   private scoreController: ScoreController;
+  private readonly gameSpeed: number;
 
-  public constructor(scoreController: ScoreController) {
+  public constructor(room: Room, scoreController: ScoreController) {
     this.scoreController = scoreController;
-    this.court = initCourt(2);
+    this.court = initCourt(room.size, room.gameData.options.paddleRatio);
+    this.gameSpeed = room.gameData.options.gameSpeed;
   }
 
   public getCourt(): Court {
@@ -33,11 +35,19 @@ export class CourtController {
     this.court.state.paddles[playerIndex]!.velocity = getDirection(playerInput);
   }
 
+  public giveUp(playerIndex: number): void {
+    this.court.state.paddles[playerIndex] = {
+      offsetFromCenter: 0,
+      edgeRatio: 1,
+      velocity: 0,
+    };
+  }
+
   public update(delta: number): void {
     const updateResult = updateCourtState(
       this.getState(),
       this.court.geometry,
-      delta,
+      delta * this.gameSpeed,
     );
     if (typeof updateResult === "number") {
       this.scoreController.onBallMissed(

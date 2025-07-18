@@ -34,3 +34,14 @@ export const GameUpdateMessageSchema = z.discriminatedUnion("type", [
 ]);
 
 export type GameUpdateMessage = z.infer<typeof GameUpdateMessageSchema>;
+
+export const MatchResultSchema = z.object({
+  participants: z.array(z.object({
+    userId: z.number().int(),
+    score: z.number().int(),
+  })),
+  start: z.coerce.date(),
+  end: z.coerce.date(),
+});
+
+export type MatchResult = z.infer<typeof MatchResultSchema>;

@@ -19,4 +19,8 @@ export class PongScoreController implements ScoreController {
     }
     this.sender(this.playerScores);
   }
+
+  getScores(): number[] {
+    return this.playerScores;
+  }
 }

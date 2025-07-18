@@ -1,19 +1,39 @@
 import { GameInputMessageSchema } from "schemas";
-import type { GameUpdateMessage, Room } from "schemas";
+import type { GameUpdateMessage, Room, MatchResult } from "schemas";
 
 import { GameController } from "./game_controller.js";
 
 import { CourtController, ScoreController } from "pong";
 import { PongScoreController } from "../score/pong_score_controller.js";
 
+async function saveMatchResult(userIds: number[], scores: number[], startTime: Date, endTime: Date): Promise<number> {
+  const matchResult: MatchResult = {
+    participants: userIds.map((userId, index) => ({
+      userId,
+      score: scores[index]!,
+    })),
+    start: startTime,
+    end: endTime,
+  };
+  const url = process.env['USER_SERVICE_URL'] + '/match/save';
+  await fetch(url, {
+    method: "POST",
+    body: JSON.stringify(matchResult),
+  }); // TODO actual save logic
+  return 0;
+}
+
 export class PongController extends GameController {
   private courtController: CourtController;
   private readonly scoreController: ScoreController;
   private readonly playerMessages: GameUpdateMessage[][];
   private broadcastMessages: GameUpdateMessage[] = [];
+  private usersGaveUp: Set<number> = new Set();
+  private readonly startTime: Date;
 
   public constructor(room: Room) {
     super(room);
+    this.startTime = new Date();
     this.playerMessages = Array.from({length: room.size}).map(_ => []);
     this.scoreController = new PongScoreController(room.size, 10, (scores) => {
       this.broadcastMessages.push({
@@ -21,7 +41,20 @@ export class PongController extends GameController {
         payload: scores,
       });
     });
-    this.courtController = new CourtController(this.scoreController);
+    this.courtController = new CourtController(room, this.scoreController);
+  }
+
+  private endGame(): void {
+    const scores = this.scoreController.getScores();
+    for (const userIndex of this.usersGaveUp) {
+      scores[userIndex] = -1;
+    }
+    saveMatchResult(this.room.joinedUsers, scores, this.startTime, new Date()).then(matchId => {
+      this.broadcastMessages.push({
+        type: "gameEnded",
+        matchId: matchId,
+      })
+    });
   }
 
   getBroadcastMessages(): object[] {
@@ -37,6 +70,9 @@ export class PongController extends GameController {
   }
 
   onPlayerAction(index: number, action: object): void {
+    if (this.usersGaveUp.has(index)) {
+      return;
+    }
     const parsed = GameInputMessageSchema.safeParse(action);
     if (!parsed.success) {
       return;
@@ -58,7 +94,11 @@ export class PongController extends GameController {
         break;
       }
       case "giveUp": {
-        // TODO implement a proper giveup
+        this.usersGaveUp.add(index);
+        this.courtController.giveUp(index);
+        if (this.usersGaveUp.size + 1 >= this.room.size) {
+          this.endGame();
+        }
         break;
       }
     }
