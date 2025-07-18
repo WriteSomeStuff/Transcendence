@@ -33,13 +33,6 @@ app.register(proxy, {
   prefix: "/user",
 });
 
-// Is this needed?
-// app.register(proxy, {
-//   upstream: "http://oauth_service",
-//   prefix: "/callback",
-//   rewritePrefix: "/api/auth/oauth/callback",
-// });
-
 app.listen(
   { port: 80, host: "0.0.0.0" },
   (err: Error | null, address: string) => {
