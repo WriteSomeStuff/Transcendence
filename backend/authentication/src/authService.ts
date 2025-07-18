@@ -88,6 +88,40 @@ export const login = async (username: string, password: string): Promise<AuthRes
 	}
 };
 
+const findOrCreateUser = async (email: string): Promise<{userId: number}> => {
+	try {
+		console.log(`[Auth Service] Finding or creating user with email: ${email}`);
+		let userId: number | undefined;
+		try {
+			userId = await fetchUserIdByUsername(email);
+		} catch (e) {
+			console.log(`[Auth Service] User not found, creating new user`);
+			
+			const password = await argon2.hash(email);
+
+			console.log(`[Auth Controller] Registering user '${email}'`);
+			const newUserId = await register(email, password);
+			console.log(`[Auth Controller] Registering user '${email}' successful: ${newUserId}`);
+			
+			console.log(`[Auth Controller] Registering user '${email}' to user db`);
+			const response = await registerUserInUserService(email, newUserId);
+			if (!response.ok) {
+				throw new Error(`Failed to register user in user service: ${response.statusText}`);
+			}
+			console.log(`[Auth Controller] Registering user '${email}' to user db successful`);
+
+
+			console.log(`[Auth Service] New user created with ID: ${newUserId}`);
+			return { userId: newUserId };
+		}
+		console.log(`[Auth Service] User found with ID: ${userId}`);
+		return { userId: userId };
+	} catch (e) {
+		console.error('[Auth Service] Error finding or creating user:', e);
+		throw new Error("An error occurred while finding or creating the user");
+	}
+}
+
 export const OAuthCallback = async (code: string): Promise<{ userId: number }> => {
 	try {
 		console.log(`[Auth Service] Processing OAuth callback with code: ${code}`);
@@ -96,14 +130,10 @@ export const OAuthCallback = async (code: string): Promise<{ userId: number }> =
 		console.log(`[Auth Service] OAuth token received: ${tokenResponse.token}`);
 		const email = await fetchUserInfoFrom42(tokenResponse.token);
 
-		// change this to find user by email
 		console.log(`[Auth Service] User info fetched: ${JSON.stringify(email)}`);
-		const userId = await fetchUserIdByUsername(email);
-		if (!userId) {
-			throw new Error("User not found in the database");
-		}
+		const userId = await findOrCreateUser(email.email);
 
-		return { userId: userId };
+		return { userId: userId.userId };
 	} catch (e) {
 		console.error('[Auth Service] Error during OAuth callback:', e);
 		throw new Error("An error occurred during OAuth callback");

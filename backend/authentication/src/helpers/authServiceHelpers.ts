@@ -97,5 +97,3 @@ export const fetchUserInfoFrom42 = async (token: string): Promise<{ email: strin
 		throw new Error("An error occurred while fetching user info from 42");
 	}
 }
-
-// finduser (later find or create)
