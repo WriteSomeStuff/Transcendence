@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { MatchResultSchema } from "schemas";
-import type { History } from "schemas";
+import { HistoryResponseSchema, MatchResultSchema } from "schemas";
+import type { MatchHistory } from "schemas";
 
 import {
 	createMatchParticipant,
@@ -87,18 +87,15 @@ export const createMatchHandler = async(request: FastifyRequest, reply:FastifyRe
 export const getMatchHistoryHandler = async(request: FastifyRequest, reply:FastifyReply) => {
 	try {
 		console.log(`[Match controller] getting match history`);
-		const history: History[] = await getMatchHistory(request.user.userId);
+		const history: MatchHistory[] = await getMatchHistory(request.user.userId);
 		console.log(`[Match controller] getting match history successful`);
 
-		reply.status(200).send({
-			success: true,
-			data: history });
+		const successPayload = { success: true, data: history };
+		reply.status(200).send(HistoryResponseSchema.parse(successPayload));
 	}
 	catch (e: any) {
 		console.error('Error getting match history:', e);
-		reply.status(500).send({
-			success: false,
-			error: "An error occured trying to fetch the match history."
-		});
+		const errorPayload = { success: false, error: 'Error: ' + e };
+		reply.status(500).send(HistoryResponseSchema.parse(errorPayload));
 	}
 }

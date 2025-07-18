@@ -30,7 +30,8 @@ export {
   FriendSchema,
   FriendListResponseSchema,
   FriendRequestListResponseSchema,
-	HistorySchema
+	HistorySchema,
+  HistoryResponseSchema
 } from "./user_schemas.js";
 export type {
   UserId,
@@ -38,7 +39,7 @@ export type {
   Friend,
   FriendListResponse,
   Friendship,
-	History
+	MatchHistory
 } from "./user_schemas.js";
 export {
   RoomPermissionsSchema,

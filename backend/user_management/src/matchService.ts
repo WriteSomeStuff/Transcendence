@@ -1,5 +1,5 @@
 import { runTransaction } from "./db.js";
-import type { History } from "schemas";
+import type { MatchHistory } from "schemas";
 
 export const createTournament = async (name: string) => {
 	try {
@@ -72,7 +72,7 @@ export const getMatchHistory = async (userId: number) => {
 
 			if (!rows || rows.length === 0) return []
 
-			const history: History[] = rows.map(row => ({
+			const history: MatchHistory[] = rows.map(row => ({
 				date: new Date(row.match_end),
 				userScore: row.user_score,
 				opponentInfo: [{opponentId: row.opponent_id, opponentScore: row.opponent_score}],

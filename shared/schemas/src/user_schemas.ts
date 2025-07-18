@@ -63,4 +63,15 @@ export const HistorySchema = z.object({
   })),
 });
 
-export type History = z.infer<typeof HistorySchema>;
+export const HistoryResponseSchema = z.discriminatedUnion("success", [
+  z.object({
+    success: z.literal(true),
+    data: z.array(HistorySchema),
+  }),
+  z.object({
+    success: z.literal(false),
+    error: z.string(),
+  }),
+]);
+
+export type MatchHistory = z.infer<typeof HistorySchema>;

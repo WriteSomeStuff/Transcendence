@@ -5,10 +5,12 @@ import { bindNavbar } from "./utils.js";
 import type { App } from "../app.js";
 import {
 	FriendListResponseSchema,
-	FriendRequestListResponseSchema
+	FriendRequestListResponseSchema,
+  HistoryResponseSchema
 } from "schemas";
 import type {
 	Friend,
+  MatchHistory,
 	Friendship
 } from "schemas";
 
@@ -149,6 +151,60 @@ async function displayUsername() {
   const username = document.getElementById("username") as HTMLHeadingElement;
   if (username) {
     username.textContent = fetchedUsername;
+  }
+}
+
+async function fetchMatchHistory(): Promise<MatchHistory[] | string> {
+  	try {
+      const response: Response = await fetch("/api/user/match/history", { method: "GET" });
+      if (!response.ok) {
+        return response.statusText;
+      }
+
+		const parsedResponse = HistoryResponseSchema.safeParse(await response.json());
+		console.log(parsedResponse);
+
+		if (!parsedResponse.success) {
+			return parsedResponse.error.toString();
+		}
+		if (!parsedResponse.data.success) {
+			return parsedResponse.data.error;
+		}
+		return parsedResponse.data.data;
+  	} catch (e: any) {
+    	console.error("Error fetching user data:", e);
+    	return e.message;
+  	}
+}
+
+async function displayMatchHistory() {
+  const list: MatchHistory[] | string = await fetchMatchHistory();
+  const matchHistory = document.getElementById("matchHistory") as HTMLUListElement;
+  if (!matchHistory) return;
+
+  if (typeof list === "string") {
+    matchHistory.textContent = "Something went wrong:" + list;
+    return;
+  } else if (list.length === 0) {
+    matchHistory.textContent = "You don't have any matches (yet)";
+    return;
+  }
+  //  test below with an actual match and display it better.. currently work in progress
+  for (const history of list) {
+    const docUser = document.createElement("span");
+    docUser.className = "min-w-[8rem] truncate";
+    docUser.textContent = history.date.toISOString();
+
+    const docStatus = document.createElement("span");
+    docStatus.className = "text-right";
+    docStatus.textContent = history.userScore.toString();
+
+    const listElement = document.createElement("li");
+
+    listElement.className = "flex justify-between items-center gap-4";
+    listElement.appendChild(docUser);
+    listElement.appendChild(docStatus);
+    matchHistory.appendChild(listElement);
   }
 }
 
@@ -531,6 +587,7 @@ async function sendFriendRequest() {
 
 function bindProfileViewElements(app: App) {
 	displayUsername();
+  displayMatchHistory();
 	displayFriendList(app);
 	displayFriendRequestList(app);
 	sendFriendRequest();
