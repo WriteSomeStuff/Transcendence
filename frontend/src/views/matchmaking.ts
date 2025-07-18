@@ -7,7 +7,6 @@ import { logOut } from "./profile.js";
 
 import { RoomSchema } from "schemas";
 import type { MatchmakingMessage, Room } from "schemas";
-import { log } from "console";
 
 const MatchmakingServerMessage = z.discriminatedUnion("action", [
   z.object({
@@ -66,7 +65,12 @@ function createRoomElement(room: Room, socket: WebSocket): HTMLElement {
   return roomDiv;
 }
 
-function fillAvailableRooms(rooms: Room[], docRooms: HTMLElement, userId: number, socket: WebSocket) {
+function fillAvailableRooms(
+  rooms: Room[],
+  docRooms: HTMLElement,
+  userId: number,
+  socket: WebSocket,
+) {
   docRooms.innerHTML = "";
   for (const room of rooms) {
     if (

@@ -1,9 +1,4 @@
-// stores relative values of a paddle
-export interface PaddleState {
-  offsetFromCenter: number; // from -1 to 1, relative
-  edgeRatio: number;
-  velocity: number;
-}
+import type { PaddleState } from "schemas";
 
 export function initPaddle(edgeRatio: number): PaddleState {
   return {

@@ -27,10 +27,10 @@ export const formBindings: Record<
     serviceName: "Registration",
   },
   login: {
-		formId: "loginForm",
-		url: "/api/auth/login",
-		serviceName: "Login",
-	},
+    formId: "loginForm",
+    url: "/api/auth/login",
+    serviceName: "Login",
+  },
 };
 
 type formBinding = { formId: string; url: string; serviceName: string };
@@ -71,7 +71,7 @@ export function bindCredentialsForm(formBinding: formBinding, app: App) {
         throw new Error(data.error || `HTTP error; status: ${response.status}`);
       }
 
-      if (formBinding.formId === 'loginForm' && data.twoFA === true) {
+      if (formBinding.formId === "loginForm" && data.twoFA === true) {
         bindVerify2FAModal();
         bindVerify2FAForm(username, app);
         return;
@@ -79,10 +79,10 @@ export function bindCredentialsForm(formBinding: formBinding, app: App) {
 
       console.log(`${formBinding.serviceName} successful: ${data}`);
       if (formBinding.formId === "registrationForm") {
-		alert("Registration successful!");
+        alert("Registration successful!");
         app.selectView({ view: "login", params: {} });
       } else {
-		alert("Login successful!");
+        alert("Login successful!");
         app.resetView();
       }
     } catch (e) {

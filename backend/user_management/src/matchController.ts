@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { z } from 'zod';
+import { MatchResultSchema } from "schemas";
 import type { History } from "schemas";
 
 import {
@@ -8,15 +8,6 @@ import {
 	createTournament,
 	getMatchHistory
 } from "./matchService.ts";
-
-const MatchResultSchema = z.object({
-	participants: z.array(z.object({
-		user_id: z.number().int(),
-		score: z.number().int(),
-	})),
-	start: z.coerce.date(),
-	end: z.coerce.date(),
-});
 
 export const createTournamentHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
@@ -69,7 +60,7 @@ export const createMatchHandler = async(request: FastifyRequest, reply:FastifyRe
 
 		for (const participant of parsed.data.participants) {
 			console.log(`[Match controller] inserting match_participant into db`);
-			await createMatchParticipant(participant.user_id, matchId, participant.score);
+			await createMatchParticipant(participant.userId, matchId, participant.score);
 			console.log(`[Match controller] Inserting match_participant into db successful`);
 		}
 		reply.status(201).send({
