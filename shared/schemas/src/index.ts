@@ -38,11 +38,17 @@ export {
 	RoomPermissionsSchema,
 	RoomGameDataSchema,
 	RoomSchema,
-	MatchmakingMessageSchema
+	MatchmakingMessageSchema,
+	TournamentSchema,
+	TournamentMatchSchema,
+	TournamentBracketSchema,
 } from "./matchmaking_schemas.js";
 export type {
 	RoomPermissions,
 	RoomGameData,
 	Room,
-	MatchmakingMessage
+	MatchmakingMessage,
+	Tournament,
+	TournamentMatch,
+	TournamentBracket,
 } from "./matchmaking_schemas.js";

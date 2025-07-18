@@ -39,6 +39,38 @@ export const RoomSchema = z.object({
 
 export type Room = z.infer<typeof RoomSchema>;
 
+export const TournamentMatchSchema = z.object({
+	id: z.string(),
+	round: z.number(),
+	player1: z.union([UserIdSchema, z.null()]),
+	player2: z.union([UserIdSchema, z.null()]),
+  	winner: z.union([UserIdSchema, z.null()]),
+	nextMatchId: z.union([z.string(), z.null()]),
+});
+
+export type TournamentMatch = z.infer<typeof TournamentMatchSchema>;
+
+export const TournamentBracketSchema = z.object({
+	matches: z.array(TournamentMatchSchema),
+	currentRound: z.number(),
+});
+
+export type TournamentBracket = z.infer<typeof TournamentBracketSchema>;
+
+export const TournamentSchema = z.object({
+	id: z.string(),
+	name: z
+		.string()
+		.min(1, "Tournament name is required"),
+	size: z.enum(["4", "8", "16"]).transform(Number),
+	joinedUsers: z.array(UserIdSchema),
+	permissions: RoomPermissionsSchema.refine((p) => p.type === "tournament"),
+	gameData: RoomGameDataSchema,
+	bracket: TournamentBracketSchema,
+});
+
+export type Tournament = z.infer<typeof TournamentSchema>;
+
 export const MatchmakingMessageSchema = z.discriminatedUnion("action", [
   z.object({
     action: z.literal("createRoom"),
