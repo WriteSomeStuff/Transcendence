@@ -25,19 +25,19 @@ function tournament(room: Tournament) {
 	 * 2. create bracket to decide where people go after winning, losing -> back to default view
 	 */
 
-	const amountOfPlayers: number = room.size;
+	const totalPlayers: number = room.size;
 	// for N players you need N - 1 amount of matches
-	const amountOfMatches = amountOfPlayers - 1;
+	const totalMatches = totalPlayers - 1;
 
 	let bracket = {
-		matches: new Array<TournamentMatch>(amountOfMatches),
+		matches: new Array<TournamentMatch>(totalMatches),
 		currentRound: 1 
 	} as TournamentBracket;
 
 	// fill bracket
-	const amountOfRounds = Math.log2(amountOfPlayers);
+	const amountOfRounds = Math.log2(totalPlayers);
 	// 1. fill first 2/4/8 matches matches[0]-[n/2 - 1]
-	for (let i = 0; i < amountOfPlayers; i += 2) {
+	for (let i = 0; i < totalPlayers; i += 2) {
 		// TODO implement random draw?
 		let match: TournamentMatch = {
 			id: uuidv4(),
@@ -47,7 +47,6 @@ function tournament(room: Tournament) {
 			winner: null,
 			nextMatchId: null,
 		};
-
 		bracket.matches.push(match);
 	}
 	// 2. create rest of tournament with empty matches
@@ -67,6 +66,23 @@ function tournament(room: Tournament) {
 		}
 	}
 	// 3. add nextMatchId to first (, second and third) round
-
+	// For each match in the first (and subsequent) rounds, set the nextMatchId to the match in the next round
+	
+	const matchesInFirstRound = totalPlayers / 2;
+	// Assign nextMatchId for each match based on the round structure
+	
+	
 	// 4. add bracket to Tournament room I guess
 }
+
+// [0] [1]
+//   [2]
+
+// [0] [1] [2] [3]
+// 	[4] [5]
+// 	  [6]
+
+// [0] [1] [2] [3] [4] [5] [6] [7]
+// 		[8] [9] [10] [11]
+// 			[12] [13]
+// 	  		  [14]
