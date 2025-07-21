@@ -34,7 +34,6 @@ services:
     networks:
       - internal
     environment:
-      - NODE_ENV=development
       - USER_SERVICE_URL=http://user_service
       - AUTH_DB_PATH=/app/data/database/auth_db.sqlite3
     env_file:

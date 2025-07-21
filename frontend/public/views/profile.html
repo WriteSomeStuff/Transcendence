@@ -12,8 +12,6 @@
 		<div class="flex flex-col sm:flex-row sm:flex-wrap justify-center items-center gap-4 bg-purple-700 p-4">
 			<button class="px-3 py-2 text-sm sm:px-6 sm:py-4 sm:text-base rounded-md hover:bg-purple-950 w-full sm:w-auto" page="profile">Profile</button>
 			<button class="px-3 py-2 text-sm sm:px-6 sm:py-4 sm:text-base rounded-md hover:bg-purple-950 w-full sm:w-auto" page="matchmaking">Play game</button>
-			<button class="px-3 py-2 text-sm sm:px-6 sm:py-4 sm:text-base rounded-md hover:bg-purple-950 w-full sm:w-auto" page="pong">Pong</button>
-			<button class="px-3 py-2 text-sm sm:px-6 sm:py-4 sm:text-base rounded-md hover:bg-purple-950 w-full sm:w-auto" page="memory">Memory</button>
 			<button class="px-3 py-2 text-sm sm:px-6 sm:py-4 sm:text-base rounded-md hover:bg-purple-950 w-full sm:w-auto" id="logout">Log out</button>
 		</div>
 		<div class="grid grid-cols-1 sm:grid-cols-2 gap-6 p-6 sm:p-10">
@@ -22,7 +20,7 @@
 				<button id="openUserInfoEditor" class="w-4 h-5 sm:w-5 sm:h-6 md:w-6 md:h-7">
 					<img class="w-full h-full object-contain" src="./assets/gifs/pencil.gif" alt="Edit username or password"/>
 				</button>
-				<dialog class="modal m-2" id="modal"> <!-- Edit user info -->
+				<dialog class="modal m-2" id="modal">
 					<h2>Update username, password or avatar</h2>
 					<form id="avatarForm" enctype="multipart/form-data">
 		 				<input type="file" id="avatarInput" accept="image/*" name="avatar" class="sm:text-base rounded-md border-2 border-gray-300">
@@ -68,6 +66,17 @@
 			</div>
 			<div class="flex flex-col items-center border-8 animate-rainbow p-4">
 				<h1>Match history</h1>
+			</div>
+			<div class="flex flex-col items-center border-8 animate-rainbow p-4">
+				<h1 class="text-base sm:text-lg">Friend Requests</h1>
+				<ul id="requests"></ul>
+			</div>
+			<div class="flex flex-col items-center border-8 animate-rainbow p-4" >
+				<h1 class="text-base sm:text-lg">Friend Search</h1>
+				<div>
+					<input type="text" id="search-input" placeholder="Search for username...">
+					<button id="search-button" class="sm:text-base rounded-md border-2 border-blue-500 bg-blue-700 hover:border-purple-500 hover:bg-purple-950 text-white mt-2">Send Friend Request</button>
+				</div>
 			</div>
 		</div>
 		<img class="fixed bottom-4 left-4 w-[20vw] max-w-[120px] h-auto z-40" src="/assets/gifs/hellokitty.gif" alt="Hello kitty gif"/>

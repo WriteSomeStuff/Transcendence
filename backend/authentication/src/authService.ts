@@ -1,9 +1,9 @@
 import argon2 from "argon2";
 import * as OTPAuth from "otpauth";
 import QRCode from "qrcode";
-import db, {runTransaction} from "./db.js";
+import runTransaction from "./db.js";
 
-import type {AuthResultObj, Enable2FAResultObj} from "./types/types.js";
+import type { AuthResultObj, Enable2FAResultObj } from "./types/types.js";
 import { fetchUserIdByUsername, fetchUsernameByUserId, processOAuthLogin, fetchUserInfoFrom42 } from "./helpers/authServiceHelpers.js";
 
 // @ts-ignore
@@ -13,7 +13,7 @@ export const register = async (username: string, password: string): Promise<numb
 
 		return runTransaction((db) => {
 			const stmt = db.prepare(`
-				INSERT INTO user (password_hash) 
+				INSERT INTO user (password_hash)
 				VALUES (?)
 			`);
 			const result = stmt.run(hashedPassword);
@@ -62,7 +62,7 @@ export const login = async (username: string, password: string): Promise<AuthRes
 		if (!userInfo) {
 			console.log(`[Auth Service] User '${username}' not found in auth service db`);
 			return {
-				success: false, 
+				success: false,
 				error: "User not found"
 			};
 		}
@@ -96,13 +96,13 @@ const findOrCreateUser = async (email: string): Promise<{userId: number}> => {
 			userId = await fetchUserIdByUsername(email);
 		} catch (e) {
 			console.log(`[Auth Service] User not found, creating new user`);
-			
+
 			const password = await argon2.hash(email);
 
 			console.log(`[Auth Controller] Registering user '${email}'`);
 			const newUserId = await register(email, password);
 			console.log(`[Auth Controller] Registering user '${email}' successful: ${newUserId}`);
-			
+
 			console.log(`[Auth Controller] Registering user '${email}' to user db`);
 			const response = await registerUserInUserService(email, newUserId);
 			if (!response.ok) {
@@ -167,7 +167,7 @@ export const verify2FA = async (token: string, username: string): Promise<AuthRe
 
 		const userInfo = runTransaction((db) => {
 			const stmt = db.prepare(`
-				SELECT 
+				SELECT
 					two_fa_secret,
 					two_fa_enabled
 				FROM
@@ -199,7 +199,7 @@ export const verify2FA = async (token: string, username: string): Promise<AuthRe
 		});
 
 		console.log(`[Auth Service] TOTP instance created for user ${username} with secret ${userInfo.two_fa_secret}`);
-		
+
 		var res = totp.validate({ token, window: 1 });
 		if (res !== null) {
 			console.log(`[Auth Service] 2FA token for user ${username} is valid`);
@@ -232,6 +232,12 @@ export const updatePassword = async (newPassword: string, userId: number) => {
 	}
 }
 
+/**
+ * Enables 2FA for a user and returns the secret and QR code data URL.
+ * @param userId - The ID of the user for whom to enable 2FA.
+ * @returns An object containing the success status, 2FA secret, and QR code data URL.
+ *          If an error occurs, it returns { success: false, error: <error_message> }.
+ */
 export const enable2FA = async (userId: number): Promise<Enable2FAResultObj> => {
 	try {
 		console.log(`[Auth Service] Enabling 2FA for user ID ${userId}`);
@@ -259,7 +265,7 @@ export const enable2FA = async (userId: number): Promise<Enable2FAResultObj> => 
 		runTransaction((db) => {
 			const updateStmt = db.prepare(`
 				UPDATE user
-				SET 
+				SET
 					two_fa_enabled = 1,
 					two_fa_secret = ?
 				WHERE
@@ -282,7 +288,7 @@ export const disable2FA = async (userId: number) => {
 		runTransaction((db) => {
 			const stmt = db.prepare(`
 				UPDATE user
-				SET 
+				SET
 					two_fa_enabled = 0,
 					two_fa_secret = NULL
 				WHERE
@@ -300,7 +306,7 @@ export const removeUser = async (userId: number) => {
 		runTransaction((db) => {
 			const stmt = db.prepare(`
 				DELETE FROM user
-				WHERE 
+				WHERE
 					user_id = ?
 			`);
 			stmt.run(userId);

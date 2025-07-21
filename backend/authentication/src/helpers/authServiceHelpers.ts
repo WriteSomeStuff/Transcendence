@@ -7,10 +7,10 @@ export const fetchUserIdByUsername = async (username: string): Promise<number> =
 		}
 	});
 
-	const data = await response.json() as { success: boolean, user_id?: number, error?: string };
+	const data = await response.json() as { success: boolean, userId?: number, error?: string };
 
-	if (data.success && typeof data.user_id === "number") {
-		return data.user_id;
+	if (data.success && typeof data.userId === "number") {
+		return data.userId;
 	} else {
 		throw new Error("User not found");
 	}

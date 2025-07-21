@@ -9,7 +9,7 @@ const db = new Database(DB_PATH, {
 	verbose: console.log,
 });
 
-export function runTransaction<T>(fn: (db: Database.Database) => T): T {
+function runTransaction<T>(fn: (db: Database.Database) => T): T {
 	const transaction = db.transaction(fn);
 	return transaction(db);
 }
@@ -20,11 +20,10 @@ const sql = `
 		password_hash	TEXT	NOT NULL,
 		two_fa_enabled	INTEGER	DEFAULT 0,
 		two_fa_secret	TEXT,
-		created_at		TEXT	DEFAULT (datetime('now', '+2 hour'))
+		created_at		TEXT	DEFAULT (datetime('now'))
 	);
 `
 // 0 = false, 1 = true
-// datetime +2 hour because it return UTC, +2 hour -> CEST
 
 try {
 	console.log("[auth-db init] Initialising authentication database:");
@@ -35,4 +34,4 @@ try {
 	process.exit(1);
 }
 
-export default db;
+export default runTransaction;
