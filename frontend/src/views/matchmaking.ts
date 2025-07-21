@@ -78,6 +78,31 @@ function fillAvailableRooms(rooms: Room[], docRooms: HTMLElement, userId: number
   }
 }
 
+async function promptTotalPlayers(): Promise<number> {
+  const modal = document.getElementById("players-modal") as HTMLDialogElement;
+  const closeModalButton = document.getElementById("close-total-players-modal") as HTMLButtonElement;
+  const playerButtons = modal.querySelectorAll("button[id$='players']");
+
+  if (!modal || !closeModalButton || playerButtons.length === 0) return 0;
+  
+  modal.showModal();
+  
+  return new Promise<number>((resolve) => {
+    playerButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        const value = parseInt(button.id, 10); // converts "4players" -> 4
+        modal.close();
+        resolve(value);
+      });
+    });
+
+    closeModalButton.addEventListener("click", () => {
+      modal.close();
+      resolve(0);
+    });
+  });
+}
+
 export async function renderMatchmakingView(
   view: z.infer<typeof MatchmakingViewSchema>,
   app: App,
@@ -94,6 +119,12 @@ export async function renderMatchmakingView(
   await logOut(app);
   const createButton = document.getElementById("createRoom");
   if (!createButton) {
+    console.error("Couldn't find a button!");
+    app.selectView({ view: "profile", params: {} });
+    return;
+  }
+  const createTournamentButton = document.getElementById("createTournament") as HTMLButtonElement;
+  if (!createTournamentButton) {
     console.error("Couldn't find a button!");
     app.selectView({ view: "profile", params: {} });
     return;
@@ -122,6 +153,26 @@ export async function renderMatchmakingView(
     };
     socket.send(JSON.stringify(newRoomMessage));
   });
+  createTournamentButton.addEventListener("click", async () => {
+	const totalPlayers = await promptTotalPlayers();
+	if (totalPlayers === 0) return;
+	// TODO own type for tournament message, and parsing in backend
+	const newTournamentMessage: MatchmakingMessage = {
+		action: "createRoom",
+		size: totalPlayers,
+		permissions: {
+			type: "tournament",
+		},
+		gameData: {
+			game: "pong",
+			options: {
+				paddleRatio: 0.4,
+				gameSpeed: 1,
+			},
+		},
+	};
+	socket.send(JSON.stringify(newTournamentMessage));
+  })
   socket.onmessage = (e: MessageEvent) => {
     const parsed = MatchmakingServerMessage.safeParse(JSON.parse(e.data));
     if (!parsed.success) {

@@ -5,56 +5,36 @@ import type {
 } from "schemas";
 import { v4 as uuidv4 } from "uuid";
 
-// export const TournamentSchema = z.object({
-// 	id: z.string(),
-// 	name: z
-// 		.string()
-// 		.min(1, "Tournament name is required"),
-// 	size: z.enum(["4", "8", "16"]).transform(Number),
-// 	joinedUsers: z.array(UserIdSchema),
-// 	permissions: RoomPermissionsSchema.refine((p) => p.type === "tournament"),
-// 	gameData: RoomGameDataSchema,
-// });
-
-// export type Tournament = z.infer<typeof TournamentSchema>;
-
-function tournament(room: Tournament) {
-	// room is filled with 4, 8 or 16 users
-	/**
-	 * 1. divide into pairs -> first matchup
-	 * 2. create bracket to decide where people go after winning, losing -> back to default view
-	 */
-
+export function tournament(room: Tournament) {
 	const totalPlayers: number = room.size;
-	// for N players you need N - 1 amount of matches
 	const totalMatches = totalPlayers - 1;
+	const totalRounds = Math.log2(totalPlayers);
 
 	let bracket = {
-		matches: new Array<TournamentMatch>(totalMatches),
-		currentRound: 1 
+		matches: [] as TournamentMatch[],
+		currentRound: 0
 	} as TournamentBracket;
 
-	// fill bracket
-	const amountOfRounds = Math.log2(totalPlayers);
-	// 1. fill first 2/4/8 matches matches[0]-[n/2 - 1]
+	// 1. Create and fill first round: matches[0]-[n/2 - 1]
 	for (let i = 0; i < totalPlayers; i += 2) {
-		// TODO implement random draw?
+		// TODO option: implement random draw?
 		let match: TournamentMatch = {
 			id: uuidv4(),
-			round: 1,
-			player1: room.joinedUsers[i] ?? null,
-			player2: room.joinedUsers[i + 1] ?? null,
+			round: 0,
+			player1: room.joinedUsers[i]!,
+			player2: room.joinedUsers[i + 1]!,
 			winner: null,
 			nextMatchId: null,
 		};
 		bracket.matches.push(match);
 	}
-	// 2. create rest of tournament with empty matches
-	// Create empty matches for the remaining rounds (except the first round)
-	for (let round = 2; round <= amountOfRounds; round++) {
-		const matchesInRound = Math.pow(2, amountOfRounds - round);
+	console.log("[Tournament] First round matches created and filled");
+	
+	// 2. Create rest of tournament with empty matches: matches[n/2]-[n - 1]
+	for (let round = 1; round < totalRounds; round++) {
+		const matchesInRound = Math.pow(2, totalRounds - 1 - round);
 		for (let i = 0; i < matchesInRound; i++) {
-			const match: TournamentMatch = {
+			let match: TournamentMatch = {
 				id: uuidv4(),
 				round: round,
 				player1: null,
@@ -65,24 +45,32 @@ function tournament(room: Tournament) {
 			bracket.matches.push(match);
 		}
 	}
-	// 3. add nextMatchId to first (, second and third) round
-	// For each match in the first (and subsequent) rounds, set the nextMatchId to the match in the next round
+	console.log("[Tournament] Remaining rounds matches created");
 	
-	const matchesInFirstRound = totalPlayers / 2;
-	// Assign nextMatchId for each match based on the round structure
+	// 3. Add nextMatchId to first (and subsequent) round(s)
+	let nextRoundIndex = totalPlayers / 2;
+	for (let i = 0; i < totalMatches - 1; i += 2) { // loops through all the matches (as pairs) until the final
+		console.log(`[Tournament] Winner of [${i}] and [${i + 1}] -> [${nextRoundIndex}]`);
+		bracket.matches[i]!.nextMatchId = bracket.matches[nextRoundIndex]!.id;
+		bracket.matches[i + 1]!.nextMatchId = bracket.matches[nextRoundIndex]!.id;
+		nextRoundIndex++;
+	}
+	console.log("[Tournament] Bracket created");
+	console.log(bracket.matches);
 	
-	
-	// 4. add bracket to Tournament room I guess
+	// 4. Add bracket to Tournament room
+	room.bracket = bracket;
 }
 
-// [0] [1]
-//   [2]
+//rnd| matches
+// 0 | [0] [1]
+// 1 |   [2]
 
-// [0] [1] [2] [3]
-// 	[4] [5]
-// 	  [6]
+// 0 | [0] [1] [2] [3]
+// 1 | 	[4] [5]
+// 2 | 	  [6]
 
-// [0] [1] [2] [3] [4] [5] [6] [7]
-// 		[8] [9] [10] [11]
-// 			[12] [13]
-// 	  		  [14]
+// 0 | [0] [1] [2] [3] [4] [5] [6] [7]
+// 1 | 		[8] [9] [10] [11]
+// 3 |			[12] [13]
+// 4 |	  		  [14]

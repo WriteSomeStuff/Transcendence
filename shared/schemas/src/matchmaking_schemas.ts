@@ -13,8 +13,8 @@ export const RoomPermissionsSchema = z.discriminatedUnion("type", [
   }),
   z.object({
     type: z.literal("tournament"),
-    allowedUsers: z.array(UserIdSchema),
-    matchId: z.string(),
+    // allowedUsers: z.array(UserIdSchema),
+    // matchId: z.string(),
   }),
 ]);
 
@@ -57,16 +57,22 @@ export const TournamentBracketSchema = z.object({
 
 export type TournamentBracket = z.infer<typeof TournamentBracketSchema>;
 
+/** Use of bracket
+ * totalMatches = totalPlayers - 1
+ * first match in round index = totalPlayers / 2 * currentRound
+ * totalMatchesRound = 2 ^ (totalMatches - 1 - currentRound)
+ * so we loop over the matches array and everytime matches[i] finishes we update
+ * the array and start the next match
+ **/
+
 export const TournamentSchema = z.object({
 	id: z.string(),
-	name: z
-		.string()
-		.min(1, "Tournament name is required"),
+	name: z.string().min(1, "Tournament name is required"),
 	size: z.enum(["4", "8", "16"]).transform(Number),
 	joinedUsers: z.array(UserIdSchema),
 	permissions: RoomPermissionsSchema.refine((p) => p.type === "tournament"),
 	gameData: RoomGameDataSchema,
-	bracket: TournamentBracketSchema,
+	bracket: z.union([TournamentBracketSchema, z.null()]),
 });
 
 export type Tournament = z.infer<typeof TournamentSchema>;
