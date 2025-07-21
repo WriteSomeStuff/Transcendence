@@ -5,10 +5,12 @@ import { bindNavbar } from "./utils.js";
 import type { App } from "../app.js";
 import {
 	FriendListResponseSchema,
-	FriendRequestListResponseSchema
+	FriendRequestListResponseSchema,
+  HistoryResponseSchema
 } from "schemas";
 import type {
 	Friend,
+  MatchHistory,
 	Friendship
 } from "schemas";
 
@@ -94,7 +96,7 @@ function bindUserInfoUpdateForm(app: App, infoType: string) {
     if (!response.ok || data.success === false) {
       console.error(`[formHandlers] Updating ${infoType} failed`);
       alert(data.error || `HTTP error; status: ${response.status}`);
-	  return;
+      return;
     }
 
     console.log(`[formHandlers] Updating ${infoType} successful`);
@@ -152,6 +154,82 @@ async function displayUsername() {
   }
 }
 
+async function fetchMatchHistory(): Promise<MatchHistory[] | string> {
+  	try {
+      const response: Response = await fetch("/api/user/match/history", { method: "GET" });
+      if (!response.ok) {
+        return response.statusText;
+      }
+
+		const parsedResponse = HistoryResponseSchema.safeParse(await response.json());
+		console.log(parsedResponse);
+
+		if (!parsedResponse.success) {
+			return parsedResponse.error.toString();
+		}
+		if (!parsedResponse.data.success) {
+			return parsedResponse.data.error;
+		}
+		return parsedResponse.data.data;
+  	} catch (e: any) {
+    	console.error("Error fetching user data:", e);
+    	return e.message;
+  	}
+}
+
+async function displayMatchHistory() {
+  const list: MatchHistory[] | string = await fetchMatchHistory();
+  const matchHistory = document.getElementById("matchHistory") as HTMLUListElement;
+  const matchWins = document.getElementById("winsAndLosses") as HTMLUListElement;
+  if (!matchHistory || !matchWins) return;
+
+  if (typeof list === "string") {
+    matchHistory.textContent = "Something went wrong:" + list;
+    return;
+  } else if (list.length === 0) {
+    matchHistory.textContent = "You don't have any matches (yet)";
+    matchWins.textContent = `0 / 0`;
+    return;
+  }
+
+  var winAmount: number = 0;
+  var lossAmount: number = 0;
+  for (const history of list) {
+    const docDate: HTMLSpanElement = document.createElement("span");
+    docDate.textContent = history.date.toISOString();
+
+    const docScore: HTMLSpanElement = document.createElement("span");
+    docScore.textContent = history.userScore.toString() + " points";
+    
+    var win: boolean = true;
+    for (const opponent of history.opponentInfo) {
+      if (history.userScore < opponent.opponentScore) {
+        win = false;
+        break;
+      }
+    }
+    if (win === false) {
+      lossAmount++;
+      var docWin: HTMLSpanElement = document.createElement("span");
+      docWin.textContent = "Defeat";
+    }
+    else {
+      winAmount++;
+      var docWin: HTMLSpanElement = document.createElement("span");
+      docWin.textContent = "Victory";
+    }
+
+    const listElement = document.createElement("li");
+    listElement.className = "flex justify-between items-center gap-4";
+    listElement.appendChild(docDate);
+    listElement.appendChild(docScore);
+    listElement.appendChild(docWin);
+    matchHistory.appendChild(listElement);
+  }
+
+  matchWins.textContent = `${winAmount} / ${lossAmount}`;
+}
+
 async function fetchFriendList(): Promise<Friend[] | string> {
   	try {
 		const response: Response = await fetch("/api/user/friends/list", { method: "GET" });
@@ -195,9 +273,9 @@ async function displayFriendList(app: App) {
     );
     const docUser = document.createElement("span");
     docUser.className = "min-w-[8rem] truncate";
-	docUser.textContent = friend.username;
-    
-	const docStatus = document.createElement("span");
+    docUser.textContent = friend.username;
+
+    const docStatus = document.createElement("span");
     docStatus.className = "text-right";
     docStatus.textContent = friend.accountStatus;
 
@@ -210,7 +288,7 @@ async function displayFriendList(app: App) {
 
 		const data = await response.json() as { success: boolean, error?: string };
 		if (!response.ok || !data.success) {
-			console.log("Could not remove friend: " 
+			console.log("Could not remove friend: "
 				+ data.error || `HTTP error; status: ${response.status}`);
 			alert("Something went wrong removing the friend");
 			return;
@@ -219,9 +297,9 @@ async function displayFriendList(app: App) {
 		console.log("Friend removed");
 		app.resetView();
 	});
-    
+
 	const listElement = document.createElement("li");
-    
+
 	listElement.className = "flex justify-between items-center gap-4";
     listElement.appendChild(docUser);
     listElement.appendChild(docStatus);
@@ -233,7 +311,7 @@ async function displayFriendList(app: App) {
 async function fetchRequestList(): Promise<Friendship[] | string> {
 	try {
 		const response: Response = await fetch("/api/user/friends/requests", { method: "GET" });
-		
+
 		const data = await response.json() as {
 			success: boolean;
 			error?: string;
@@ -296,7 +374,7 @@ async function displayFriendRequestList(app: App) {
 
 			const data = await response.json() as { success: boolean, error?: string };
 			if (!response.ok || !data.success) {
-				console.log("Could not accept friend request: " 
+				console.log("Could not accept friend request: "
 					+ data.error || `HTTP error; status: ${response.status}`);
 				alert("Something went wrong accepting the friend request");
 				return;
@@ -320,7 +398,7 @@ async function displayFriendRequestList(app: App) {
 
 			const data = await response.json() as { success: boolean, error?: string };
 			if (!response.ok || !data.success) {
-				console.log("Could not reject friend request: " 
+				console.log("Could not reject friend request: "
 					+ data.error || `HTTP error; status: ${response.status}`);
 				alert("Something went wrong rejecting the friend request");
 				return;
@@ -362,104 +440,112 @@ async function displayAvatar() {
 }
 
 export async function logOut(app: App) {
-	const logOutBtn = document.getElementById("logout");
-	if (!logOutBtn) return;
-	
-	logOutBtn.addEventListener("click", async (event) => {
-		event.preventDefault();
-		console.log("Logging out");
-		
-		const url = "/api/auth/logout";
-		const response = await fetch(url, { method: 'DELETE' });
-		
-		const data = (await response.json()) as {
-			  success: boolean;
-			  error?: string;
-		};
-		
-		if (!response.ok || data.success === false) {
-			console.error("Error, something went wrong logging out: " + data.error);
-			  alert(data.error || `HTTP error; status: ${response.status}`);
-		}
+  const logOutBtn = document.getElementById("logout");
+  if (!logOutBtn) return;
 
-		console.log("User logged out successfully");
-		alert("Log out successful");
+  logOutBtn.addEventListener("click", async (event) => {
+    event.preventDefault();
+    console.log("Logging out");
 
-	  app.resetView();
-	});
-	
+    const url = "/api/auth/logout";
+    const response = await fetch(url, { method: "DELETE" });
+
+    const data = (await response.json()) as {
+      success: boolean;
+      error?: string;
+    };
+
+    if (!response.ok || data.success === false) {
+      console.error("Error, something went wrong logging out: " + data.error);
+      alert(data.error || `HTTP error; status: ${response.status}`);
+    }
+
+    console.log("User logged out successfully");
+    alert("Log out successful");
+
+    app.resetView();
+  });
 }
 
-function bind2FAButtons(app: App) {
-	const enable2FAButton = document.getElementById('enable-2fa') as HTMLButtonElement;
-	const disable2FAButton = document.getElementById('disable-2fa') as HTMLButtonElement;
-	const qrCodeImage = document.getElementById('qr-code') as HTMLImageElement;
-	const twoFAModal = document.getElementById('2FAModal') as HTMLDialogElement;
-	const close2FAModal = document.getElementById('close2FAModal') as HTMLButtonElement;
+export function bind2FAButtons(app: App) {
+  const enable2FAButton = document.getElementById(
+    "enable-2fa",
+  ) as HTMLButtonElement;
+  const disable2FAButton = document.getElementById(
+    "disable-2fa",
+  ) as HTMLButtonElement;
+  const qrCodeImage = document.getElementById("qr-code") as HTMLImageElement;
+  const twoFAModal = document.getElementById("2FAModal") as HTMLDialogElement;
+  const close2FAModal = document.getElementById(
+    "close2FAModal",
+  ) as HTMLButtonElement;
 
-	if (enable2FAButton) {
-		enable2FAButton.addEventListener('click', async () => {
-			enable2FAButton.disabled = true;
-			disable2FAButton?.removeAttribute('disabled');
-			try {
-				const response = await fetch('/api/auth/enable2fa', {
-					method: 'POST'
-				});
-				const data = await response.json() as {
-					success: boolean;
-					error?: string,
-					qrCode?: string
-				};
-				if (!response.ok || !data.success) {
-					throw new Error(data.error || `HTTP error; status: ${response.status}`);
-				}
+  if (enable2FAButton) {
+    enable2FAButton.addEventListener("click", async () => {
+      enable2FAButton.disabled = true;
+      disable2FAButton?.removeAttribute("disabled");
+      try {
+        const response = await fetch("/api/auth/enable2fa", {
+          method: "POST",
+        });
+        const data = (await response.json()) as {
+          success: boolean;
+          error?: string;
+          qrCode?: string;
+        };
+        if (!response.ok || !data.success) {
+          throw new Error(
+            data.error || `HTTP error; status: ${response.status}`,
+          );
+        }
 
-				// Set QR code and open modal
-				if (qrCodeImage && data.qrCode) {
-					qrCodeImage.src = data.qrCode;
-				}
-				if (twoFAModal) {
-					twoFAModal.showModal();
-				}
+        // Set QR code and open modal
+        if (qrCodeImage && data.qrCode) {
+          qrCodeImage.src = data.qrCode;
+        }
+        if (twoFAModal) {
+          twoFAModal.showModal();
+        }
 
-				alert('2FA enabled successfully!');
+        alert("2FA enabled successfully!");
+      } catch (error) {
+        console.error("Error enabling 2FA:", error);
+        const message = error instanceof Error ? error.message : String(error);
+        alert(`Failed to enable 2FA: ${message}`);
+      }
+    });
+  }
 
-			} catch (error) {
-				console.error('Error enabling 2FA:', error);
-				const message = error instanceof Error ? error.message : String(error);
-				alert(`Failed to enable 2FA: ${message}`);
-			}
-		});
-	}
+  if (close2FAModal && twoFAModal) {
+    close2FAModal.addEventListener("click", () => {
+      twoFAModal.close();
+    });
+  }
 
-	if (close2FAModal && twoFAModal) {
-		close2FAModal.addEventListener('click', () => {
-			twoFAModal.close();
-		});
-	}
+  if (disable2FAButton) {
+    disable2FAButton.addEventListener("click", async () => {
+      disable2FAButton.disabled = true;
+      enable2FAButton?.removeAttribute("disabled");
+      try {
+        const response = await fetch("/api/auth/disable2fa", {
+          method: "POST",
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+          throw new Error(
+            data.error || `HTTP error; status: ${response.status}`,
+          );
+        }
+        alert("2FA disabled successfully!");
 
-	if (disable2FAButton) {
-		disable2FAButton.addEventListener('click', async () => {
-			disable2FAButton.disabled = true;
-			enable2FAButton?.removeAttribute('disabled');
-			try {
-				const response = await fetch('/api/auth/disable2fa', {
-					method: 'POST'
-				});
-				const data = await response.json();
-				if (!response.ok || !data.success) {
-					throw new Error(data.error || `HTTP error; status: ${response.status}`);
-				}
-				alert('2FA disabled successfully!');
-
-				app.resetView();
-			} catch (error) {
-				console.error('Error disabling 2FA:', error);
-				const message = error instanceof Error ? error.message : String(error);
-				alert(`Failed to disable 2FA: ${message}`);
-			}
-		});
-	}
+        app.resetView();
+      } catch (error) {
+        console.error("Error disabling 2FA:", error);
+        const message = error instanceof Error ? error.message : String(error);
+        alert(`Failed to disable 2FA: ${message}`);
+      }
+    });
+  }
 }
 
 async function sendRequest(username: string) {
@@ -523,6 +609,7 @@ async function sendFriendRequest() {
 
 function bindProfileViewElements(app: App) {
 	displayUsername();
+  displayMatchHistory();
 	displayFriendList(app);
 	displayFriendRequestList(app);
 	sendFriendRequest();

@@ -1,150 +1,119 @@
-import { z } from "zod";
+import type { Vector2, PaddleState, CourtGeometry } from "schemas";
 
-import { createDtoTransformable } from "./dto_transformable.js";
+import { vec2 } from "./vector2.ts";
 
-import { Vector2 } from "./vector2.ts";
-import { PaddleState } from "./paddle_state.ts";
+export function getWallQuadrilateral(
+  geometry: CourtGeometry,
+  index: number,
+): [Vector2, Vector2, Vector2, Vector2] {
+  const a = geometry.vertices[(index * 2) % (geometry.playerCount * 2)]!;
+  const b = geometry.vertices[(index * 2 + 1) % (geometry.playerCount * 2)]!;
+  const shiftAtoB = vec2.scale(
+    vec2.normalize(vec2.subtract(b, a)),
+    Math.tan(geometry.renderEdgeAngle) * geometry.wallThickness,
+  );
+  return [
+    a,
+    b,
+    vec2.add(
+      vec2.add(
+        b,
+        vec2.scale(geometry.normals[index * 2]!, -geometry.wallThickness),
+      ),
+      vec2.negate(shiftAtoB),
+    ),
+    vec2.add(
+      vec2.add(
+        a,
+        vec2.scale(geometry.normals[index * 2]!, -geometry.wallThickness),
+      ),
+      shiftAtoB,
+    ),
+  ];
+}
 
-const CourtGeometryDto = z.object({
-  playerCount: z.number().int().min(2),
-  playerZoneDepth: z.number(),
-  wallZoneDepth: z.number(),
-  ballRadius: z.number(),
-  paddleThickness: z.number(),
-  wallThickness: z.number(),
+function getPaddlePoints(
+  geometry: CourtGeometry,
+  index: number,
+  paddle: PaddleState,
+  reducedByRadius: boolean,
+): [Vector2, Vector2] {
+  const [a, b] = getPlayerLineSurface(geometry, index);
+  const edgeLength = vec2.length(vec2.subtract(b, a));
+  const paddleLength = edgeLength * paddle.edgeRatio;
+  const edgeDirection = vec2.normalize(vec2.subtract(b, a));
+  const center = vec2.add(
+    vec2.scale(vec2.add(a, b), 0.5),
+    vec2.scale(
+      edgeDirection,
+      ((edgeLength - paddleLength) / 2) * paddle.offsetFromCenter,
+    ),
+  );
+  const centerToPaddleSide = vec2.scale(
+    edgeDirection,
+    (paddleLength - (reducedByRadius ? geometry.ballRadius : 0)) / 2,
+  );
+  return [
+    vec2.subtract(center, centerToPaddleSide),
+    vec2.add(center, centerToPaddleSide),
+  ];
+}
 
-  vertices: z.array(Vector2.getSchema()),
-  normals: z.array(Vector2.getSchema()),
-  renderEdgeAngle: z.number(),
-});
+export function getWallNormal(geometry: CourtGeometry, index: number): Vector2 {
+  return geometry.normals[index * 2]!;
+}
 
-export class CourtGeometry extends createDtoTransformable(CourtGeometryDto) {
-  public readonly playerCount: number;
-  public readonly ballRadius: number;
-  public readonly paddleThickness: number;
-  public readonly wallThickness: number;
+export function getPlayerLineNormal(
+  geometry: CourtGeometry,
+  index: number,
+): Vector2 {
+  return geometry.normals[(index * 2 + 1) % (geometry.playerCount * 2)]!;
+}
 
-  private readonly vertices: Vector2[];
-  private readonly normals: Vector2[];
-  private readonly renderEdgeAngle: number;
+export function getPaddleQuadrilateral(
+  geometry: CourtGeometry,
+  index: number,
+  paddle: PaddleState,
+): [Vector2, Vector2, Vector2, Vector2] {
+  const [a, b] = getPaddlePoints(geometry, index, paddle, true);
+  const normalShift = vec2.scale(
+    getPlayerLineNormal(geometry, index),
+    geometry.paddleThickness,
+  );
+  return [a, b, vec2.add(b, normalShift), vec2.add(a, normalShift)];
+}
 
-  public readonly frameWidth: number;
-  public readonly frameHeight: number;
+export function getWallSurface(
+  geometry: CourtGeometry,
+  index: number,
+): [Vector2, Vector2] {
+  return [
+    geometry.vertices[index * 2]!,
+    geometry.vertices[(index * 2 + 1) % (geometry.playerCount * 2)]!,
+  ];
+}
 
-  private readonly edgeCount: number;
+export function getPlayerLineSurface(
+  geometry: CourtGeometry,
+  index: number,
+): [Vector2, Vector2] {
+  return [
+    geometry.vertices[(index * 2 + 1) % (geometry.playerCount * 2)]!,
+    geometry.vertices[(index * 2 + 2) % (geometry.playerCount * 2)]!,
+  ];
+}
 
-  constructor(
-    playerCount: number,
-    ballRadius: number,
-    paddleThickness: number,
-    wallThickness: number,
-    vertices: Vector2[],
-    normals: Vector2[],
-    renderEdgeAngle: number,
-    frameWidth: number,
-    frameHeight: number,
-  ) {
-    super();
-    this.playerCount = playerCount;
-    this.ballRadius = ballRadius;
-    this.paddleThickness = paddleThickness;
-    this.wallThickness = wallThickness;
-    this.vertices = vertices;
-    this.normals = normals;
-    this.renderEdgeAngle = renderEdgeAngle;
-    this.frameWidth = frameWidth;
-    this.frameHeight = frameHeight;
-    this.edgeCount = playerCount * 2;
-  }
-
-  public getWallQuadrilateral(
-    index: number,
-  ): [Vector2, Vector2, Vector2, Vector2] {
-    const a = this.vertices[(index * 2) % this.edgeCount]!;
-    const b = this.vertices[(index * 2 + 1) % this.edgeCount]!;
-    const shiftAtoB = b
-      .subtract(a)
-      .normalize()
-      .scale(Math.tan(this.renderEdgeAngle) * this.wallThickness);
-    return [
-      a,
-      b,
-      b
-        .add(this.normals[index * 2]!.scale(-this.wallThickness))
-        .add(shiftAtoB.scale(-1)),
-      a.add(this.normals[index * 2]!.scale(-this.wallThickness)).add(shiftAtoB),
-    ];
-  }
-
-  private getPaddlePoints(
-    index: number,
-    paddle: PaddleState,
-    reducedByRadius: boolean,
-  ): [Vector2, Vector2] {
-    const [a, b] = this.getPlayerLineSurface(index);
-    const edgeLength = a.subtract(b).length();
-    const paddleLength = edgeLength * paddle.edgeRatio;
-    const edgeDirection = b.subtract(a).normalize();
-    const center = a
-      .add(b)
-      .scale(0.5)
-      .add(
-        edgeDirection.scale(
-          ((edgeLength - paddleLength) / 2) * paddle.offsetFromCenter,
-        ),
-      );
-    const centerToPaddleSide = edgeDirection.scale(
-      (paddleLength - (reducedByRadius ? this.ballRadius : 0)) / 2,
-    );
-    return [
-      center.subtract(centerToPaddleSide),
-      center.add(centerToPaddleSide),
-    ];
-  }
-
-  public getWallNormal(index: number): Vector2 {
-    return this.normals[index * 2]!;
-  }
-
-  public getPlayerLineNormal(index: number): Vector2 {
-    return this.normals[(index * 2 + 1) % this.edgeCount]!;
-  }
-
-  public getPaddleQuadrilateral(
-    index: number,
-    paddle: PaddleState,
-  ): [Vector2, Vector2, Vector2, Vector2] {
-    const [a, b] = this.getPaddlePoints(index, paddle, true);
-    const normalShift = this.normals[index * 2 + 1]!.scale(
-      this.paddleThickness,
-    );
-    return [a, b, b.add(normalShift), a.add(normalShift)];
-  }
-
-  public getWallSurface(index: number): [Vector2, Vector2] {
-    return [
-      this.vertices[index * 2]!,
-      this.vertices[(index * 2 + 1) % this.edgeCount]!,
-    ];
-  }
-
-  public getPlayerLineSurface(index: number): [Vector2, Vector2] {
-    return [
-      this.vertices[(index * 2 + 1) % this.edgeCount]!,
-      this.vertices[(index * 2 + 2) % this.edgeCount]!,
-    ];
-  }
-
-  public getPaddleSurface(
-    index: number,
-    paddle: PaddleState,
-  ): [Vector2, Vector2] {
-    const [a, b] = this.getPaddlePoints(index, paddle, false);
-    const normalShift = this.normals[index * 2 + 1]!.scale(
-      this.paddleThickness,
-    );
-    return [a.add(normalShift), b.add(normalShift)];
-  }
+export function getPaddleSurface(
+  geometry: CourtGeometry,
+  index: number,
+  paddle: PaddleState,
+): [Vector2, Vector2] {
+  const [a, b] = getPaddlePoints(geometry, index, paddle, false);
+  const normalShift = vec2.scale(
+    getPlayerLineNormal(geometry, index),
+    geometry.paddleThickness,
+  );
+  return [vec2.add(a, normalShift), vec2.add(b, normalShift)];
 }
 
 function create2PlayerCourt(
@@ -154,29 +123,31 @@ function create2PlayerCourt(
   paddleThickness: number,
   wallThickness: number,
 ): CourtGeometry {
-  const vertices = [
-    new Vector2(-playerZoneDepth, -wallZoneDepth),
-    new Vector2(playerZoneDepth, -wallZoneDepth),
-    new Vector2(playerZoneDepth, wallZoneDepth),
-    new Vector2(-playerZoneDepth, wallZoneDepth),
+  const vertices: Vector2[] = [
+    vec2.create(-playerZoneDepth, -wallZoneDepth),
+    vec2.create(playerZoneDepth, -wallZoneDepth),
+    vec2.create(playerZoneDepth, wallZoneDepth),
+    vec2.create(-playerZoneDepth, wallZoneDepth),
   ];
-  const normals = [
-    new Vector2(0, 1),
-    new Vector2(-1, 0),
-    new Vector2(0, -1),
-    new Vector2(1, 0),
+  const normals: Vector2[] = [
+    vec2.create(0, 1),
+    vec2.create(-1, 0),
+    vec2.create(0, -1),
+    vec2.create(1, 0),
   ];
-  return new CourtGeometry(
-    2,
-    ballRadius,
-    paddleThickness,
-    wallThickness,
-    vertices,
-    normals,
-    0,
-    2 * playerZoneDepth,
-    2 * (wallZoneDepth + wallThickness),
-  );
+  return {
+    playerCount: 2,
+    playerZoneDepth: paddleThickness,
+    wallZoneDepth: wallZoneDepth,
+    ballRadius: ballRadius,
+    paddleThickness: paddleThickness,
+    wallThickness: wallThickness,
+    vertices: vertices,
+    normals: normals,
+    renderEdgeAngle: 0,
+    frameWidth: 2 * playerZoneDepth,
+    frameHeight: 2 * (wallZoneDepth + wallThickness),
+  };
 }
 
 export function createCourtGeometry(
@@ -209,7 +180,8 @@ export function createCourtGeometry(
   for (let i = 0; i < playerCount; i++) {
     const angle = ((2 * Math.PI) / playerCount) * i;
     innerPolygonVertices.push(
-      new Vector2(Math.sin(angle), -Math.cos(angle)).scale(
+      vec2.scale(
+        vec2.create(Math.sin(angle), -Math.cos(angle)),
         distanceToInnerPolygonVertex,
       ),
     );
@@ -221,21 +193,29 @@ export function createCourtGeometry(
     const next = innerPolygonVertices[(playerCount + i + 1) % playerCount]!;
     const curr = innerPolygonVertices[i]!;
     vertices.push(
-      curr.add(
-        prev.subtract(curr).normalize().scale(distanceFromInnerPolygonVertex),
+      vec2.add(
+        curr,
+        vec2.scale(
+          vec2.normalize(vec2.subtract(prev, curr)),
+          distanceFromInnerPolygonVertex,
+        ),
       ),
     );
     vertices.push(
-      curr.add(
-        next.subtract(curr).normalize().scale(distanceFromInnerPolygonVertex),
+      vec2.add(
+        curr,
+        vec2.scale(
+          vec2.normalize(vec2.subtract(next, curr)),
+          distanceFromInnerPolygonVertex,
+        ),
       ),
     );
     normals.push(
-      vertices[i * 2]!.add(vertices[i * 2 + 1]!)
-        .scale(-1)
-        .normalize(),
+      vec2.normalize(
+        vec2.negate(vec2.add(vertices[i * 2]!, vertices[i * 2 + 1]!)),
+      ),
     );
-    normals.push(curr.add(next).scale(-1).normalize());
+    normals.push(vec2.normalize(vec2.negate(vec2.add(curr, next))));
   }
   const outerPolygonSide =
     (playerZoneDepth + extraPlayerZoneDepth) *
@@ -245,15 +225,17 @@ export function createCourtGeometry(
     outerPolygonSide / (2 * Math.sin(Math.PI / playerCount));
   const width = 4 * distanceToOuterPolygonVertex;
   const height = 4 * distanceToOuterPolygonVertex;
-  return new CourtGeometry(
-    playerCount,
-    ballRadius,
-    paddleThickness,
-    wallThickness,
-    vertices,
-    normals,
-    renderEdgeAngle,
-    width,
-    height,
-  );
+  return {
+    playerCount: playerCount,
+    playerZoneDepth: playerZoneDepth,
+    wallZoneDepth: wallZoneDepth,
+    ballRadius: ballRadius,
+    paddleThickness: paddleThickness,
+    wallThickness: wallThickness,
+    vertices: vertices,
+    normals: normals,
+    renderEdgeAngle: renderEdgeAngle,
+    frameWidth: width,
+    frameHeight: height,
+  };
 }

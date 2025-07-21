@@ -1,16 +1,21 @@
-import { Court, initCourt } from "./court.ts";
-import { CourtState, updateCourtState } from "./court_state.ts";
-import { PlayerInput } from "./player_input.ts";
+import type {Court, CourtState, Room } from "schemas";
+
+import { initCourt } from "./court.ts";
+import { initCourtState, updateCourtState } from "./court_state.ts";
 import { ScoreController } from "./score_controller.ts";
+import type { PongPlayerInput } from "schemas";
+import { getDirection } from "./player_input.js";
+import { vec2 } from "./vector2.js";
 
 export class CourtController {
   private readonly court: Court;
-  private lastTouch: number | null = null;
   private scoreController: ScoreController;
+  private readonly gameSpeed: number;
 
-  public constructor(scoreController: ScoreController) {
+  public constructor(room: Room, scoreController: ScoreController) {
     this.scoreController = scoreController;
-    this.court = initCourt(2);
+    this.court = initCourt(room.size, room.gameData.options.paddleRatio);
+    this.gameSpeed = room.gameData.options.gameSpeed;
   }
 
   public getCourt(): Court {
@@ -25,24 +30,38 @@ export class CourtController {
     this.court.state = state;
   }
 
-  public updateInput(playerIndex: number, playerInput: PlayerInput): void {
+  public updateInput(playerIndex: number, playerInput: PongPlayerInput): void {
     console.log("new input", playerIndex, playerInput);
-    this.court.state.paddles[playerIndex]!.velocity =
-      playerInput.getDirection();
+    this.court.state.paddles[playerIndex]!.velocity = getDirection(playerInput);
+  }
+
+  public giveUp(playerIndex: number): void {
+    this.court.state.paddles[playerIndex] = {
+      offsetFromCenter: 0,
+      edgeRatio: 1,
+      velocity: 0,
+    };
   }
 
   public update(delta: number): void {
-    const [bouncedIndex, state] = updateCourtState(
+    const updateResult = updateCourtState(
       this.getState(),
       this.court.geometry,
-      delta,
+      delta * this.gameSpeed,
     );
-    this.court.state = state;
-    if (this.court.state.ballPosition.length() === 0) {
-      // the court was reset
-      this.scoreController.onBallMissed(this.lastTouch, bouncedIndex);
-    } else if (bouncedIndex != -1) {
-      this.lastTouch = bouncedIndex;
+    if (typeof updateResult === "number") {
+      this.scoreController.onBallMissed(
+        this.court.state.lastBouncedIndex,
+        updateResult,
+      );
+      this.court.state = initCourtState(
+        this.court.geometry,
+        vec2.length(this.court.state.ballVelocity),
+        this.court.state.paddles.map((paddle) => paddle.edgeRatio),
+        updateResult,
+      );
+    } else {
+      this.court.state = updateResult;
     }
   }
 }

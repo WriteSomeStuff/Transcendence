@@ -1,10 +1,10 @@
-import { PlayerScore } from "../score/player_score.js";
+import type { Room } from "schemas";
 
 export abstract class GameController {
-  protected scores: PlayerScore[];
+  protected room: Room;
 
-  protected constructor(playersAmount: number) {
-    this.scores = Array.from({ length: playersAmount });
+  protected constructor(room: Room) {
+    this.room = room;
   }
 
   public abstract getBroadcastMessages(): object[];

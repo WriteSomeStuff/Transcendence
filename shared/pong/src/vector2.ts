@@ -1,67 +1,52 @@
-import { z } from "zod";
+import type { Vector2 } from "schemas";
 
-import { createDtoTransformable } from "./dto_transformable.js";
-
-const Vector2Dto = z.object({
-  x: z.number(),
-  y: z.number(),
-});
-
-export class Vector2 extends createDtoTransformable(Vector2Dto) {
-  public readonly x: number;
-  public readonly y: number;
-
-  constructor(x: number, y: number) {
-    super();
-    this.x = x;
-    this.y = y;
-  }
-
-  public add(v: Vector2): Vector2 {
-    return new Vector2(this.x + v.x, this.y + v.y);
-  }
-
-  public subtract(v: Vector2): Vector2 {
-    return this.add(v.negate());
-  }
-
-  public dot(v: Vector2): number {
-    return this.x * v.x + this.y * v.y;
-  }
-
-  public reflect(v: Vector2): Vector2 {
-    return this.subtract(v.scale(this.dot(v) * 2));
-  }
-
-  public scale(scalar: number): Vector2 {
-    return new Vector2(this.x * scalar, this.y * scalar);
-  }
-
-  public negate(): Vector2 {
-    return new Vector2(-this.x, -this.y);
-  }
-
-  public length(): number {
-    return Math.hypot(this.x, this.y);
-  }
-
-  public normalize(): Vector2 {
-    if (this.length() < 0.000001) {
-      return new Vector2(0, 0);
+export const vec2 = {
+  create: (x: number, y: number): Vector2 => {
+    return {
+      x: x,
+      y: y,
+    };
+  },
+  add: (a: Vector2, b: Vector2): Vector2 => {
+    return {
+      x: a.x + b.x,
+      y: a.y + b.y,
+    };
+  },
+  subtract: (a: Vector2, b: Vector2): Vector2 => {
+    return {
+      x: a.x - b.x,
+      y: a.y - b.y,
+    };
+  },
+  dot: (a: Vector2, b: Vector2): number => {
+    return a.x * b.x + a.y * b.y;
+  },
+  reflect: (a: Vector2, b: Vector2): Vector2 => {
+    return vec2.subtract(a, vec2.scale(b, vec2.dot(a, b) * 2));
+  },
+  scale: (a: Vector2, k: number): Vector2 => {
+    return {
+      x: a.x * k,
+      y: a.y * k,
+    };
+  },
+  negate: (a: Vector2): Vector2 => {
+    return vec2.scale(a, -1);
+  },
+  length: (a: Vector2): number => {
+    return Math.hypot(a.x, a.y);
+  },
+  normalize: (a: Vector2): Vector2 => {
+    if (vec2.length(a) < 0.000001) {
+      return vec2.create(0, 0);
     }
-    return this.scale(1 / this.length());
-  }
-
-  public toTuple(): [number, number] {
-    return [this.x, this.y];
-  }
-
-  public static fromAngle(angle: number): Vector2 {
-    return new Vector2(Math.cos(angle), Math.sin(angle));
-  }
-}
-
-// const myVecDto = {x: 1, y: 1};
-// const myVec = Vector2.fromDTO(myVecDto);
-// console.log(myVec);
-// console.log(myVec.normalize().toDTO());
+    return vec2.scale(a, 1 / vec2.length(a));
+  },
+  toTuple: (a: Vector2): [number, number] => {
+    return [a.x, a.y];
+  },
+  fromAngle: (angle: number): Vector2 => {
+    return vec2.create(Math.cos(angle), Math.cos(angle));
+  },
+};

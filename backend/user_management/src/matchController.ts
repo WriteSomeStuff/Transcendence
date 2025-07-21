@@ -1,20 +1,13 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { z } from 'zod';
+import { HistoryResponseSchema, MatchResultSchema } from "schemas";
+import type { MatchHistory } from "schemas";
 
 import {
 	createMatchParticipant,
 	createMatchState,
-	createTournament
+	createTournament,
+	getMatchHistory
 } from "./matchService.ts";
-
-const MatchResultSchema = z.object({
-	participants: z.array(z.object({
-		user_id: z.number().int(),
-		score: z.number().int(),
-	})),
-	start: z.coerce.date(),
-	end: z.coerce.date(),
-});
 
 export const createTournamentHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
@@ -67,7 +60,7 @@ export const createMatchHandler = async(request: FastifyRequest, reply:FastifyRe
 
 		for (const participant of parsed.data.participants) {
 			console.log(`[Match controller] inserting match_participant into db`);
-			await createMatchParticipant(participant.user_id, matchId, participant.score);
+			await createMatchParticipant(participant.userId, matchId, participant.score);
 			console.log(`[Match controller] Inserting match_participant into db successful`);
 		}
 		reply.status(201).send({
@@ -88,5 +81,21 @@ export const createMatchHandler = async(request: FastifyRequest, reply:FastifyRe
 				error: "An error occured inserting a match into user_service database."
 			});
 		}
+	}
+}
+
+export const getMatchHistoryHandler = async(request: FastifyRequest, reply:FastifyReply) => {
+	try {
+		console.log(`[Match controller] getting match history`);
+		const history: MatchHistory[] = await getMatchHistory(request.user.userId);
+		console.log(`[Match controller] getting match history successful`);
+
+		const successPayload = { success: true, data: history };
+		reply.status(200).send(HistoryResponseSchema.parse(successPayload));
+	}
+	catch (e: any) {
+		console.error('Error getting match history:', e);
+		const errorPayload = { success: false, error: 'Error: ' + e };
+		reply.status(500).send(HistoryResponseSchema.parse(errorPayload));
 	}
 }
