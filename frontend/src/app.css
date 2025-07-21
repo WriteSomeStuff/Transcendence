@@ -59,6 +59,14 @@
     }
   }
 
+  .pong-canvas {
+    -ms-interpolation-mode: nearest-neighbor;
+    image-rendering: crisp-edges;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-crisp-edges;
+    image-rendering: pixelated;
+  }
+
   .animate-rainbow {
     animation: rainbow 20s infinite;
   }
@@ -80,6 +88,12 @@
   .bg-size-20 {
     background-size: 20%;
   }
+
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #fed7e2 #000000;
+  }
+
 }
 
 @font-face {

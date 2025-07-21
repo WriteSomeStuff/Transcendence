@@ -5,7 +5,7 @@
 </div>
 
 <div class="m-0 p-0 font-comic overflow-y-hidden box-border flex h-screen w-screen items-center justify-center bg-stars bg-10% text-pink-200 relative">
-	<div class="flex flex-col w-full max-w-4xl h-[95vh] bg-black p-4 sm:p-6 md:p-8 text-center border-8 animate-rainbow overflow-y-auto">
+	<div class="flex flex-col w-full max-w-4xl h-[95vh] bg-black p-4 sm:p-6 md:p-8 text-center border-8 animate-rainbow overflow-y-auto custom-scrollbar">
 		<div class="flex justify-center items-center py-6">
 			<img src="https://i.picasion.com/gl/92/kjzM.gif" alt="header gif" class="w-full max-w-[750px] h-auto"/>
 		</div>
@@ -57,22 +57,24 @@
 				</dialog>
 				<img class="w-full max-w-xs h-auto" id="avatarImg" alt="User Avatar"/>
 			</div>
-			<div class="flex flex-col items-center border-8 animate-rainbow p-4">
-				<h1 class="text-base sm:text-lg">Friends</h1>
+			<div class="flex flex-col items-center border-8 animate-rainbow p-6 h-32 w-full">
+				<h1 class="text-base sm:text-lg font-bold">Wins / losses</h1>
+				<div id="winsAndLosses" class="w-full overflow-y-auto custom-scrollbar max-h-48 mt-2"></div>
+			</div>
+			<div class="flex flex-col items-center border-8 animate-rainbow p-6 h-64 sm:h-72 w-full overflow-y-auto custom-scrollbar">
+				<h1 class="text-base sm:text-lg font-bold">Match history</h1>
+				<div id="matchHistory" class="w-full overflow-y-auto custom-scrollbar max-h-48 mt-2"></div>
+			</div>
+			<div class="flex flex-col items-center border-8 animate-rainbow p-6 h-64 sm:h-72 w-full overflow-y-auto custom-scrollbar">
+				<h1 class="text-base sm:text-lg font-bold">Friends</h1>
 				<ul id="friendsList"></ul>
 			</div>
-			<div class="flex flex-col items-center border-8 animate-rainbow p-4">
-				<h1>Wins / losses</h1>
-			</div>
-			<div class="flex flex-col items-center border-8 animate-rainbow p-4">
-				<h1>Match history</h1>
-			</div>
-			<div class="flex flex-col items-center border-8 animate-rainbow p-4">
-				<h1 class="text-base sm:text-lg">Friend Requests</h1>
+			<div class="flex flex-col items-center border-8 animate-rainbow p-4 w-full overflow-y-auto custom-scrollbar">
+				<h1 class="text-base sm:text-lg font-bold">Friend Requests</h1>
 				<ul id="requests"></ul>
 			</div>
 			<div class="flex flex-col items-center border-8 animate-rainbow p-4" >
-				<h1 class="text-base sm:text-lg">Friend Search</h1>
+				<h1 class="text-base sm:text-lg font-bold">Friend Search</h1>
 				<div>
 					<input type="text" id="search-input" placeholder="Search for username...">
 					<button id="search-button" class="sm:text-base rounded-md border-2 border-blue-500 bg-blue-700 hover:border-purple-500 hover:bg-purple-950 text-white mt-2">Send Friend Request</button>

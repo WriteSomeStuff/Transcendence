@@ -46,7 +46,7 @@ export const Enable2FAResultSchema = z.discriminatedUnion("success", [
     .object({
       success: z.literal(true),
       qrCode: z.string(),
-	  message: z.string(),
+      message: z.string(),
     })
     .required(),
   z
