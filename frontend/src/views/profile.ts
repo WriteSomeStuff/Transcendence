@@ -191,20 +191,17 @@ async function displayMatchHistory() {
     matchWins.textContent = `0 / 0`;
     return;
   }
+
   var winAmount: number = 0;
   var lossAmount: number = 0;
-  //  test below with an actual match and display it better.. currently work in progress
   for (const history of list) {
     const docDate: HTMLSpanElement = document.createElement("span");
-    docDate.className = "min-w-[8rem] truncate";
     docDate.textContent = history.date.toISOString();
 
     const docScore: HTMLSpanElement = document.createElement("span");
-    docScore.className = "text-right";
     docScore.textContent = history.userScore.toString() + " points";
     
     var win: boolean = true;
-    // check all opponents their scores to see if user won or lost
     for (const opponent of history.opponentInfo) {
       if (history.userScore < opponent.opponentScore) {
         win = false;
@@ -214,17 +211,15 @@ async function displayMatchHistory() {
     if (win === false) {
       lossAmount++;
       var docWin: HTMLSpanElement = document.createElement("span");
-      docWin.className = "text-right";
       docWin.textContent = "Defeat";
     }
     else {
       winAmount++;
       var docWin: HTMLSpanElement = document.createElement("span");
-      docWin.className = "text-right";
       docWin.textContent = "Victory";
     }
-    const listElement = document.createElement("li");
 
+    const listElement = document.createElement("li");
     listElement.className = "flex justify-between items-center gap-4";
     listElement.appendChild(docDate);
     listElement.appendChild(docScore);

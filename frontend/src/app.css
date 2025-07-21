@@ -88,6 +88,12 @@
   .bg-size-20 {
     background-size: 20%;
   }
+
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #fed7e2 #000000;
+  }
+
 }
 
 @font-face {
