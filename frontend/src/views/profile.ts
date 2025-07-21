@@ -180,32 +180,59 @@ async function fetchMatchHistory(): Promise<MatchHistory[] | string> {
 async function displayMatchHistory() {
   const list: MatchHistory[] | string = await fetchMatchHistory();
   const matchHistory = document.getElementById("matchHistory") as HTMLUListElement;
-  if (!matchHistory) return;
+  const matchWins = document.getElementById("winsAndLosses") as HTMLUListElement;
+  if (!matchHistory || !matchWins) return;
 
   if (typeof list === "string") {
     matchHistory.textContent = "Something went wrong:" + list;
     return;
   } else if (list.length === 0) {
     matchHistory.textContent = "You don't have any matches (yet)";
+    matchWins.textContent = `0 / 0`;
     return;
   }
+  var winAmount: number = 0;
+  var lossAmount: number = 0;
   //  test below with an actual match and display it better.. currently work in progress
   for (const history of list) {
-    const docUser = document.createElement("span");
-    docUser.className = "min-w-[8rem] truncate";
-    docUser.textContent = history.date.toISOString();
+    const docDate: HTMLSpanElement = document.createElement("span");
+    docDate.className = "min-w-[8rem] truncate";
+    docDate.textContent = history.date.toISOString();
 
-    const docStatus = document.createElement("span");
-    docStatus.className = "text-right";
-    docStatus.textContent = history.userScore.toString();
-
+    const docScore: HTMLSpanElement = document.createElement("span");
+    docScore.className = "text-right";
+    docScore.textContent = history.userScore.toString() + " points";
+    
+    var win: boolean = true;
+    // check all opponents their scores to see if user won or lost
+    for (const opponent of history.opponentInfo) {
+      if (history.userScore < opponent.opponentScore) {
+        win = false;
+        break;
+      }
+    }
+    if (win === false) {
+      lossAmount++;
+      var docWin: HTMLSpanElement = document.createElement("span");
+      docWin.className = "text-right";
+      docWin.textContent = "Defeat";
+    }
+    else {
+      winAmount++;
+      var docWin: HTMLSpanElement = document.createElement("span");
+      docWin.className = "text-right";
+      docWin.textContent = "Victory";
+    }
     const listElement = document.createElement("li");
 
     listElement.className = "flex justify-between items-center gap-4";
-    listElement.appendChild(docUser);
-    listElement.appendChild(docStatus);
+    listElement.appendChild(docDate);
+    listElement.appendChild(docScore);
+    listElement.appendChild(docWin);
     matchHistory.appendChild(listElement);
   }
+
+  matchWins.textContent = `${winAmount} / ${lossAmount}`;
 }
 
 async function fetchFriendList(): Promise<Friend[] | string> {
