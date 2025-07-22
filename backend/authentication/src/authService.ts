@@ -4,8 +4,7 @@ import QRCode from "qrcode";
 import runTransaction from "./db.js";
 
 import type { AuthResultObj, Enable2FAResultObj } from "./types/types.js";
-import { fetchUserIdByUsername } from "./helpers/authServiceHelpers.js";
-import { fetchUsernameByUserId } from "./helpers/authServiceHelpers.js";
+import { fetchUserIdByUsername, fetchUsernameByUserId, processOAuthLogin, fetchUserInfoFrom42 } from "./helpers/authServiceHelpers.js";
 
 // @ts-ignore
 export const register = async (username: string, password: string): Promise<number> => {
@@ -14,7 +13,7 @@ export const register = async (username: string, password: string): Promise<numb
 
 		return runTransaction((db) => {
 			const stmt = db.prepare(`
-				INSERT INTO user (password_hash) 
+				INSERT INTO user (password_hash)
 				VALUES (?)
 			`);
 			const result = stmt.run(hashedPassword);
@@ -63,7 +62,7 @@ export const login = async (username: string, password: string): Promise<AuthRes
 		if (!userInfo) {
 			console.log(`[Auth Service] User '${username}' not found in auth service db`);
 			return {
-				success: false, 
+				success: false,
 				error: "User not found"
 			};
 		}
@@ -88,6 +87,59 @@ export const login = async (username: string, password: string): Promise<AuthRes
 		return { success: false, error: e.message };
 	}
 };
+
+const findOrCreateUser = async (email: string): Promise<{userId: number}> => {
+	try {
+		console.log(`[Auth Service] Finding or creating user with email: ${email}`);
+		let userId: number | undefined;
+		try {
+			userId = await fetchUserIdByUsername(email);
+		} catch (e) {
+			console.log(`[Auth Service] User not found, creating new user`);
+
+			const password = await argon2.hash(email);
+
+			console.log(`[Auth Controller] Registering user '${email}'`);
+			const newUserId = await register(email, password);
+			console.log(`[Auth Controller] Registering user '${email}' successful: ${newUserId}`);
+
+			console.log(`[Auth Controller] Registering user '${email}' to user db`);
+			const response = await registerUserInUserService(email, newUserId);
+			if (!response.ok) {
+				throw new Error(`Failed to register user in user service: ${response.statusText}`);
+			}
+			console.log(`[Auth Controller] Registering user '${email}' to user db successful`);
+
+
+			console.log(`[Auth Service] New user created with ID: ${newUserId}`);
+			return { userId: newUserId };
+		}
+		console.log(`[Auth Service] User found with ID: ${userId}`);
+		return { userId: userId };
+	} catch (e) {
+		console.error('[Auth Service] Error finding or creating user:', e);
+		throw new Error("An error occurred while finding or creating the user");
+	}
+}
+
+export const OAuthCallback = async (code: string): Promise<{ userId: number }> => {
+	try {
+		console.log(`[Auth Service] Processing OAuth callback with code: ${code}`);
+		const tokenResponse = await processOAuthLogin(code);
+
+		console.log(`[Auth Service] OAuth token received: ${tokenResponse.token}`);
+		const email = await fetchUserInfoFrom42(tokenResponse.token);
+
+		console.log(`[Auth Service] User info fetched: ${JSON.stringify(email)}`);
+		const userId = await findOrCreateUser(email.email);
+
+		return { userId: userId.userId };
+	} catch (e) {
+		console.error('[Auth Service] Error during OAuth callback:', e);
+		throw new Error("An error occurred during OAuth callback");
+
+	}
+}
 
 export const setStatusInUserService = async (userId: number, status: string): Promise<Response> => {
 	try {
@@ -115,7 +167,7 @@ export const verify2FA = async (token: string, username: string): Promise<AuthRe
 
 		const userInfo = runTransaction((db) => {
 			const stmt = db.prepare(`
-				SELECT 
+				SELECT
 					two_fa_secret,
 					two_fa_enabled
 				FROM
@@ -147,7 +199,7 @@ export const verify2FA = async (token: string, username: string): Promise<AuthRe
 		});
 
 		console.log(`[Auth Service] TOTP instance created for user ${username} with secret ${userInfo.two_fa_secret}`);
-		
+
 		var res = totp.validate({ token, window: 1 });
 		if (res !== null) {
 			console.log(`[Auth Service] 2FA token for user ${username} is valid`);
@@ -213,7 +265,7 @@ export const enable2FA = async (userId: number): Promise<Enable2FAResultObj> => 
 		runTransaction((db) => {
 			const updateStmt = db.prepare(`
 				UPDATE user
-				SET 
+				SET
 					two_fa_enabled = 1,
 					two_fa_secret = ?
 				WHERE
@@ -236,7 +288,7 @@ export const disable2FA = async (userId: number) => {
 		runTransaction((db) => {
 			const stmt = db.prepare(`
 				UPDATE user
-				SET 
+				SET
 					two_fa_enabled = 0,
 					two_fa_secret = NULL
 				WHERE
@@ -254,7 +306,7 @@ export const removeUser = async (userId: number) => {
 		runTransaction((db) => {
 			const stmt = db.prepare(`
 				DELETE FROM user
-				WHERE 
+				WHERE
 					user_id = ?
 			`);
 			stmt.run(userId);

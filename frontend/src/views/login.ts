@@ -66,10 +66,26 @@ export async function renderLoginView(
   view: z.infer<typeof LoginViewSchema>,
   app: App,
 ): Promise<void> {
+  if (view.params.code) {
+    console.log("[LoginView] OAuth code received:", view.params.code);
+    try {
+      const response = await fetch(`/api/auth/oauth/callback?code=${view.params.code}`, {
+        method: 'GET',
+      });
+      if (!response.ok) {
+        throw new Error(`OAuth callback failed: ${response.statusText}`);
+      }
+      const data = await response.json();
+      console.log("[LoginView] OAuth login successful:", data);
+      app.resetView();
+    } catch (error) {
+      console.error("[LoginView] OAuth login error:", error);
+      alert(`OAuth login failed: ${error}`);
+    }
+  }
   app.appContainer.innerHTML = await fetch("/views/login.html").then((res) =>
     res.text(),
   );
   bindNavbar(app);
   bindCredentialsForm(formBindings["login"]!, app);
-  void view;
 }
