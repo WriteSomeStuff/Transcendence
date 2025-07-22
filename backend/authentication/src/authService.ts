@@ -126,10 +126,10 @@ export const OAuthCallback = async (code: string): Promise<{ userId: number }> =
 		const tokenResponse = await processOAuthLogin(code);
 
 		console.log(`[Auth Service] OAuth token received: ${tokenResponse.token}`);
-		const email = await fetchUserInfoFrom42(tokenResponse.token);
+		const userInfo = await fetchUserInfoFrom42(tokenResponse.token);
 
-		console.log(`[Auth Service] User info fetched: ${JSON.stringify(email)}`);
-		const userId = await findOrCreateUser(email.email);
+		console.log(`[Auth Service] User info fetched: ${JSON.stringify(userInfo)}`);
+		const userId = await findOrCreateUser(userInfo.email, userInfo.username);
 
 		return { userId: userId.userId };
 	} catch (e) {
