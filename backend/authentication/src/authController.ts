@@ -41,26 +41,26 @@ export const registerUserHandler = async (request: FastifyRequest, reply: Fastif
 			});
 			return;
 		}
-		const { username, password } = parseResult.data;
+		const { email, password, username } = parseResult.data;
 
-		console.log(`[Auth Controller] Registering user '${username}'`);
-		const userId = await register(username, password);
-		console.log(`[Auth Controller] Registering user '${username}' successful: ${userId}`);
-		
+		console.log(`[Auth Controller] Registering user '${email}'`);
+		const userId = await register(email, password);
+		console.log(`[Auth Controller] Registering user '${email}' successful: ${userId}`);
+
 		console.log(`[Auth Controller] Registering user '${username}' to user db`);
 		const response = await registerUserInUserService(username, userId);
 		console.log(`[Auth Controller] Registering user '${username}' to user db successful`);
 
 		if (!response.ok) {
 			await handleUserDbError(response, userId, reply);
-			return;	
+			return;
 		}
 
 		reply.status(201).send({
 			success: true,
 			message: "User registered successfully"
 		});
-	
+
 	} catch (e) {
 		console.error('Error registering the user:', e);
 		reply.status(500).send({
