@@ -81,38 +81,38 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 			reply.status(400).send(AuthResultSchema.parse(badRequestPayload));
 			return;
 		}
-		const { username, password } = parseResult.data;
+		const { email, password } = parseResult.data;
 
-		console.log(`[Auth Controller] Logging in user '${username}'`);
-		const result = await login(username, password);
-		console.log(`[Auth Controller] Logging in user '${username}' successful`);
+		console.log(`[Auth Controller] Logging in user '${email}'`);
+		const result = await login(email, password);
+		console.log(`[Auth Controller] Logging in user '${email}' successful`);
 
 		if (!result.success) {
 			const errorPayload = { success: false, error: result.error };
 			reply.status(401).send(AuthResultSchema.parse(errorPayload));
 		}
-		
+
 		// If login is successful and 2FA is enabled, send a response indicating that 2FA verification is required
 		if (result.twoFA) {
-			console.log(`[Auth Controller] User ${result.userId} ${username} has 2FA enabled`);
+			console.log(`[Auth Controller] User ${result.userId} ${email} has 2FA enabled`);
 			const twoFAPayload = {
 				success: true,
 				userId: result.userId,
-				username: username,
+				email: email,
 				twoFA: true,
 				message: "Two-factor authentication is enabled for this user. Please verify your token.",
 			};
 			reply.status(200).send(AuthResultSchema.parse(twoFAPayload));
 		}
 
-		console.log(`[Auth Controller] Handling successful login for user ${result.userId} ${username}`);
+		console.log(`[Auth Controller] Handling successful login for user ${result.userId} ${email}`);
 		await handleSuccessfulLogin(request, reply, Number(result.userId));
-		console.log(`[Auth Controller] User ${result.userId} ${username} logged in successfully`);
+		console.log(`[Auth Controller] User ${result.userId} ${email} logged in successfully`);
 
 		const successPayload = {
 			success: true,
 			userId: result.userId,
-			username: username,
+			email: email,
 			twoFA: false,
 			message: "User logged in successfully"
 		}
