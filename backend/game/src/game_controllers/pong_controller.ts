@@ -19,11 +19,14 @@ export class PongController extends GameController {
     super(room);
     this.startTime = new Date();
     this.playerMessages = Array.from({ length: room.size }).map((_) => []);
-    this.scoreController = new PongScoreController(room.size, 10, (scores) => {
+    this.scoreController = new PongScoreController(room.size, 2, (scores) => {
       this.broadcastMessages.push({
         type: "scoresUpdate",
         payload: scores,
       });
+	  if (this.scoreController.isMaxScoreReached()) {
+      this.gameEnded = true;
+    }
     });
     this.courtController = new CourtController(room, this.scoreController);
   }
