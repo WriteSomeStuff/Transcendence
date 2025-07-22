@@ -40,12 +40,11 @@ export const registerUserInUserService = async (username: string, userId: number
 	}
 }
 
-export const login = async (username: string, password: string): Promise<AuthResultObj> => {
+export const login = async (email: string, password: string): Promise<AuthResultObj> => {
 	try {
-		console.log(`[Auth Service] Fetching to get corresponding user id for '${username}'`);
-		const userId = await fetchUserIdByUsername(username);
-		console.log(`[Auth Service] Fetching to get corresponding user id for '${username}' successful: ${userId}`);
+		const userId = await fetchUserIdByEmail(email);
 
+		console.log(`[Auth Service] Fetching user info for user ID ${userId}`);
 		const userInfo = runTransaction((db) => {
 			const stmt = db.prepare(`
 				SELECT
@@ -58,9 +57,8 @@ export const login = async (username: string, password: string): Promise<AuthRes
 			`);
 			return stmt.get(userId) as { password_hash: string, two_fa_enabled: boolean };
 		});
-
 		if (!userInfo) {
-			console.log(`[Auth Service] User '${username}' not found in auth service db`);
+			console.log(`[Auth Service] User '${email}' not found in auth service db`);
 			return {
 				success: false,
 				error: "User not found"
@@ -68,13 +66,13 @@ export const login = async (username: string, password: string): Promise<AuthRes
 		}
 		const verified = await argon2.verify(userInfo.password_hash, password);
 		if (!verified) {
-			console.log(`[Auth Service] Incorrect password for user '${username}'`);
+			console.log(`[Auth Service] Incorrect password for user '${email}'`);
 			return {
 				success: false,
 				error: "Incorrect password"
 			};
 		} else {
-			console.log(`[Auth Service] User '${username}' verified`);
+			console.log(`[Auth Service] User '${email}' verified`);
 			return {
 				success: true,
 				userId: userId,
