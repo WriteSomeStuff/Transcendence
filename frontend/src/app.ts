@@ -30,6 +30,20 @@ function getGlobalState(): GlobalAppState {
   return navigateTo(view);
 }
 
+function toStringRecord<T extends Record<string, any>>(
+  obj: T,
+): Record<string, string> {
+  const result: Record<string, string> = {};
+
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== undefined) {
+      result[key] = String(value); // Converts to string
+    }
+  }
+
+  return result;
+}
+
 async function renderState(
   state: GlobalAppState,
   app: App,
@@ -58,9 +72,14 @@ async function renderState(
     }
     case "game": {
       await renderGameView(state.viewState, app);
+      break;
     }
   }
-  if (push) window.history.pushState({}, "", "/" + state.viewState.view);
+  if (push) {
+    const params = new URLSearchParams(toStringRecord(state.viewState.params));
+    const newUrl = window.location.protocol + "//" + window.location.host + "/" + state.viewState.view + ((params.size > 0) ? ("?" + params.toString()) : "");
+    window.history.pushState({ path: newUrl }, "", newUrl);
+  }
 }
 
 class App {

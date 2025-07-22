@@ -1,6 +1,6 @@
 import Database from "better-sqlite3";
 
-const DB_PATH: string = process.env["AUTH_DB_PATH"] as string;
+const DB_PATH = process.env["AUTH_DB_PATH"] as string;
 if (!DB_PATH) {
 	throw new Error("AUTH_DB_PATH environment variable is not set");
 }

@@ -4,7 +4,7 @@ import fastifyWebsocket from "@fastify/websocket";
 import { GameController } from "./game_controllers/game_controller.js";
 import { PongController } from "./game_controllers/pong_controller.js";
 
-import { RoomSchema } from "schemas";
+import { type MatchResult, RoomSchema } from "schemas";
 
 import { WebSocket } from "ws";
 
@@ -13,10 +13,10 @@ const app = Fastify();
 await app.register(fastifyWebsocket);
 
 class GameUser {
-  public userId: string;
+  public userId: number;
   public socket: WebSocket | null;
 
-  public constructor(userId: string) {
+  public constructor(userId: number) {
     this.userId = userId;
     this.socket = null;
   }
@@ -44,14 +44,32 @@ class GameUser {
   }
 }
 
+async function saveMatchResult(matchResult: MatchResult): Promise<number> {
+  const url = process.env["USER_SERVICE_URL"] + "/match";
+  return await fetch(url, {
+    method: "POST",
+    body: JSON.stringify(matchResult),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data["success"]) {
+        return Number(data["matchId"]);
+      } else {
+        console.error("Error in saving match:", data["error"]);
+        return -1;
+      }
+    });
+}
+
 class Game {
   public gameId: string;
   public users: GameUser[];
   public controller: GameController;
+  private isGameOver: boolean = false;
 
   public constructor(
     gameId: string,
-    userIds: string[],
+    userIds: number[],
     controller: GameController,
   ) {
     this.gameId = gameId;
@@ -64,19 +82,38 @@ class Game {
   }
 
   public update(delta: number): void {
+    if (this.isGameOver) {
+      return;
+    }
     this.controller.update(delta);
     const broadcastMessages = this.controller.getBroadcastMessages();
     for (let i = 0; i < this.users.length; i++) {
       this.users[i]!.sendMessages(broadcastMessages);
       this.users[i]!.sendMessages(this.controller.getPlayerMessages(i));
     }
+    if (this.controller.isGameOver()) {
+      this.isGameOver = true;
+      saveMatchResult(this.controller.getGameResult()).then((matchId) => {
+        for (const user of this.users) {
+          user.sendMessages([
+            {
+              type: "gameEnded",
+              matchId: matchId,
+            },
+          ]);
+          user.unsetSocket();
+          delete usersToGames[user.userId];
+        }
+        delete games[this.gameId];
+      });
+    }
   }
 
-  private getUserIndex(userId: string): number {
+  private getUserIndex(userId: number): number {
     return this.users.findIndex((user) => user.userId === userId);
   }
 
-  public register(userId: string, socket: WebSocket) {
+  public register(userId: number, socket: WebSocket) {
     console.log("register", userId);
     const user = this.users.find((user) => user.userId === userId);
     if (!user) {
@@ -100,9 +137,9 @@ class Game {
 const usersToGames: { [userId: string]: string } = {};
 const games: { [gameId: string]: Game } = {};
 
-app.get("/pong/ws", { websocket: true }, (socket: WebSocket, req) => {
+app.get("/ws", { websocket: true }, (socket: WebSocket, req) => {
   console.log("Processing ws request", req, req.headers);
-  const userId = req.headers["cookie"]!;
+  const userId = Number(req.headers["cookie"]!);
   console.log("userId", userId);
   const gameId = usersToGames[userId];
   console.log("gameId", gameId);
@@ -112,6 +149,21 @@ app.get("/pong/ws", { websocket: true }, (socket: WebSocket, req) => {
   }
   const game: Game = games[gameId]!;
   game.register(userId, socket);
+});
+
+app.get("/users", (req, res) => {
+  console.log("Processing users request", req, req.headers);
+  const userId = Number(req.headers["cookie"]!);
+  console.log("userId", userId);
+  const gameId = usersToGames[userId];
+  console.log("gameId", gameId);
+  if (gameId === undefined) {
+    res.status(404).send("Not found gameId");
+    return;
+  }
+  const game: Game = games[gameId]!;
+  const userIds = game.users.map((user) => user.userId);
+  res.status(200).send(userIds);
 });
 
 let lastUpdate = new Date().getTime();
@@ -136,8 +188,8 @@ app.post("/create", (req, res) => {
     });
     return;
   }
-  const userIds = parsed.data.joinedUsers.map((x) => x.toString());
-  const controller = new PongController();
+  const userIds = parsed.data.joinedUsers;
+  const controller = new PongController(parsed.data);
   games[gameId] = new Game(gameId, userIds, controller);
   for (const userId of userIds) {
     console.log("adding user", userId);

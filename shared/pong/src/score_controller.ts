@@ -1,3 +1,5 @@
 export interface ScoreController {
-  onBallMissed(lastTouchBy: number | null, missedBy: number): void;
+  onBallMissed(lastTouchBy: number, missedBy: number): void;
+  getScores(): number[];
+  isMaxScoreReached(): boolean;
 }

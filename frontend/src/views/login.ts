@@ -5,39 +5,47 @@ import { bindNavbar, formBindings, bindCredentialsForm } from "./utils.js";
 import type { App } from "../app.js";
 
 export function bindVerify2FAModal() {
-  const twoFAModal = document.getElementById('verify2FAModal') as HTMLDialogElement;
-  const close2FAModal = document.getElementById('closeVerify2FAModal') as HTMLButtonElement;
+  const twoFAModal = document.getElementById(
+    "verify2FAModal",
+  ) as HTMLDialogElement;
+  const close2FAModal = document.getElementById(
+    "closeVerify2FAModal",
+  ) as HTMLButtonElement;
   if (!twoFAModal) {
     throw new Error("2FA modal not found");
   }
   twoFAModal.showModal();
   if (close2FAModal) {
-    close2FAModal.addEventListener('click', () => {
+    close2FAModal.addEventListener("click", () => {
       twoFAModal.close();
     });
   }
 }
 
 export function bindVerify2FAForm(username: string, app: App) {
-  const form = document.getElementById('verify-2fa-form') as HTMLFormElement;
+  const form = document.getElementById("verify-2fa-form") as HTMLFormElement;
   if (!form) return;
-  
-  form.addEventListener('submit', async function (event: Event) {
+
+  form.addEventListener("submit", async function (event: Event) {
     event.preventDefault();
     console.log("[formHandlers] Handling 2FA verification");
 
-    const token = (document.getElementById('2fa-token') as HTMLInputElement).value;
+    const token = (document.getElementById("2fa-token") as HTMLInputElement)
+      .value;
 
     try {
-      const response = await fetch('/api/auth/verify2fa', {
-        method: 'POST',
+      const response = await fetch("/api/auth/verify2fa", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ token, username })
+        body: JSON.stringify({ token, username }),
       });
 
-      const data = await response.json() as { success: boolean, error?: string };
+      const data = (await response.json()) as {
+        success: boolean;
+        error?: string;
+      };
 
       if (!response.ok || data.success === false) {
         throw new Error(data.error || `HTTP error; status: ${response.status}`);
@@ -58,10 +66,26 @@ export async function renderLoginView(
   view: z.infer<typeof LoginViewSchema>,
   app: App,
 ): Promise<void> {
+  if (view.params.code) {
+    console.log("[LoginView] OAuth code received:", view.params.code);
+    try {
+      const response = await fetch(`/api/auth/oauth/callback?code=${view.params.code}`, {
+        method: 'GET',
+      });
+      if (!response.ok) {
+        throw new Error(`OAuth callback failed: ${response.statusText}`);
+      }
+      const data = await response.json();
+      console.log("[LoginView] OAuth login successful:", data);
+      app.resetView();
+    } catch (error) {
+      console.error("[LoginView] OAuth login error:", error);
+      alert(`OAuth login failed: ${error}`);
+    }
+  }
   app.appContainer.innerHTML = await fetch("/views/login.html").then((res) =>
     res.text(),
   );
   bindNavbar(app);
   bindCredentialsForm(formBindings["login"]!, app);
-  void view;
 }
