@@ -7,16 +7,16 @@ import type { AuthResultObj, Enable2FAResultObj } from "./types/types.js";
 import { fetchUserIdByEmail, fetchEmailByUserId, processOAuthLogin, fetchUserInfoFrom42 } from "./helpers/authServiceHelpers.js";
 
 // @ts-ignore
-export const register = async (username: string, password: string): Promise<number> => {
+export const register = async (email: string, password: string): Promise<number> => {
 	try {
 		const hashedPassword = await argon2.hash(password);
 
 		return runTransaction((db) => {
 			const stmt = db.prepare(`
-				INSERT INTO user (password_hash)
-				VALUES (?)
+				INSERT INTO user (email, password_hash)
+				VALUES (?, ?)
 			`);
-			const result = stmt.run(hashedPassword);
+			const result = stmt.run(email, hashedPassword);
 
 			return Number(result.lastInsertRowid);
 		});
