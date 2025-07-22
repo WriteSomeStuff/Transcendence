@@ -19,7 +19,7 @@ const MatchmakingServerMessage = z.discriminatedUnion("action", [
   }),
 ]);
 
-function createRoomElement(room: Room, socket: WebSocket): HTMLElement {
+function createRoomElement(room: Room, socket: WebSocket, userId: number): HTMLElement {
   const roomDiv = document.createElement("div");
   roomDiv.classList.add("flex");
   roomDiv.classList.add("flex-col");
@@ -53,14 +53,25 @@ function createRoomElement(room: Room, socket: WebSocket): HTMLElement {
   button.classList.add("rounded-md");
   button.classList.add("w-full");
   button.classList.add("sm:w-auto");
-  button.textContent = "Join";
-  button.onclick = () => {
-    const message: MatchmakingMessage = {
-      action: "joinRoom",
-      roomId: room.id,
+  if (room.joinedUsers.includes(userId)) {
+    button.textContent = "Leave";
+    button.onclick = () => {
+      const message: MatchmakingMessage = {
+        action: "leaveRoom",
+        roomId: room.id,
+      };
+      socket.send(JSON.stringify(message));
     };
-    socket.send(JSON.stringify(message));
-  };
+  } else {
+    button.textContent = "Join";
+    button.onclick = () => {
+      const message: MatchmakingMessage = {
+        action: "joinRoom",
+        roomId: room.id,
+      };
+      socket.send(JSON.stringify(message));
+    };
+  }
   roomDiv.appendChild(button);
   return roomDiv;
 }
@@ -77,7 +88,7 @@ function fillAvailableRooms(
       room.permissions.type === "public" ||
       room.permissions.allowedUsers.includes(userId)
     ) {
-      docRooms.appendChild(createRoomElement(room, socket));
+      docRooms.appendChild(createRoomElement(room, socket, userId));
     }
   }
 }
@@ -89,8 +100,13 @@ export async function renderMatchmakingView(
   const userId = await fetch("/api/user/profile")
     .then((res) => res.json())
     .then((user) => {
-      return user.id as number;
+      return user.data.id as number;
     });
+  if (userId === undefined) {
+    console.error("Couldn't fetch user id!");
+    app.selectView({ view: "profile", params: {} });
+    return;
+  }
   app.appContainer.innerHTML = await fetch("/views/matchmaking.html").then(
     (res) => res.text(),
   );
