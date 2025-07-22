@@ -223,8 +223,8 @@ export function createCourtGeometry(
     Math.tan(Math.PI / playerCount);
   const distanceToOuterPolygonVertex =
     outerPolygonSide / (2 * Math.sin(Math.PI / playerCount));
-  const width = 4 * distanceToOuterPolygonVertex;
-  const height = 4 * distanceToOuterPolygonVertex;
+  const width = 2 * distanceToOuterPolygonVertex;
+  const height = 2 * distanceToOuterPolygonVertex;
   return {
     playerCount: playerCount,
     playerZoneDepth: playerZoneDepth,

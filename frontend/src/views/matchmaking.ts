@@ -93,6 +93,33 @@ function fillAvailableRooms(
   }
 }
 
+function bindRoomCreation(createButton: HTMLButtonElement, roomSettingsModal: HTMLDialogElement, gameSettingsForm: HTMLFormElement, socket: WebSocket) {
+  createButton.addEventListener("click", () => {
+    roomSettingsModal.showModal();
+  });
+  // TODO add close
+  gameSettingsForm.addEventListener("submit", event => {
+    event.preventDefault();
+    const formData = new FormData(gameSettingsForm);
+    const newRoomMessage: MatchmakingMessage = {
+      action: "createRoom",
+      size: Number(formData.get("gameSize") as string),
+      permissions: {
+        type: "public",
+      },
+      gameData: {
+        game: "pong",
+        options: {
+          paddleRatio: 0.4,
+          gameSpeed: 1,
+        },
+      },
+    };
+    socket.send(JSON.stringify(newRoomMessage));
+    roomSettingsModal.close();
+  });
+}
+
 export async function renderMatchmakingView(
   view: z.infer<typeof MatchmakingViewSchema>,
   app: App,
@@ -113,8 +140,20 @@ export async function renderMatchmakingView(
   bindNavbar(app);
   await logOut(app);
   const createButton = document.getElementById("createRoom");
-  if (!createButton) {
+  if (!createButton || !(createButton instanceof HTMLButtonElement)) {
     console.error("Couldn't find a button!");
+    app.selectView({ view: "profile", params: {} });
+    return;
+  }
+  const roomSettingsModal = document.getElementById("roomSettingsModal");
+  if (!roomSettingsModal || !(roomSettingsModal instanceof HTMLDialogElement)) {
+    console.error("Couldn't find a roomSettingsModal!");
+    app.selectView({ view: "profile", params: {} });
+    return;
+  }
+  const gameSettingsForm = document.getElementById("gameSettingsForm");
+  if (!gameSettingsForm || !(gameSettingsForm instanceof HTMLFormElement)) {
+    console.error("Couldn't find a gameSettingsForm!");
     app.selectView({ view: "profile", params: {} });
     return;
   }
@@ -132,23 +171,7 @@ export async function renderMatchmakingView(
     }
   });
   observer.observe(document.body, { childList: true, subtree: true });
-  createButton.addEventListener("click", () => {
-    const newRoomMessage: MatchmakingMessage = {
-      action: "createRoom",
-      size: 2,
-      permissions: {
-        type: "public",
-      },
-      gameData: {
-        game: "pong",
-        options: {
-          paddleRatio: 0.4,
-          gameSpeed: 1,
-        },
-      },
-    };
-    socket.send(JSON.stringify(newRoomMessage));
-  });
+  bindRoomCreation(createButton, roomSettingsModal, gameSettingsForm, socket);
   socket.onmessage = (e: MessageEvent) => {
     const parsed = MatchmakingServerMessage.safeParse(JSON.parse(e.data));
     if (!parsed.success) {

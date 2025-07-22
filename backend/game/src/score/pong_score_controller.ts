@@ -12,11 +12,10 @@ export class PongScoreController implements ScoreController {
   }
 
   onBallMissed(lastTouchBy: number, missedBy: number): void {
-    void missedBy; // to avoid tsconfig error
-    this.playerScores[lastTouchBy] = this.playerScores[lastTouchBy]! + 1;
-    if (this.playerScores[lastTouchBy] >= this.maxScore) {
-      // TODO handle game end
+    if (lastTouchBy === missedBy) {
+      this.playerScores[lastTouchBy] = this.playerScores[lastTouchBy]! - 1;
     }
+    this.playerScores[lastTouchBy] = this.playerScores[lastTouchBy]! + 1;
     this.sender(this.playerScores);
   }
 
