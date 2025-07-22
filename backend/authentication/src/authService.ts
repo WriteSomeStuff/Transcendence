@@ -4,7 +4,7 @@ import QRCode from "qrcode";
 import runTransaction from "./db.js";
 
 import type { AuthResultObj, Enable2FAResultObj } from "./types/types.js";
-import { fetchUserIdByUsername, fetchUsernameByUserId, processOAuthLogin, fetchUserInfoFrom42 } from "./helpers/authServiceHelpers.js";
+import { fetchUserIdByEmail, fetchEmailByUserId, processOAuthLogin, fetchUserInfoFrom42 } from "./helpers/authServiceHelpers.js";
 
 // @ts-ignore
 export const register = async (username: string, password: string): Promise<number> => {
