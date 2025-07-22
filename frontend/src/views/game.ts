@@ -52,6 +52,8 @@ function initCourt(canvas: HTMLCanvasElement, socket: WebSocket, court: Court) {
     if (!document.body.contains(canvas)) {
       document.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("keyup", onKeyUp);
+      localStorage.removeItem("gameId");
+      socket.close();
       observer.disconnect();
     }
   });
