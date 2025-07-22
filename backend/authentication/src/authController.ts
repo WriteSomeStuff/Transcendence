@@ -157,7 +157,7 @@ export const OAuthloginHandler = async (request: FastifyRequest, reply: FastifyR
 export const OAuthCallbackHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
 		console.log(`[Auth Controller] OAuth callback received`);
-		
+
 		const { code } = request.query as { code: string};
 		if (!code) {
 			console.error(`[Auth Controller] OAuth callback missing code`);
@@ -178,7 +178,7 @@ export const OAuthCallbackHandler = async (request: FastifyRequest, reply: Fasti
 			});
 			return;
 		}
-		
+
 		console.log(`[Auth Controller] User ID from OAuth callback: ${userId}`);
 		await handleSuccessfulLogin(request, reply, userId);
 		console.log(`[Auth Controller] User ${userId} logged in successfully after OAuth callback`);
@@ -255,7 +255,7 @@ export const logoutUserHandler = async (request: FastifyRequest, reply: FastifyR
 
 		console.log(`[Auth Controller] Setting status to 'offline' for user ${request.user.userId}`);
 		const response = await setStatusInUserService(request.user.userId, 'offline');
-		
+
 		if (!response.ok) {
 			console.error('Failed to update user service database:', response.statusText);
 			reply.status(response.status).send({
@@ -265,12 +265,12 @@ export const logoutUserHandler = async (request: FastifyRequest, reply: FastifyR
 			return;
 		}
 		console.log(`[Auth Controller] Set status to 'offline' for user ${request.user.userId}`);
-	
+
 		return reply.status(200).send({
 			success: true,
 			message: "Logout successful"
 		});
-		
+
 	} catch (e) {
 		console.error('Error clearing cookie:', e);
 		reply.status(500).send({
@@ -295,7 +295,7 @@ export const updatePasswordHandler = async (request: FastifyRequest, reply: Fast
 		reply.status(500).send({
 			success: false,
 			error: 'An error occurred updating the password: ' + e
-		});	
+		});
 	}
 }
 
@@ -337,7 +337,7 @@ export const disable2FAHandler = async (request: FastifyRequest, reply: FastifyR
 	try {
 		await disable2FA(request.user.userId);
 
-		reply.status(200).send({ 
+		reply.status(200).send({
 			success: true,
 			message: "Two-factor authentication disabled successfully"
 		});
@@ -345,7 +345,7 @@ export const disable2FAHandler = async (request: FastifyRequest, reply: FastifyR
 	} catch (e) {
 		reply.status(500).send({
 			success: false,
-			error: 'An error occurred disabling 2FA' 
+			error: 'An error occurred disabling 2FA'
 		});
 	}
 }
