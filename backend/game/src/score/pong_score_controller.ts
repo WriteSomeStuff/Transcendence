@@ -23,4 +23,13 @@ export class PongScoreController implements ScoreController {
   getScores(): number[] {
     return this.playerScores;
   }
+
+  isMaxScoreReached(): boolean {
+    for (const score of this.playerScores) {
+      if (score >= this.maxScore) {
+        return true;
+      }
+    }
+    return false;
+	}
 }
