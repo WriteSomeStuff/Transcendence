@@ -17,6 +17,7 @@ function runTransaction<T>(fn: (db: Database.Database) => T): T {
 const sql = `
 	CREATE TABLE IF NOT EXISTS user (
 		user_id			INTEGER	PRIMARY KEY,
+		email			TEXT	NOT NULL UNIQUE,
 		password_hash	TEXT	NOT NULL,
 		two_fa_enabled	INTEGER	DEFAULT 0,
 		two_fa_secret	TEXT,
