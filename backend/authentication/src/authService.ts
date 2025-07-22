@@ -86,12 +86,12 @@ export const login = async (email: string, password: string): Promise<AuthResult
 	}
 };
 
-const findOrCreateUser = async (email: string): Promise<{userId: number}> => {
+const findOrCreateUser = async (email: string, username: string): Promise<{userId: number}> => {
 	try {
 		console.log(`[Auth Service] Finding or creating user with email: ${email}`);
 		let userId: number | undefined;
 		try {
-			userId = await fetchUserIdByUsername(email);
+			userId = await fetchUserIdByEmail(email);
 		} catch (e) {
 			console.log(`[Auth Service] User not found, creating new user`);
 
@@ -99,10 +99,10 @@ const findOrCreateUser = async (email: string): Promise<{userId: number}> => {
 
 			console.log(`[Auth Controller] Registering user '${email}'`);
 			const newUserId = await register(email, password);
-			console.log(`[Auth Controller] Registering user '${email}' successful: ${newUserId}`);
+			console.log(`[Auth Controller] Registering user '${email}' to auth db successful: ${newUserId}`);
 
-			console.log(`[Auth Controller] Registering user '${email}' to user db`);
-			const response = await registerUserInUserService(email, newUserId);
+			console.log(`[Auth Controller] Registering user '${email}' with username '${username}' to user db`);
+			const response = await registerUserInUserService(username, newUserId);
 			if (!response.ok) {
 				throw new Error(`Failed to register user in user service: ${response.statusText}`);
 			}
