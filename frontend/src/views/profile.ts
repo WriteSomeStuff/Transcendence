@@ -196,7 +196,7 @@ async function displayMatchHistory() {
   var lossAmount: number = 0;
   for (const history of list) {
     const docDate: HTMLSpanElement = document.createElement("span");
-    docDate.textContent = history.date.toISOString();
+    docDate.textContent = `${history.date.getDate().toString().padStart(2, '0')}/${(history.date.getMonth()+1).toString().padStart(2, '0')}/${history.date.getFullYear()}`;
 
     const docScore: HTMLSpanElement = document.createElement("span");
     docScore.textContent = history.userScore.toString() + " points";
@@ -300,7 +300,7 @@ async function displayFriendList(app: App) {
 
 	const listElement = document.createElement("li");
 
-	listElement.className = "flex justify-between items-center gap-4";
+	listElement.className = "flex justify-between items-center gap-4 overflow-y-auto custom-scrollbar";
     listElement.appendChild(docUser);
     listElement.appendChild(docStatus);
 	listElement.appendChild(removeBtn);
@@ -410,7 +410,7 @@ async function displayFriendRequestList(app: App) {
 
 		const listElement = document.createElement("li");
 
-		listElement.className = "flex justify-between items-center gap-4";
+		listElement.className = "flex justify-between items-center gap-4 overflow-y-auto custom-scrollbar";
 		listElement.appendChild(docSender);
 		listElement.appendChild(acceptBtn);
 		listElement.appendChild(rejectBtn);

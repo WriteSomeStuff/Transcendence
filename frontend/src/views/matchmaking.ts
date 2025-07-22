@@ -109,6 +109,13 @@ export async function renderMatchmakingView(
     return;
   }
   const socket = new WebSocket("/api/matchmaking/ws");
+  const observer = new MutationObserver(() => {
+    if (!document.body.contains(createButton)) {
+      socket.close();
+      observer.disconnect();
+    }
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
   createButton.addEventListener("click", () => {
     const newRoomMessage: MatchmakingMessage = {
       action: "createRoom",
@@ -130,6 +137,7 @@ export async function renderMatchmakingView(
     const parsed = MatchmakingServerMessage.safeParse(JSON.parse(e.data));
     if (!parsed.success) {
       console.error("Unable to parse matchmaking", parsed.error, e);
+      app.resetView();
       return;
     }
     switch (parsed.data.action) {
