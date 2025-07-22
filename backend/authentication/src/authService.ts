@@ -239,17 +239,17 @@ export const updatePassword = async (newPassword: string, userId: number) => {
 export const enable2FA = async (userId: number): Promise<Enable2FAResultObj> => {
 	try {
 		console.log(`[Auth Service] Enabling 2FA for user ID ${userId}`);
-		const username = await fetchUsernameByUserId(userId);
-		if (!username) {
-			console.error(`[Auth Service] Username not found for user ID ${userId}`);
-			return { success: false, error: "Username not found" };
+		const email = await fetchEmailByUserId(userId);
+		if (!email) {
+			console.error(`[Auth Service] Email not found for user ID ${userId}`);
+			return { success: false, error: "Email not found" };
 		}
-		console.log(`[Auth Service] Fetched username for user ID ${userId}: ${username}`);
+		console.log(`[Auth Service] Fetched email for user ID ${userId}: ${email}`);
 
-		console.log(`[Auth Service] Creating TOTP instance for user ${username}`);
+		console.log(`[Auth Service] Creating TOTP instance for user ${email}`);
 		const totp = new OTPAuth.TOTP({
 			issuer: 'Transcendence',
-			label: username,
+			label: email,
 			algorithm: 'SHA1',
 			digits: 6,
 			period: 30
@@ -259,7 +259,7 @@ export const enable2FA = async (userId: number): Promise<Enable2FAResultObj> => 
 		const otpAuthUrl = totp.toString();
 		const qrCodeDataUrl = await QRCode.toDataURL(otpAuthUrl);
 
-		console.log(`[Auth Service] 2FA enabled for user ${username} with secret ${secret}`);
+		console.log(`[Auth Service] 2FA enabled for user ${email} with secret ${secret}`);
 		runTransaction((db) => {
 			const updateStmt = db.prepare(`
 				UPDATE user
