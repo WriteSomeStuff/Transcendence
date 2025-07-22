@@ -75,7 +75,7 @@ export function bindCredentialsForm(formBinding: formBinding, app: App) {
 
       if (formBinding.formId === "loginForm" && data.twoFA === true) {
         bindVerify2FAModal();
-        bindVerify2FAForm(username, app);
+        bindVerify2FAForm(email, app);
         return;
       }
 
