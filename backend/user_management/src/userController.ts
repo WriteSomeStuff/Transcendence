@@ -3,7 +3,7 @@ import { promises as fs } from "fs";
 import path from 'path';
 
 import {
-	CredentialsSchema,
+	RegisterSchema,
 	User
 } from "schemas";
 import {
@@ -67,7 +67,7 @@ export const getUserDataHandler = async (request: FastifyRequest, reply: Fastify
 export const updateUsernameHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
 		const { newValue } = request.body as { newValue: string };
-		const parseResult = CredentialsSchema.shape.username.safeParse(newValue);
+		const parseResult = RegisterSchema.shape.username.safeParse(newValue);
 		if (!parseResult.success) {
 			reply.status(400).send({
 				success: false,
@@ -104,7 +104,7 @@ export const updateUsernameHandler = async (request: FastifyRequest, reply: Fast
 export const updatePasswordHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
 		const { newValue } = request.body as { newValue: string };
-		const parseResult = CredentialsSchema.shape.password.safeParse(newValue);
+		const parseResult = RegisterSchema.shape.password.safeParse(newValue);
 		if (!parseResult.success) {
 			reply.status(400).send({
 				success: false,

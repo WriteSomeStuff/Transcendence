@@ -9,7 +9,8 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 
 import {
-	CredentialsSchema,
+	RegisterSchema,
+	LoginSchema,
 	AuthResultSchema,
 	Enable2FAResultSchema
 } from "schemas";
@@ -33,7 +34,7 @@ import {
 
 export const registerUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const parseResult = CredentialsSchema.safeParse(request.body);
+		const parseResult = RegisterSchema.safeParse(request.body);
 		if (!parseResult.success) {
 			reply.status(400).send({
 				success: false,
@@ -72,7 +73,7 @@ export const registerUserHandler = async (request: FastifyRequest, reply: Fastif
 
 export const loginUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const parseResult = CredentialsSchema.safeParse(request.body);
+		const parseResult = LoginSchema.safeParse(request.body);
 		if (!parseResult.success) {
 			const badRequestPayload = {
 				success: false,
