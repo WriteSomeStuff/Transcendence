@@ -4,7 +4,7 @@ import fastifyWebsocket from "@fastify/websocket";
 import { GameController } from "./game_controllers/game_controller.js";
 import { PongController } from "./game_controllers/pong_controller.js";
 
-import { RoomSchema } from "schemas";
+import { type MatchResult, RoomSchema } from "schemas";
 
 import { WebSocket } from "ws";
 
@@ -44,10 +44,28 @@ class GameUser {
   }
 }
 
+async function saveMatchResult(matchResult: MatchResult): Promise<number> {
+  const url = process.env["USER_SERVICE_URL"] + "/match";
+  return await fetch(url, {
+    method: "POST",
+    body: JSON.stringify(matchResult),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data["success"]) {
+        return Number(data["matchId"]);
+      } else {
+        console.error("Error in saving match:", data["error"]);
+        return -1;
+      }
+    });
+}
+
 class Game {
   public gameId: string;
   public users: GameUser[];
   public controller: GameController;
+  private isGameOver: boolean = false;
 
   public constructor(
     gameId: string,
@@ -64,11 +82,30 @@ class Game {
   }
 
   public update(delta: number): void {
+    if (this.isGameOver) {
+      return;
+    }
     this.controller.update(delta);
     const broadcastMessages = this.controller.getBroadcastMessages();
     for (let i = 0; i < this.users.length; i++) {
       this.users[i]!.sendMessages(broadcastMessages);
       this.users[i]!.sendMessages(this.controller.getPlayerMessages(i));
+    }
+    if (this.controller.isGameOver()) {
+      this.isGameOver = true;
+      saveMatchResult(this.controller.getGameResult()).then((matchId) => {
+        for (const user of this.users) {
+          user.sendMessages([
+            {
+              type: "gameEnded",
+              matchId: matchId,
+            },
+          ]);
+          user.unsetSocket();
+          delete usersToGames[user.userId];
+        }
+        delete games[this.gameId];
+      });
     }
   }
 
@@ -125,7 +162,7 @@ app.get("/users", (req, res) => {
     return;
   }
   const game: Game = games[gameId]!;
-  const userIds = game.users.map(user => user.userId);
+  const userIds = game.users.map((user) => user.userId);
   res.status(200).send(userIds);
 });
 

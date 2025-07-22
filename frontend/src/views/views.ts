@@ -20,7 +20,8 @@ export const RegisterViewSchema = z.object({
 export const ProfileViewSchema = z.object({
   view: z.literal("profile"),
   params: z.object({
-    userId: z.string().uuid().optional(),
+    userId: z.number().optional(),
+    matchId: z.number().optional(),
   }),
 });
 

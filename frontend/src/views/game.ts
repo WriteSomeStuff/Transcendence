@@ -52,6 +52,8 @@ function initCourt(canvas: HTMLCanvasElement, socket: WebSocket, court: Court) {
     if (!document.body.contains(canvas)) {
       document.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("keyup", onKeyUp);
+      localStorage.removeItem("gameId");
+      socket.close();
       observer.disconnect();
     }
   });
@@ -67,7 +69,11 @@ function updateCourt(canvas: HTMLCanvasElement, court: Court) {
   renderCourt(court, ctx);
 }
 
-function updateScores(scoreboard: HTMLElement, usernames: string[], scores: number[]) {
+function updateScores(
+  scoreboard: HTMLElement,
+  usernames: string[],
+  scores: number[],
+) {
   scoreboard.innerHTML = "";
   const elements = usernames.map((username, idx) => {
     const p = document.createElement("p");
@@ -107,11 +113,21 @@ export async function renderGameView(
     app.resetView();
     return;
   }
-  const userIds = await fetch("/api/game/users").then((res) => res.json()) as number[];
-  const usernames = await Promise.all(userIds.map(async userId => {
-    return await fetch(`/api/user/get-username?userId=${userId}`).then((res) => res.json()).then(data => data["username"] as string);
-  }));
-  updateScores(scoreboard, usernames, usernames.map(_ => 0));
+  const userIds = (await fetch("/api/game/users").then((res) =>
+    res.json(),
+  )) as number[];
+  const usernames = await Promise.all(
+    userIds.map(async (userId) => {
+      return await fetch(`/api/user/get-username?userId=${userId}`)
+        .then((res) => res.json())
+        .then((data) => data["username"] as string);
+    }),
+  );
+  updateScores(
+    scoreboard,
+    usernames,
+    usernames.map((_) => 0),
+  );
   const socket = new WebSocket("/api/game/ws");
   socket.onmessage = (event: MessageEvent) => {
     const parsed = GameUpdateMessageSchema.safeParse(JSON.parse(event.data));
@@ -132,11 +148,20 @@ export async function renderGameView(
         updateCourt(canvas, parsed.data.payload);
         break;
       }
+      case "gameEnded": {
+        localStorage.removeItem("gameId");
+        app.selectView({
+          view: "profile",
+          params: {
+            matchId: parsed.data.matchId,
+          },
+        });
+      }
     }
   };
   quitButton.addEventListener("click", async () => {
     const message: GameInputMessage = {
-      type: "giveUp"
+      type: "giveUp",
     };
     socket.send(JSON.stringify(message));
     localStorage.removeItem("gameId");

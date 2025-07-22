@@ -102,6 +102,8 @@ services:
       dockerfile: backend/game/Dockerfile
     networks:
       - internal
+    environment:
+      - USER_SERVICE_URL=http://user_service
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://game/health" ]
       interval: 5s

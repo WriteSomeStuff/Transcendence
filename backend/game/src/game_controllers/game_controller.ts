@@ -1,4 +1,4 @@
-import type { Room } from "schemas";
+import type { MatchResult, Room } from "schemas";
 
 export abstract class GameController {
   protected room: Room;
@@ -14,4 +14,7 @@ export abstract class GameController {
   public abstract onPlayerLeave(index: number): void;
   public abstract start(): void;
   public abstract update(delta: number): void;
+
+  public abstract isGameOver(): boolean;
+  public abstract getGameResult(): MatchResult;
 }
