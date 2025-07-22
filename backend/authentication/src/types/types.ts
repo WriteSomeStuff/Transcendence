@@ -1,7 +1,7 @@
 export interface AuthResultObj {
 	success: boolean;
 	userId?: number;
-	username?: string;
+	email?: string;
 	error?: string;
 	twoFA?: boolean;
 }
