@@ -47,10 +47,12 @@ export function bindCredentialsForm(formBinding: formBinding, app: App) {
     event.preventDefault(); // prevents automatic reload and allows manual handling
     console.log("[FRONTEND] Handling login");
 
-    const username = (document.getElementById("username") as HTMLInputElement)
-      .value;
+	const email = (document.getElementById("email") as HTMLInputElement)
+	  .value;
     const password = (document.getElementById("password") as HTMLInputElement)
       .value;
+    const username = (document.getElementById("username") as HTMLInputElement)
+      ?.value;
 
     try {
       const response = await fetch(formBinding.url, {
@@ -58,7 +60,7 @@ export function bindCredentialsForm(formBinding: formBinding, app: App) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ email, password, username }),
       });
 
       const data = (await response.json()) as {
