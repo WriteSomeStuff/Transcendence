@@ -157,11 +157,11 @@ export const setStatusInUserService = async (userId: number, status: string): Pr
 	}
 }
 
-export const verify2FA = async (token: string, username: string): Promise<AuthResultObj> => {
+export const verify2FA = async (token: string, email: string): Promise<AuthResultObj> => {
 	try {
-		console.log(`[Auth Service] Fetching to get corresponding user id for '${username}'`);
-		const userId = await fetchUserIdByUsername(username);
-		console.log(`[Auth Service] Fetching to get corresponding user id for '${username}' successful: ${userId}`);
+		console.log(`[Auth Service] Fetching to get corresponding user id for '${email}'`);
+		const userId = await fetchUserIdByEmail(email);
+		console.log(`[Auth Service] Fetching to get corresponding user id for '${email}' successful: ${userId}`);
 
 		const userInfo = runTransaction((db) => {
 			const stmt = db.prepare(`
@@ -177,33 +177,33 @@ export const verify2FA = async (token: string, username: string): Promise<AuthRe
 		});
 
 		if (!userInfo) {
-			console.error(`[Auth Service] User with username ${username} not found for 2FA verification`);
+			console.error(`[Auth Service] User with email ${email} not found for 2FA verification`);
 			return { success: false, error: "User not found" };
 		}
 
 		if (!userInfo.two_fa_secret || userInfo.two_fa_enabled !== 1) {
-			console.error(`[Auth Service] User with username ${username} does not have 2FA enabled`);
+			console.error(`[Auth Service] User with email ${email} does not have 2FA enabled`);
 			return { success: false, error: "2FA is not enabled for this user" };
 		}
 
-		console.log(`[Auth Service] Verifying 2FA token for user ${username}`);
+		console.log(`[Auth Service] Verifying 2FA token for user ${email}`);
 		const totp = new OTPAuth.TOTP({
 			issuer: 'Transcendence',
-			label: username,
+			label: email,
 			algorithm: 'SHA1',
 			digits: 6,
 			period: 30,
 			secret: OTPAuth.Secret.fromBase32(userInfo.two_fa_secret)
 		});
 
-		console.log(`[Auth Service] TOTP instance created for user ${username} with secret ${userInfo.two_fa_secret}`);
+		console.log(`[Auth Service] TOTP instance created for user ${email} with secret ${userInfo.two_fa_secret}`);
 
 		var res = totp.validate({ token, window: 1 });
 		if (res !== null) {
-			console.log(`[Auth Service] 2FA token for user ${username} is valid`);
-			return { success: true, userId: userId, username: username };
+			console.log(`[Auth Service] 2FA token for user ${email} is valid`);
+			return { success: true, userId: userId, email: email };
 		} else {
-			console.error(`[Auth Service] Invalid 2FA token for user ${username}`);
+			console.error(`[Auth Service] Invalid 2FA token for user ${email}`);
 			return { success: false, error: "Invalid 2FA token" };
 		}
 	} catch (e) {
