@@ -9,7 +9,8 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 
 import {
-	CredentialsSchema,
+	RegisterSchema,
+	LoginSchema,
 	AuthResultSchema,
 	Enable2FAResultSchema
 } from "schemas";
@@ -33,7 +34,7 @@ import {
 
 export const registerUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const parseResult = CredentialsSchema.safeParse(request.body);
+		const parseResult = RegisterSchema.safeParse(request.body);
 		if (!parseResult.success) {
 			reply.status(400).send({
 				success: false,
@@ -41,26 +42,26 @@ export const registerUserHandler = async (request: FastifyRequest, reply: Fastif
 			});
 			return;
 		}
-		const { username, password } = parseResult.data;
+		const { email, password, username } = parseResult.data;
 
-		console.log(`[Auth Controller] Registering user '${username}'`);
-		const userId = await register(username, password);
-		console.log(`[Auth Controller] Registering user '${username}' successful: ${userId}`);
-		
+		console.log(`[Auth Controller] Registering user '${email}'`);
+		const userId = await register(email, password);
+		console.log(`[Auth Controller] Registering user '${email}' successful: ${userId}`);
+
 		console.log(`[Auth Controller] Registering user '${username}' to user db`);
 		const response = await registerUserInUserService(username, userId);
 		console.log(`[Auth Controller] Registering user '${username}' to user db successful`);
 
 		if (!response.ok) {
 			await handleUserDbError(response, userId, reply);
-			return;	
+			return;
 		}
 
 		reply.status(201).send({
 			success: true,
 			message: "User registered successfully"
 		});
-	
+
 	} catch (e) {
 		console.error('Error registering the user:', e);
 		reply.status(500).send({
@@ -72,7 +73,7 @@ export const registerUserHandler = async (request: FastifyRequest, reply: Fastif
 
 export const loginUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const parseResult = CredentialsSchema.safeParse(request.body);
+		const parseResult = LoginSchema.safeParse(request.body);
 		if (!parseResult.success) {
 			const badRequestPayload = {
 				success: false,
@@ -81,38 +82,38 @@ export const loginUserHandler = async (request: FastifyRequest, reply: FastifyRe
 			reply.status(400).send(AuthResultSchema.parse(badRequestPayload));
 			return;
 		}
-		const { username, password } = parseResult.data;
+		const { email, password } = parseResult.data;
 
-		console.log(`[Auth Controller] Logging in user '${username}'`);
-		const result = await login(username, password);
-		console.log(`[Auth Controller] Logging in user '${username}' successful`);
+		console.log(`[Auth Controller] Logging in user '${email}'`);
+		const result = await login(email, password);
+		console.log(`[Auth Controller] Logging in user '${email}' successful`);
 
 		if (!result.success) {
 			const errorPayload = { success: false, error: result.error };
 			reply.status(401).send(AuthResultSchema.parse(errorPayload));
 		}
-		
+
 		// If login is successful and 2FA is enabled, send a response indicating that 2FA verification is required
 		if (result.twoFA) {
-			console.log(`[Auth Controller] User ${result.userId} ${username} has 2FA enabled`);
+			console.log(`[Auth Controller] User ${result.userId} ${email} has 2FA enabled`);
 			const twoFAPayload = {
 				success: true,
 				userId: result.userId,
-				username: username,
+				email: email,
 				twoFA: true,
 				message: "Two-factor authentication is enabled for this user. Please verify your token.",
 			};
 			reply.status(200).send(AuthResultSchema.parse(twoFAPayload));
 		}
 
-		console.log(`[Auth Controller] Handling successful login for user ${result.userId} ${username}`);
+		console.log(`[Auth Controller] Handling successful login for user ${result.userId} ${email}`);
 		await handleSuccessfulLogin(request, reply, Number(result.userId));
-		console.log(`[Auth Controller] User ${result.userId} ${username} logged in successfully`);
+		console.log(`[Auth Controller] User ${result.userId} ${email} logged in successfully`);
 
 		const successPayload = {
 			success: true,
 			userId: result.userId,
-			username: username,
+			email: email,
 			twoFA: false,
 			message: "User logged in successfully"
 		}
@@ -157,7 +158,7 @@ export const OAuthloginHandler = async (request: FastifyRequest, reply: FastifyR
 export const OAuthCallbackHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
 		console.log(`[Auth Controller] OAuth callback received`);
-		
+
 		const { code } = request.query as { code: string};
 		if (!code) {
 			console.error(`[Auth Controller] OAuth callback missing code`);
@@ -178,7 +179,7 @@ export const OAuthCallbackHandler = async (request: FastifyRequest, reply: Fasti
 			});
 			return;
 		}
-		
+
 		console.log(`[Auth Controller] User ID from OAuth callback: ${userId}`);
 		await handleSuccessfulLogin(request, reply, userId);
 		console.log(`[Auth Controller] User ${userId} logged in successfully after OAuth callback`);
@@ -201,18 +202,18 @@ export const OAuthCallbackHandler = async (request: FastifyRequest, reply: Fasti
 export const verify2FATokenHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
 		console.log(`[Auth Controller] Received request to verify 2FA token`);
-		const { token, username } = request.body as { token: string, username: string };
+		const { token, email } = request.body as { token: string, email: string };
 
-		console.log(`[Auth Controller] Received request to verify 2FA token for user ${username}`);
-		if (!token || !username) {
-			console.error(`[Auth Controller] Missing token or username in request body`);
-			reply.status(400).send({ error: 'Username and token are required' });
+		console.log(`[Auth Controller] Received request to verify 2FA token for user ${email}`);
+		if (!token || !email) {
+			console.error(`[Auth Controller] Missing token or email in request body`);
+			reply.status(400).send({ error: 'email and token are required' });
 			return;
 		}
 
-		console.log(`[Auth Controller] Verifying 2FA token for user ${username}`);
-		const result = await verify2FA(token, username);
-		
+		console.log(`[Auth Controller] Verifying 2FA token for user ${email}`);
+		const result = await verify2FA(token, email);
+
 		if (!result.success) {
 			reply.status(401).send({ error: result.error });
 			return;
@@ -220,18 +221,18 @@ export const verify2FATokenHandler = async (request: FastifyRequest, reply: Fast
 
 		let userId = result.userId; // Ensure userId is defined
 		if (userId === undefined) {
-			console.error(`[Auth Controller] User ID missing after 2FA verification for user ${username}`);
+			console.error(`[Auth Controller] User ID missing after 2FA verification for user ${email}`);
 			reply.status(500).send({ error: "User ID missing after 2FA verification" });
 			return;
 		}
 
-		console.log(`[Auth Controller] User ${username} verified 2FA token successfully`);
+		console.log(`[Auth Controller] User ${email} verified 2FA token successfully`);
 
-		console.log(`[Auth Controller] Handling successful login for user ${username}`);
+		console.log(`[Auth Controller] Handling successful login for user ${email}`);
 		await handleSuccessfulLogin(request, reply, userId);
-		console.log(`[Auth Controller] User ${username} logged in successfully after 2FA verification`);
+		console.log(`[Auth Controller] User ${email} logged in successfully after 2FA verification`);
 
-		reply.status(200).send({ 
+		reply.status(200).send({
 			success: true,
 			message: "2FA token verified successfully",
 			next: "/home"
@@ -240,7 +241,7 @@ export const verify2FATokenHandler = async (request: FastifyRequest, reply: Fast
 	} catch (e) {
 		console.error('Error verifying 2FA token:', e);
 		if (e instanceof Error) {
-			reply.status(500).send({ 
+			reply.status(500).send({
 				success: false,
 				error: 'An error occurred during 2FA verification: ' + e.message
 			});
@@ -255,7 +256,7 @@ export const logoutUserHandler = async (request: FastifyRequest, reply: FastifyR
 
 		console.log(`[Auth Controller] Setting status to 'offline' for user ${request.user.userId}`);
 		const response = await setStatusInUserService(request.user.userId, 'offline');
-		
+
 		if (!response.ok) {
 			console.error('Failed to update user service database:', response.statusText);
 			reply.status(response.status).send({
@@ -265,12 +266,12 @@ export const logoutUserHandler = async (request: FastifyRequest, reply: FastifyR
 			return;
 		}
 		console.log(`[Auth Controller] Set status to 'offline' for user ${request.user.userId}`);
-	
+
 		return reply.status(200).send({
 			success: true,
 			message: "Logout successful"
 		});
-		
+
 	} catch (e) {
 		console.error('Error clearing cookie:', e);
 		reply.status(500).send({
@@ -295,7 +296,7 @@ export const updatePasswordHandler = async (request: FastifyRequest, reply: Fast
 		reply.status(500).send({
 			success: false,
 			error: 'An error occurred updating the password: ' + e
-		});	
+		});
 	}
 }
 
@@ -337,7 +338,7 @@ export const disable2FAHandler = async (request: FastifyRequest, reply: FastifyR
 	try {
 		await disable2FA(request.user.userId);
 
-		reply.status(200).send({ 
+		reply.status(200).send({
 			success: true,
 			message: "Two-factor authentication disabled successfully"
 		});
@@ -345,7 +346,7 @@ export const disable2FAHandler = async (request: FastifyRequest, reply: FastifyR
 	} catch (e) {
 		reply.status(500).send({
 			success: false,
-			error: 'An error occurred disabling 2FA' 
+			error: 'An error occurred disabling 2FA'
 		});
 	}
 }

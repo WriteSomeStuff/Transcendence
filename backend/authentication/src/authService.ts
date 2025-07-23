@@ -4,19 +4,19 @@ import QRCode from "qrcode";
 import runTransaction from "./db.js";
 
 import type { AuthResultObj, Enable2FAResultObj } from "./types/types.js";
-import { fetchUserIdByUsername, fetchUsernameByUserId, processOAuthLogin, fetchUserInfoFrom42 } from "./helpers/authServiceHelpers.js";
+import { fetchUserIdByEmail, fetchEmailByUserId, processOAuthLogin, fetchUserInfoFrom42 } from "./helpers/authServiceHelpers.js";
 
 // @ts-ignore
-export const register = async (username: string, password: string): Promise<number> => {
+export const register = async (email: string, password: string): Promise<number> => {
 	try {
 		const hashedPassword = await argon2.hash(password);
 
 		return runTransaction((db) => {
 			const stmt = db.prepare(`
-				INSERT INTO user (password_hash)
-				VALUES (?)
+				INSERT INTO user (email, password_hash)
+				VALUES (?, ?)
 			`);
-			const result = stmt.run(hashedPassword);
+			const result = stmt.run(email, hashedPassword);
 
 			return Number(result.lastInsertRowid);
 		});
@@ -40,12 +40,11 @@ export const registerUserInUserService = async (username: string, userId: number
 	}
 }
 
-export const login = async (username: string, password: string): Promise<AuthResultObj> => {
+export const login = async (email: string, password: string): Promise<AuthResultObj> => {
 	try {
-		console.log(`[Auth Service] Fetching to get corresponding user id for '${username}'`);
-		const userId = await fetchUserIdByUsername(username);
-		console.log(`[Auth Service] Fetching to get corresponding user id for '${username}' successful: ${userId}`);
+		const userId = await fetchUserIdByEmail(email);
 
+		console.log(`[Auth Service] Fetching user info for user ID ${userId}`);
 		const userInfo = runTransaction((db) => {
 			const stmt = db.prepare(`
 				SELECT
@@ -58,9 +57,8 @@ export const login = async (username: string, password: string): Promise<AuthRes
 			`);
 			return stmt.get(userId) as { password_hash: string, two_fa_enabled: boolean };
 		});
-
 		if (!userInfo) {
-			console.log(`[Auth Service] User '${username}' not found in auth service db`);
+			console.log(`[Auth Service] User '${email}' not found in auth service db`);
 			return {
 				success: false,
 				error: "User not found"
@@ -68,13 +66,13 @@ export const login = async (username: string, password: string): Promise<AuthRes
 		}
 		const verified = await argon2.verify(userInfo.password_hash, password);
 		if (!verified) {
-			console.log(`[Auth Service] Incorrect password for user '${username}'`);
+			console.log(`[Auth Service] Incorrect password for user '${email}'`);
 			return {
 				success: false,
 				error: "Incorrect password"
 			};
 		} else {
-			console.log(`[Auth Service] User '${username}' verified`);
+			console.log(`[Auth Service] User '${email}' verified`);
 			return {
 				success: true,
 				userId: userId,
@@ -88,12 +86,12 @@ export const login = async (username: string, password: string): Promise<AuthRes
 	}
 };
 
-const findOrCreateUser = async (email: string): Promise<{userId: number}> => {
+const findOrCreateUser = async (email: string, username: string): Promise<{userId: number}> => {
 	try {
 		console.log(`[Auth Service] Finding or creating user with email: ${email}`);
 		let userId: number | undefined;
 		try {
-			userId = await fetchUserIdByUsername(email);
+			userId = await fetchUserIdByEmail(email);
 		} catch (e) {
 			console.log(`[Auth Service] User not found, creating new user`);
 
@@ -101,10 +99,10 @@ const findOrCreateUser = async (email: string): Promise<{userId: number}> => {
 
 			console.log(`[Auth Controller] Registering user '${email}'`);
 			const newUserId = await register(email, password);
-			console.log(`[Auth Controller] Registering user '${email}' successful: ${newUserId}`);
+			console.log(`[Auth Controller] Registering user '${email}' to auth db successful: ${newUserId}`);
 
-			console.log(`[Auth Controller] Registering user '${email}' to user db`);
-			const response = await registerUserInUserService(email, newUserId);
+			console.log(`[Auth Controller] Registering user '${email}' with username '${username}' to user db`);
+			const response = await registerUserInUserService(username, newUserId);
 			if (!response.ok) {
 				throw new Error(`Failed to register user in user service: ${response.statusText}`);
 			}
@@ -128,10 +126,10 @@ export const OAuthCallback = async (code: string): Promise<{ userId: number }> =
 		const tokenResponse = await processOAuthLogin(code);
 
 		console.log(`[Auth Service] OAuth token received: ${tokenResponse.token}`);
-		const email = await fetchUserInfoFrom42(tokenResponse.token);
+		const userInfo = await fetchUserInfoFrom42(tokenResponse.token);
 
-		console.log(`[Auth Service] User info fetched: ${JSON.stringify(email)}`);
-		const userId = await findOrCreateUser(email.email);
+		console.log(`[Auth Service] User info fetched: ${JSON.stringify(userInfo)}`);
+		const userId = await findOrCreateUser(userInfo.email, userInfo.username);
 
 		return { userId: userId.userId };
 	} catch (e) {
@@ -159,11 +157,11 @@ export const setStatusInUserService = async (userId: number, status: string): Pr
 	}
 }
 
-export const verify2FA = async (token: string, username: string): Promise<AuthResultObj> => {
+export const verify2FA = async (token: string, email: string): Promise<AuthResultObj> => {
 	try {
-		console.log(`[Auth Service] Fetching to get corresponding user id for '${username}'`);
-		const userId = await fetchUserIdByUsername(username);
-		console.log(`[Auth Service] Fetching to get corresponding user id for '${username}' successful: ${userId}`);
+		console.log(`[Auth Service] Fetching to get corresponding user id for '${email}'`);
+		const userId = await fetchUserIdByEmail(email);
+		console.log(`[Auth Service] Fetching to get corresponding user id for '${email}' successful: ${userId}`);
 
 		const userInfo = runTransaction((db) => {
 			const stmt = db.prepare(`
@@ -179,33 +177,33 @@ export const verify2FA = async (token: string, username: string): Promise<AuthRe
 		});
 
 		if (!userInfo) {
-			console.error(`[Auth Service] User with username ${username} not found for 2FA verification`);
+			console.error(`[Auth Service] User with email ${email} not found for 2FA verification`);
 			return { success: false, error: "User not found" };
 		}
 
 		if (!userInfo.two_fa_secret || userInfo.two_fa_enabled !== 1) {
-			console.error(`[Auth Service] User with username ${username} does not have 2FA enabled`);
+			console.error(`[Auth Service] User with email ${email} does not have 2FA enabled`);
 			return { success: false, error: "2FA is not enabled for this user" };
 		}
 
-		console.log(`[Auth Service] Verifying 2FA token for user ${username}`);
+		console.log(`[Auth Service] Verifying 2FA token for user ${email}`);
 		const totp = new OTPAuth.TOTP({
 			issuer: 'Transcendence',
-			label: username,
+			label: email,
 			algorithm: 'SHA1',
 			digits: 6,
 			period: 30,
 			secret: OTPAuth.Secret.fromBase32(userInfo.two_fa_secret)
 		});
 
-		console.log(`[Auth Service] TOTP instance created for user ${username} with secret ${userInfo.two_fa_secret}`);
+		console.log(`[Auth Service] TOTP instance created for user ${email} with secret ${userInfo.two_fa_secret}`);
 
 		var res = totp.validate({ token, window: 1 });
 		if (res !== null) {
-			console.log(`[Auth Service] 2FA token for user ${username} is valid`);
-			return { success: true, userId: userId, username: username };
+			console.log(`[Auth Service] 2FA token for user ${email} is valid`);
+			return { success: true, userId: userId, email: email };
 		} else {
-			console.error(`[Auth Service] Invalid 2FA token for user ${username}`);
+			console.error(`[Auth Service] Invalid 2FA token for user ${email}`);
 			return { success: false, error: "Invalid 2FA token" };
 		}
 	} catch (e) {
@@ -241,17 +239,17 @@ export const updatePassword = async (newPassword: string, userId: number) => {
 export const enable2FA = async (userId: number): Promise<Enable2FAResultObj> => {
 	try {
 		console.log(`[Auth Service] Enabling 2FA for user ID ${userId}`);
-		const username = await fetchUsernameByUserId(userId);
-		if (!username) {
-			console.error(`[Auth Service] Username not found for user ID ${userId}`);
-			return { success: false, error: "Username not found" };
+		const email = await fetchEmailByUserId(userId);
+		if (!email) {
+			console.error(`[Auth Service] Email not found for user ID ${userId}`);
+			return { success: false, error: "Email not found" };
 		}
-		console.log(`[Auth Service] Fetched username for user ID ${userId}: ${username}`);
+		console.log(`[Auth Service] Fetched email for user ID ${userId}: ${email}`);
 
-		console.log(`[Auth Service] Creating TOTP instance for user ${username}`);
+		console.log(`[Auth Service] Creating TOTP instance for user ${email}`);
 		const totp = new OTPAuth.TOTP({
 			issuer: 'Transcendence',
-			label: username,
+			label: email,
 			algorithm: 'SHA1',
 			digits: 6,
 			period: 30
@@ -261,7 +259,7 @@ export const enable2FA = async (userId: number): Promise<Enable2FAResultObj> => 
 		const otpAuthUrl = totp.toString();
 		const qrCodeDataUrl = await QRCode.toDataURL(otpAuthUrl);
 
-		console.log(`[Auth Service] 2FA enabled for user ${username} with secret ${secret}`);
+		console.log(`[Auth Service] 2FA enabled for user ${email} with secret ${secret}`);
 		runTransaction((db) => {
 			const updateStmt = db.prepare(`
 				UPDATE user

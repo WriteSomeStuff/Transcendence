@@ -1,37 +1,77 @@
-export const fetchUserIdByUsername = async (username: string): Promise<number> => {
-	const url = process.env['USER_SERVICE_URL'] + '/get-userid?username=' + encodeURIComponent(username);
-	const response = await fetch(url, {
-		method: 'GET',
-		headers: {
-			'Content-Type': 'application/json'
+import runTransaction from "../db.js";
+
+// export const fetchUserIdByUsername = async (username: string): Promise<number> => {
+// 	const url = process.env['USER_SERVICE_URL'] + '/get-userid?username=' + encodeURIComponent(username);
+// 	const response = await fetch(url, {
+// 		method: 'GET',
+// 		headers: {
+// 			'Content-Type': 'application/json'
+// 		}
+// 	});
+
+// 	const data = await response.json() as { success: boolean, userId?: number, error?: string };
+
+// 	if (data.success && typeof data.userId === "number") {
+// 		return data.userId;
+// 	} else {
+// 		throw new Error("User not found");
+// 	}
+// }
+
+export const fetchUserIdByEmail = async (email: string): Promise<number> => {
+	console.log(`[Auth Service] Fetching corresponding user id for '${email}'`);
+	const userId = runTransaction((db) => {
+		const stmt = db.prepare(`
+			SELECT user_id
+			FROM user
+			WHERE email = ?
+		`);
+		const result = stmt.get(email);
+		if (!result) {
+			console.log(`[Auth Service] User '${email}' not found in auth service db`);
+			throw new Error("User not found");
 		}
+		return result.user_id;
 	});
-
-	const data = await response.json() as { success: boolean, userId?: number, error?: string };
-
-	if (data.success && typeof data.userId === "number") {
-		return data.userId;
-	} else {
-		throw new Error("User not found");
-	}
+	console.log(`[Auth Service] User ID for '${email}' is ${userId}`);
+	return userId;
 }
 
-export const fetchUsernameByUserId = async (userId: number): Promise<string> => {
-	const url = process.env['USER_SERVICE_URL'] + '/get-username?userId=' + encodeURIComponent(userId);
-	const response = await fetch(url, {
-		method: 'GET',
-		headers: {
-			'Content-Type': 'application/json'
+// export const fetchUsernameByUserId = async (userId: number): Promise<string> => {
+// 	const url = process.env['USER_SERVICE_URL'] + '/get-username?userId=' + encodeURIComponent(userId);
+// 	const response = await fetch(url, {
+// 		method: 'GET',
+// 		headers: {
+// 			'Content-Type': 'application/json'
+// 		}
+// 	});
+
+// 	const data = await response.json() as { success: boolean, username?: string, error?: string };
+
+// 	if (data.success && typeof data.username === "string") {
+// 		return data.username;
+// 	} else {
+// 		throw new Error("Username not found");
+// 	}
+// }
+
+export const fetchEmailByUserId = async (userId: number): Promise<string> => {
+	console.log(`[Auth Service] Fetching corresponding email for user ID '${userId}'`);
+	const email = runTransaction((db) => {
+		const stmt = db.prepare(`
+			SELECT email
+			FROM user
+			WHERE user_id = ?
+		`);
+		const result = stmt.get(userId);
+		if (!result) {
+			console.log(`[Auth Service] User with ID '${userId}' not found in auth service db`);
+			throw new Error("User not found");
 		}
+		return result.email;
 	});
-
-	const data = await response.json() as { success: boolean, username?: string, error?: string };
-
-	if (data.success && typeof data.username === "string") {
-		return data.username;
-	} else {
-		throw new Error("Username not found");
-	}
+	console.log(`[Auth Service] Email for user ID '${userId}' is ${email}`);
+	return email;
 }
 
 export const processOAuthLogin = async (code: string): Promise<{ token: string }> => {
@@ -68,7 +108,7 @@ export const processOAuthLogin = async (code: string): Promise<{ token: string }
 	}
 };
 
-export const fetchUserInfoFrom42 = async (token: string): Promise<{ email: string }> => {
+export const fetchUserInfoFrom42 = async (token: string): Promise<{ email: string, username: string }> => {
 	try {
 		console.log(`[Auth Service] Fetching user info with access token`);
 		const response = await fetch('https://api.intra.42.fr/v2/me', {
@@ -85,13 +125,15 @@ export const fetchUserInfoFrom42 = async (token: string): Promise<{ email: strin
 		}
 
 		console.log(`[Auth Service] User info fetched successfully`);
-		const userData = await response.json();
-		const email = userData.email;
-		if (!email) {
-			throw new Error("Email not found in user info");
+		const responseData = await response.json();
+		const email = responseData.email;
+		const username = responseData.login;
+		if (!email || !username) {
+			throw new Error("Email or username not found in user info");
 		}
 		console.log(`[Auth Service] User email fetched: ${email}`);
-		return { email }; 
+		console.log(`[Auth Service] User username fetched: ${username}`);
+		return { email, username };
 	} catch (e) {
 		console.error('[Auth Service] Error fetching user info from 42:', e);
 		throw new Error("An error occurred while fetching user info from 42");
