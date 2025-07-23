@@ -41,9 +41,7 @@ export class UserController {
       connectedUsers.get(userId)?.finalize();
     }
     connectedUsers.set(userId, this);
-    socket.on("open", () => {
-      UserController.update();
-    });
+    UserController.update();
     socket.on("message", async (message) => {
       console.log("Received message", message);
       const parsed = MatchmakingMessageSchema.safeParse(

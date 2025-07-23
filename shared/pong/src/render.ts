@@ -40,11 +40,15 @@ export function render(court: Court, ctx: CanvasRenderingContext2D) {
       getWallQuadrilateral(court.geometry, i),
       translatePoint,
     );
+    if (i === court.state.lastBouncedIndex) {
+      ctx.fillStyle = "red"; // in order to highlight
+    }
     addQuadrilateral(
       ctx,
       getPaddleQuadrilateral(court.geometry, i, court.state.paddles[i]!),
       translatePoint,
     );
+    ctx.fillStyle = "green";
   }
   const widthRatio = ctx.canvas.width / court.geometry.frameWidth;
   const heightRatio = ctx.canvas.height / court.geometry.frameHeight;
