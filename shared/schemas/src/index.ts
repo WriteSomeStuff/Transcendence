@@ -15,7 +15,8 @@ export type {
   PongPlayerInput,
 } from "./game/pong_schemas.js";
 export {
-  CredentialsSchema,
+  RegisterSchema,
+  LoginSchema,
   AuthResultSchema,
   Enable2FAResultSchema,
 } from "./auth_schemas.js";

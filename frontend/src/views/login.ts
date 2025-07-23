@@ -22,7 +22,7 @@ export function bindVerify2FAModal() {
   }
 }
 
-export function bindVerify2FAForm(username: string, app: App) {
+export function bindVerify2FAForm(email: string, app: App) {
   const form = document.getElementById("verify-2fa-form") as HTMLFormElement;
   if (!form) return;
 
@@ -39,7 +39,7 @@ export function bindVerify2FAForm(username: string, app: App) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ token, username }),
+        body: JSON.stringify({ token, email }),
       });
 
       const data = (await response.json()) as {
