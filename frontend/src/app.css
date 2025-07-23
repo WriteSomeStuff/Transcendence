@@ -104,6 +104,7 @@
   font-display: swap;
 }
 
+/* TODO delete this */
 dialog[open] {
   position: fixed;
   top: 50%;

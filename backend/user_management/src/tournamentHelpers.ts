@@ -2,12 +2,12 @@ import type {
 	Tournament,
 	TournamentMatch,
 	TournamentBracket,
-	RoomGameData,
 	Username,
 	UserId,
 	TournamentMatchCreateMessage,
 	TournamentCreateResponse,
 	TournamentMatchCreateResponse,
+	TournamentCreateMessage,
 } from "schemas";
 
 import {
@@ -17,23 +17,21 @@ import {
 
 import { v4 as uuidv4 } from "uuid";
 
-// TODO what if something goes wrong, matches and tournament shoudl be deleted from db?
-export async function createTournament(
-	name: string,
-	size: number,
-	usernames: Username[], 
-	gameData: RoomGameData,
-) {
+// TODO what if something goes wrong, matches and tournament should be deleted from db?
+export async function createTournamentInfo(tournamentInfo: TournamentCreateMessage): Promise<number> {
 	// 1. fetch user id's
-	const userIds: UserId[] = await getUserIds(usernames);
+	const userIds: UserId[] = await getUserIds(tournamentInfo.participants);
+	if (userIds.length === 0) {
+		throw new Error("A username was invalid");
+	}
 	// 2. make Tournament room
 	const tournament: Tournament = {
 		id: 0,
-		name: name,
-		size: size,
+		name: tournamentInfo.name,
+		size: tournamentInfo.size,
 		joinedUsers: userIds,
 		permissions: { type: "tournament" },
-		gameData: gameData,
+		gameData: tournamentInfo.gameData,
 		bracket: null,
 	}
 	// 3. pass to create bracket
@@ -41,22 +39,24 @@ export async function createTournament(
 
 	// 4. database stuff
 	// 4.1. create tournament row
-	tournament.id = await createTournamentInUserService(name);
-	if (tournament.id === 0) {
-		// TODO handle error
-		// communicate either invalid tournament name or internal server error
-	}
-	// 4.2. create all the matches in match table
-	const success = await createTournamentMatchesInUserService(tournament.id, tournament.bracket); // continue here
-	if (!success) {
-		// TODO check for errors
+	const createTournamentresult = await createTournamentInUserService(tournamentInfo.name, tournament.bracket);
+	if (typeof createTournamentresult === "number") {
+		tournament.id = createTournamentresult;
+	} else {
+		throw new Error(`Tournament creation failed: ${createTournamentresult}`);
 	}
 
-	const tournamentJson = JSON.stringify(tournament);
+	// 4.2. create all the matches in match table
+	const createMatchResult = await createTournamentMatchesInUserService(tournament.id, tournament.bracket); // continue here
+	if (createMatchResult.length != 0) {
+		throw new Error(`Tournament matches creation failed: ${createMatchResult}`);
+	}
+
 	console.log(JSON.stringify(tournament, null, 2));
+	return tournament.id;
 }
 
-async function createTournamentMatchesInUserService(tournamentId: number, bracket: TournamentBracket): Promise<boolean> {
+async function createTournamentMatchesInUserService(tournamentId: number, bracket: TournamentBracket): Promise<string> {
 	const url = process.env['USER_SERVICE_URL'] + '/match/insert-tournament-match';
 	for (const match of bracket.matches) {
 		const matchInfo: TournamentMatchCreateMessage = {
@@ -75,37 +75,37 @@ async function createTournamentMatchesInUserService(tournamentId: number, bracke
 
 		const parsed = TournamentMatchCreateResponseSchema.safeParse(await response.json());
 		if (!parsed.success) { // Invalid response		
-			return false; // TODO handle error
+			return "Invalid response from tournament creation service"; // TODO handle error
 		}
 
 		const data = parsed.data as TournamentMatchCreateResponse;
 		if (!data.success) {
-			return false; // TODO handle error in data.error
+			return data.error; // TODO handle error in data.error
 		}
 
 		match.databaseId = data.dbMatchId;
 	}
-	return true;
+	return "";
 }
 
-async function createTournamentInUserService(name: string): Promise<number> {
+async function createTournamentInUserService(name: string, bracket: TournamentBracket): Promise<number | string> {
 	const url = process.env['USER_SERVICE_URL'] + '/match/insert-tournament';
 	const response = await fetch(url, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
 		},
-		body: JSON.stringify({ name: name }),
+		body: JSON.stringify({ name, bracket }),
 	});
 
 	const parsed = TournamentCreateResponseSchema.safeParse(await response.json());
 	if (!parsed.success) { // Invalid response	
-		return 0; // TODO handle error
+		return "Invalid response from tournament creation service";
 	}
 
 	const data = parsed.data as TournamentCreateResponse;
 	if (!data.success) {
-		return 0; // TODO handle error in data.error
+		return data.error;
 	}
 
 	return data.tournamentId;
@@ -129,8 +129,7 @@ async function getUserIds(usernames: Username[]): Promise<UserId[]> {
 		if (data.success && typeof data.userId === "number") {
 			UserIds.push(data.userId);
 		} else {
-			// TODO handle error
-			// communicate back to tournament creator that username is invalid
+			return [];
 		}
 	}
 

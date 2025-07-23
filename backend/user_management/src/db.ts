@@ -28,6 +28,7 @@ const sql = `
 		tournament_id		INTEGER PRIMARY KEY,
 		tournament_name		TEXT	NOT NULL	UNIQUE,
 		created_at			TEXT	DEFAULT (datetime('now')),
+		bracket				BLOB,
 		tournament_end		TEXT,
 		tournament_status	TEXT	DEFAULT ('ongoing')	CHECK(tournament_status IN ('ongoing', 'finished'))
 	);
@@ -35,7 +36,7 @@ const sql = `
 	CREATE TABLE IF NOT EXISTS match_state (
 		match_id		INTEGER PRIMARY KEY,
 		match_date		TEXT,
-		match_status	TEXT	DEFAULT ('finished')	CHECK(match_status IN ('ongoing', 'finished')),
+		match_status	TEXT	DEFAULT ('finished')	CHECK(match_status IN ('pending', 'ongoing', 'finished')),
 		match_end		TEXT,
 		tournament_id	INTEGER,
 		FOREIGN KEY (tournament_id)

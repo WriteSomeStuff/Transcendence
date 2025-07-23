@@ -1,15 +1,16 @@
 import { runTransaction } from "./db.js";
-import type { MatchHistory } from "schemas";
+import type { MatchHistory, TournamentBracket } from "schemas";
 
-export const createTournament = async (name: string) => {
+export const insertTournament = async (name: string, bracket: TournamentBracket) => {
 	try {
 		return runTransaction((db) => {
 			const stmt = db.prepare(`
-				INSERT INTO tournament (tournament_name)
-				VALUES (?)
+				INSERT INTO tournament (tournament_name, bracket)
+				VALUES (?, ?)
 			`);
 
-			const info = stmt.run(name);
+			const bracketBuffer = Buffer.from(JSON.stringify(bracket));
+			const info = stmt.run(name, bracketBuffer);
 			return Number(info.lastInsertRowid);
 		});
 	} catch (e) {
@@ -23,7 +24,7 @@ export const createMatchState = async (start?: string, end?: string, tournamentI
 			const stmt = db.prepare(`
 				INSERT INTO match_state (match_date, match_end, tournament_id)
 				VALUES (?, ?, ?)
-				`);
+			`);
 	
 			const info = stmt.run(start, end, tournamentId ?? null);
 			return Number(info.lastInsertRowid);
@@ -79,6 +80,55 @@ export const getMatchHistory = async (userId: number) => {
 			}));
 			return history;
 		});
+	} catch (e) {
+		throw e;
+	}
+}
+
+export function insertTournamentMatchState(matchStatus: string, tournamentId: number) {
+	try {
+		return runTransaction((db) => {
+			const stmt = db.prepare(`
+				INSERT INTO match_state (match_status, tournament_id)
+				VALUES (? , ?)
+			`);
+			
+			const result = stmt.run(matchStatus, tournamentId);
+			return Number(result.lastInsertRowid);
+		});
+	} catch (e) {
+		throw e;
+	}
+}
+
+export function insertTournamentMatchParticipant(userId: number | null, matchId: number) {
+	try {
+		runTransaction((db) => {
+			const stmt = db.prepare(`
+				INSERT INTO match_participant (user_id, match_id)
+				VALUES (?, ?)
+			`);
+
+			stmt.run(userId, matchId);
+		});
+	} catch (e) {
+		throw e;
+	}
+}
+
+export function getTournament(tournamentId: number): TournamentBracket {
+	try {
+		return runTransaction((db) => {
+			const stmt = db.prepare(`
+				SELECT bracket
+				FROM tournament
+				WHERE tournament_id = ?
+			`);
+
+			const result = stmt.get(tournamentId) as { bracket: Buffer };
+			if (!result) throw new Error("Tournament not found");
+			return JSON.parse(result.bracket.toString());
+		})
 	} catch (e) {
 		throw e;
 	}

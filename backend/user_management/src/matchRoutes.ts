@@ -1,16 +1,19 @@
 import { FastifyInstance } from "fastify";
 
 import {
-  createTournamentHandler,
+  InsertTournamentHandler,
   createMatchHandler,
   getMatchHistoryHandler,
+  insertTournamentMatchHandler,
+  getTournamentHandler,
+  createTournamentHandler,
 } from "./matchController.js";
 
 const matchRoutes = async (app: FastifyInstance) => {
   app.post(
-    "/tournament",
+    "/insert-tournament",
     { preHandler: [app.authenticate] },
-    createTournamentHandler,
+    InsertTournamentHandler,
   );
   app.post("/", { preHandler: [app.authenticate] }, createMatchHandler);
 
@@ -18,6 +21,22 @@ const matchRoutes = async (app: FastifyInstance) => {
     "/history",
     { preHandler: [app.authenticate] },
     getMatchHistoryHandler,
+  );
+
+  app.post(
+	"/insert-tournament-match",
+    { preHandler: [app.authenticate] },
+	insertTournamentMatchHandler,
+  );
+
+  app.get(
+	"/tournament",
+	getTournamentHandler,
+  );
+
+  app.post(
+	"/create-tournament",
+	createTournamentHandler
   );
 };
 

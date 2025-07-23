@@ -1,23 +1,32 @@
 import { z } from "zod";
 
 const usernameRegex = /^[a-zA-Z][a-zA-Z0-9]*$/;
+
+export const UsernameSchema = z
+	.string()
+	.min(1, "Username is required")
+	.regex(
+		usernameRegex,
+		"Username must start with a letter and contain only letters and numbers",
+	);
+	
+export type Username = z.infer<typeof UsernameSchema>
+	
 const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*\W)[^\s]+$/;
 
-export const CredentialsSchema = z.object({
-  username: z
-    .string()
-    .min(1, "Username is required")
-    .regex(
-      usernameRegex,
-      "Username must start with a letter and contain only letters and numbers",
-    ),
-  password: z
+export const PasswordSchema = z
     .string()
     .min(8, "Password must be at least 8 characters long")
     .regex(
       passwordRegex,
       "Password must contain at least one letter, one number, and one special character, and no spaces",
-    ),
+    );
+	
+export type Password = z.infer<typeof PasswordSchema>
+
+export const CredentialsSchema = z.object({
+  username: UsernameSchema,
+  password: PasswordSchema,
 });
 
 export type Credentials = z.infer<typeof CredentialsSchema>;

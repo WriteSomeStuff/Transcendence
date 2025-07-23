@@ -15,11 +15,15 @@ export type {
   PongPlayerInput,
 } from "./game/pong_schemas.js";
 export {
+  UsernameSchema,
+  PasswordSchema,
   CredentialsSchema,
   AuthResultSchema,
   Enable2FAResultSchema,
 } from "./auth_schemas.js";
 export type {
+  Username,
+  Password,
   Credentials,
   AuthResult,
   Enable2FAResult,
@@ -31,7 +35,9 @@ export {
   FriendListResponseSchema,
   FriendRequestListResponseSchema,
 	HistorySchema,
-  HistoryResponseSchema
+  HistoryResponseSchema,
+  TournamentCreateResponseSchema,
+  TournamentMatchCreateResponseSchema,
 } from "./user_schemas.js";
 export type {
   UserId,
@@ -39,7 +45,9 @@ export type {
   Friend,
   FriendListResponse,
   Friendship,
-	MatchHistory
+	MatchHistory,
+	TournamentCreateResponse,
+	TournamentMatchCreateResponse,
 } from "./user_schemas.js";
 export {
   RoomPermissionsSchema,
@@ -48,7 +56,9 @@ export {
   MatchmakingMessageSchema,
 	TournamentSchema,
 	TournamentMatchSchema,
-	TournamentBracketSchema,,
+	TournamentBracketSchema,
+	TournamentCreateMessageSchema,
+	TournamentMatchCreateMessageSchema,
 } from "./matchmaking_schemas.js";
 export type {
   RoomPermissions,
@@ -57,7 +67,9 @@ export type {
   MatchmakingMessage,
 	Tournament,
 	TournamentMatch,
-	TournamentBracket,,
+	TournamentBracket,
+	TournamentCreateMessage,
+	TournamentMatchCreateMessage,
 } from "./matchmaking_schemas.js";
 export { GameInputMessageSchema, GameUpdateMessageSchema, MatchResultSchema } from "./game.js";
 export type { GameInputMessage, GameUpdateMessage, MatchResult } from "./game.js";
