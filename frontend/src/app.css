@@ -103,3 +103,18 @@
   font-style: normal;
   font-display: swap;
 }
+
+/* TODO delete this */
+dialog[open] {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  padding: 2rem;
+  z-index: 50;
+  background-color: #000000;
+  color: #fed7e2;
+  border-width: 4px;
+  border-style: groove;
+}

@@ -1,4 +1,4 @@
-<div class="fixed top-0 left-0 w-full overflow-hidden pointer-events-none h-20 z-50">
+<div class="fixed top-0 left-0 w-full overflow-hidden pointer-events-none h-20 z-40">
 	<div class="w-full animate-scrollLeft">
 		<img src="/assets/gifs/ufo.gif" alt="scrolling gif" class="h-full"/>
 	</div>
@@ -20,7 +20,7 @@
 				<button id="openUserInfoEditor" class="w-4 h-5 sm:w-5 sm:h-6 md:w-6 md:h-7">
 					<img class="w-full h-full object-contain" src="./assets/gifs/pencil.gif" alt="Edit username or password"/>
 				</button>
-				<dialog class="modal m-2" id="modal">
+				<dialog class="modal animate-rainbow" id="modal">
 					<h2>Update username, password or avatar</h2>
 					<form id="avatarForm" enctype="multipart/form-data">
 		 				<input type="file" id="avatarInput" accept="image/*" name="avatar" class="sm:text-base rounded-md border-2 border-gray-300">
@@ -44,7 +44,7 @@
 					<button id="disable-2fa" class="sm:text-base rounded-md border-2 border-red-500 bg-red-700 hover:border-purple-500 hover:bg-purple-950 text-white mt-2">Disable 2fa</button>
 					<button id="closeUserInfoEditor" class="sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 text-white mb-2 mt-6 mx-auto">Close</button>
 				</dialog>
-				<dialog class="modal m-2" id="2FAModal">
+				<dialog class="modal animate-rainbow" id="2FAModal">
 					<div id="2fa-instructions" class="text-left my-6 mx-auto">
 						<img id="qr-code" class="mt-4 mb-6 w-48 h-48 sm:w-64 sm:h-64 mx-auto" src="" alt="QR code for 2fa setup"/> <!-- QR code for 2FA setup -->
 						<h2 class="text-lg font-bold mb-2">2FA Setup Instructions</h2>
