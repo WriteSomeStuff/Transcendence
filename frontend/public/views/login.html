@@ -16,19 +16,19 @@
 		<div class="flex flex-col justify-center items-center gap-12 p-6 sm:p-10 space-y-6">
 			<p class="text-base sm:text-lg">Log in here! ʕ◉ᴥ◉ʔ</p>
 		</div>
-		<div>
-			<form id="loginForm">
-				<div>
-					<label for="email">Email:</label>
-					<input class="bg-white text-black" type="email" id="email" name="email" required>
+		<div class="flex items-center justify-center w-full z-50">
+			<form id="loginForm" class="flex flex-col items-center justify-center space-y-4 w-full max-w-sm">
+				<div class="flex flex-col w-full">
+					<label for="email" class="text-left mb-1">Email:</label>
+					<input class="bg-white text-black w-full px-3 py-2 rounded" type="email" id="email" name="email" required>
 				</div>
-				<div>
-					<label for="password">Password:</label>
-					<input class="bg-white text-black" type="password" id="password" name="password" required>
+				<div class="flex flex-col w-full">
+					<label for="password" class="text-left mb-1">Password:</label>
+					<input class="bg-white text-black w-full px-3 py-2 rounded" type="password" id="password" name="password" required>
 				</div>
-				<input type="submit" value="Submit">
+				<input type="submit" value="Submit" class="bg-purple-700 px-4 py-2 rounded hover:bg-purple-950 mt-4">
+				<a href="/api/auth/oauth/login" id="oauth" class="text-center w-full sm:w-auto sm:text-base rounded-md border-2 border-blue-500 bg-blue-700 hover:border-purple-500 hover:bg-purple-950 px-4 py-2 mt-2">Log in using your 42 account</a>
 			</form>
-			<a href="/api/auth/oauth/login" id="oauth" class="sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 text-white mt-2">Log in using your 42 account</a>
 		</div>
 		<dialog class="modal animate-rainbow" id="verify2FAModal">
 			<div id="2fa-verification-instructions" class="text-left my-6 mx-auto">
@@ -40,10 +40,10 @@
 					<input type="text" id="2fa-token" name="2fa-token"
 								placeholder="Enter verification code" required
 								class="sm:text-base rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 w-full sm:w-auto">
-					<button type="submit" class="sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 text-white w-full sm:w-auto mt-2">Verify</button>
+					<button type="submit" class="sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 w-full sm:w-auto mt-2">Verify</button>
 				</form>
 			</div>
-			<button id="closeVerify2FAModal" class="sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 text-white mb-2 mt-6 mx-auto">Close</button>
+			<button id="closeVerify2FAModal" class="sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 mb-2 mt-6 mx-auto">Close</button>
 		</dialog>
 		<div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-10">
   			<img class="w-full max-w-xs h-auto" src="/assets/gifs/kaneki2.png" alt="Kaneki png"/>
