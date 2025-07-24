@@ -5,14 +5,14 @@
 </div>
 
 <div class="m-0 p-0 font-comic overflow-y-hidden box-border flex h-screen w-screen items-center justify-center bg-stars bg-10% text-pink-200 relative">
-  <div class="relative flex flex-col w-full max-w-4xl h-[95vh] bg-black p-4 sm:p-6 md:p-8 text-center border-8 animate-rainbow overflow-y-auto custom-scrollbar">
-    <div class="flex justify-center items-center py-6">
-      <img src="https://i.picasion.com/gl/92/kjzM.gif" alt="header gif" class="w-full max-w-[750px] h-auto"/>
-    </div>
-    <div class="flex flex-col sm:flex-row sm:flex-wrap justify-center items-center gap-4 bg-purple-700 p-4">
-	    <button class="px-3 py-2 text-sm sm:px-6 sm:py-4 sm:text-base rounded-md hover:bg-purple-950 w-full sm:w-auto" page="home">Home</button>
-		  <button class="px-3 py-2 text-sm sm:px-6 sm:py-4 sm:text-base rounded-md hover:bg-purple-950 w-full sm:w-auto" page="register">Create account</button>
-	  </div>
+	<div class="relative flex flex-col w-full max-w-4xl h-[95vh] bg-black p-4 sm:p-6 md:p-8 text-center border-8 animate-rainbow overflow-y-auto custom-scrollbar">
+    	<div class="flex justify-center items-center py-6">
+      		<img src="https://i.picasion.com/gl/92/kjzM.gif" alt="header gif" class="w-full max-w-[750px] h-auto"/>
+    	</div>
+    	<div class="flex flex-col sm:flex-row sm:flex-wrap justify-center items-center gap-4 bg-purple-700 p-4">
+			<button class="px-3 py-2 text-sm sm:px-6 sm:py-4 sm:text-base rounded-md hover:bg-purple-950 w-full sm:w-auto" page="home">Home</button>
+			<button class="px-3 py-2 text-sm sm:px-6 sm:py-4 sm:text-base rounded-md hover:bg-purple-950 w-full sm:w-auto" page="register">Create account</button>
+		</div>
 		<div class="flex flex-col justify-center items-center gap-12 p-6 sm:p-10 space-y-6">
 			<p class="text-base sm:text-lg">Log in here! ʕ◉ᴥ◉ʔ</p>
 		</div>
@@ -26,8 +26,8 @@
 					<label for="password" class="text-left mb-1">Password:</label>
 					<input class="bg-white text-black w-full px-3 py-2 rounded" type="password" id="password" name="password" required>
 				</div>
-				<input type="submit" value="Submit" class="bg-purple-700 px-4 py-2 rounded hover:bg-purple-950 mt-4">
-				<a href="/api/auth/oauth/login" id="oauth" class="text-center w-full sm:w-auto sm:text-base rounded-md border-2 border-blue-500 bg-blue-700 hover:border-purple-500 hover:bg-purple-950 px-4 py-2 mt-2">Log in using your 42 account</a>
+				<input type="submit" value="Submit" class="px-3 py-2 rounded border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 mt-2">
+				<a href="/api/auth/oauth/login" id="oauth" class="text-center w-full sm:w-auto sm:text-base rounded-md border-2 border-blue-500 bg-blue-700 hover:border-purple-500 hover:bg-purple-950 px-3 py-2 mt-2">Log in using your 42 account</a>
 			</form>
 		</div>
 		<dialog class="modal animate-rainbow" id="verify2FAModal">
@@ -40,15 +40,15 @@
 					<input type="text" id="2fa-token" name="2fa-token"
 								placeholder="Enter verification code" required
 								class="sm:text-base rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 w-full sm:w-auto">
-					<button type="submit" class="sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 w-full sm:w-auto mt-2">Verify</button>
+					<button type="submit" class="px-3 py-2 sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 w-full sm:w-auto mt-2">Verify</button>
 				</form>
 			</div>
-			<button id="closeVerify2FAModal" class="sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 mb-2 mt-6 mx-auto">Close</button>
+			<button id="closeVerify2FAModal" class="px-3 py-2 sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 mb-2 mt-6 mx-auto">Close</button>
 		</dialog>
 		<div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-10">
   			<img class="w-full max-w-xs h-auto" src="/assets/gifs/kaneki2.png" alt="Kaneki png"/>
 		</div>
 	</div>
-  <img class="fixed bottom-4 left-4 w-[20vw] max-w-[120px] h-auto z-40" src="/assets/gifs/patricksponge.gif" alt="Patrick star gif"/>
-  <img class="fixed bottom-4 right-4 w-[20vw] max-w-[120px] h-auto z-40" src="/assets/gifs/gloomy2.gif" alt="Gloomy bear gif"/>
+	<img class="fixed bottom-4 left-4 w-[20vw] max-w-[120px] h-auto z-40" src="/assets/gifs/patricksponge.gif" alt="Patrick star gif"/>
+	<img class="fixed bottom-4 right-4 w-[20vw] max-w-[120px] h-auto z-40" src="/assets/gifs/gloomy2.gif" alt="Gloomy bear gif"/>
 </div>

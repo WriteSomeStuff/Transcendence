@@ -281,7 +281,7 @@ async function displayFriendList(app: App) {
 
 	// button to remove friend
 	const removeBtn: HTMLButtonElement = document.createElement("button");
-	removeBtn.className = "sm:text-base rounded-md border-2 border-red-500 bg-red-700 hover:border-purple-500 hover:bg-purple-950 mt-2";
+	removeBtn.className = "px-1 py-1 sm:text-base rounded-md border-2 border-red-500 bg-red-700 hover:border-purple-500 hover:bg-purple-950 mt-2";
 	removeBtn.textContent = "Remove";
 	removeBtn.addEventListener('click', async function () {
 		const response: Response = await fetch(`/api/user/friends/remove?userIdToRemove=${friend.userId}`, { method: 'DELETE' });
@@ -361,7 +361,7 @@ async function displayFriendRequestList(app: App) {
 
 		// buttons
 		const acceptBtn: HTMLButtonElement = document.createElement("button");
-		acceptBtn.className = "sm:text-base rounded-md border-2 border-emerald-500 bg-emerald-700 hover:border-purple-500 hover:bg-purple-950 mt-2";
+		acceptBtn.className = "px-1 py-1 sm:text-base rounded-md border-2 border-emerald-500 bg-emerald-700 hover:border-purple-500 hover:bg-purple-950 mt-2";
 		acceptBtn.textContent = "Accept";
 		acceptBtn.addEventListener('click', async function () {
 			const response: Response = await fetch("/api/user/friends/accept", {
@@ -385,7 +385,7 @@ async function displayFriendRequestList(app: App) {
 		});
 
 		const rejectBtn: HTMLButtonElement = document.createElement("button");
-		rejectBtn.className = "sm:text-base rounded-md border-2 border-red-500 bg-red-700 hover:border-purple-500 hover:bg-purple-950 mt-2";
+		rejectBtn.className = "px-1 py-1 sm:text-base rounded-md border-2 border-red-500 bg-red-700 hover:border-purple-500 hover:bg-purple-950 mt-2";
 		rejectBtn.textContent = "Reject";
 		rejectBtn.addEventListener('click', async function () {
 			const response: Response = await fetch("/api/user/friends/reject", {

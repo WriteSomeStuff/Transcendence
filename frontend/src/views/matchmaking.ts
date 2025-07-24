@@ -48,7 +48,9 @@ function createRoomElement(room: Room, socket: WebSocket, userId: number): HTMLE
   const button = document.createElement("button");
   button.classList.add("px-4");
   button.classList.add("py-2");
-  button.classList.add("bg-blue-900");
+  button.classList.add("border-2");
+  button.classList.add("border-blue-500");
+  button.classList.add("bg-blue-700");
   button.classList.add("hover:bg-blue-950");
   button.classList.add("rounded-md");
   button.classList.add("w-full");
