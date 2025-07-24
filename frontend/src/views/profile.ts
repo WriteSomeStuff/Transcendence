@@ -300,7 +300,7 @@ async function displayFriendList(app: App) {
 
 	const listElement = document.createElement("li");
 
-	listElement.className = "flex justify-between items-center gap-4 overflow-y-auto custom-scrollbar";
+	listElement.className = "flex justify-between items-center gap-4";
     listElement.appendChild(docUser);
     listElement.appendChild(docStatus);
 	listElement.appendChild(removeBtn);
@@ -410,7 +410,7 @@ async function displayFriendRequestList(app: App) {
 
 		const listElement = document.createElement("li");
 
-		listElement.className = "flex justify-between items-center gap-4 overflow-y-auto custom-scrollbar";
+		listElement.className = "flex justify-between items-center gap-4";
 		listElement.appendChild(docSender);
 		listElement.appendChild(acceptBtn);
 		listElement.appendChild(rejectBtn);
