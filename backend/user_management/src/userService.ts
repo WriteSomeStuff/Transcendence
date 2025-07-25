@@ -106,12 +106,9 @@ export const getUserId = async (username: string): Promise<number> => {
 	try {
 		const userId = runTransaction((db) => {
 			const stmt = db.prepare(`
-				SELECT 
-					user_id
-				FROM
-					user
-				WHERE
-					username = ?	
+				SELECT user_id
+				FROM user
+				WHERE username = ?	
 			`)
 	
 			const row = stmt.get(username) as { user_id: number } | undefined;
