@@ -167,16 +167,24 @@ async function promptTournamentParticipantsAndName(totalPlayers: number): Promis
 }
 
 async function handleCreateTournament() {
+	console.log("[handleCreateTournament] Start");
 	const totalPlayers = await promptTotalPlayers();
-	if (totalPlayers === 0) return;
+	console.log("[handleCreateTournament] totalPlayers selected:", totalPlayers);
+	if (totalPlayers === 0) {
+		console.log("[handleCreateTournament] User cancelled totalPlayers prompt");
+		return;
+	}
 	
 	const tournamentInfo: {
 		participants: Username[],
 		name: string,
 	} = await promptTournamentParticipantsAndName(totalPlayers);
+	console.log("[handleCreateTournament] tournamentInfo:", tournamentInfo);
 	
-	if (tournamentInfo.participants.length === 0) return;
-	console.log('Sending message:', tournamentInfo);
+	if (tournamentInfo.participants.length === 0) {
+		console.log("[handleCreateTournament] No participants provided, aborting");
+		return;
+	}
 	
 	const newTournamentMessage: TournamentCreateMessage = {
 		name: tournamentInfo.name,
@@ -192,7 +200,7 @@ async function handleCreateTournament() {
 	};
 
 	const url = '/api/user/match/create-tournament';
-	console.log("url:", url);
+	console.log("[handleCreateTournament] Sending POST to", url, "with body:", newTournamentMessage);
 	const response = await fetch(url, {
 		method: 'POST',
 		headers: {
@@ -202,12 +210,14 @@ async function handleCreateTournament() {
 	});
 
 	const data = await response.json();
+	console.log("[handleCreateTournament] Response:", data);
 	if (!response.ok || !data.success) {
-		console.error("Failed to create tournament:", data);
+		console.error("[handleCreateTournament] Failed to create tournament:", data);
 		alert(`Failed to create tournament: ${data.error || "Unknown error."}`);
 		return;
 	}
 
+	console.log("[handleCreateTournament] Tournament created successfully, ID:", data.tournamentId);
 	alert(`Tournament created successfully! Tournament ID: ${data.tournamentId}`);
 }
 
@@ -269,6 +279,7 @@ export async function renderMatchmakingView(
     socket.send(JSON.stringify(newRoomMessage));
   });
   createTournamentButton.addEventListener("click", async () => {
+	console.log("Create Tournament button clicked, handling now");
 	handleCreateTournament();
   })
   socket.onmessage = (e: MessageEvent) => {
