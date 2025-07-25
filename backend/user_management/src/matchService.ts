@@ -53,21 +53,24 @@ export const getMatchHistory = async (userId: number) => {
 		return runTransaction((db) => {
 			const getHistoryStmt = db.prepare(`
 				SELECT
-					mp.score	AS user_score,
-					mp2.user_id	AS opponent_id,
-					mp2.score	AS opponent_score,
-					ms.match_end
+					ms.match_end,
+					mp.score AS user_score,
+					GROUP_CONCAT(mp2.user_id) AS opponent_ids,
+					GROUP_CONCAT(mp2.score) AS opponent_scores
 				FROM match_participant mp
-				JOIN match_participant mp2 ON mp.match_id = mp2.match_id AND mp.user_id != mp2.user_id
 				JOIN match_state ms ON ms.match_id = mp.match_id
-				WHERE mp.user_id = ? AND ms.match_status = 'finished'
+				JOIN match_participant mp2 ON mp2.match_id = mp.match_id AND mp2.user_id != mp.user_id
+				WHERE mp.user_id = ?
+					AND ms.match_status = 'finished'
+				GROUP BY ms.match_id, mp.user_id
 				ORDER BY ms.match_end DESC;
-			`);
+			`)
+
 			const rows = getHistoryStmt.all(userId) as {
-				user_score: number,
-				opponent_id: number,
-				opponent_score: number,
 				match_end: string,
+				user_score: number,
+				opponent_ids: number[],
+				opponent_scores: number[],
 			}[];
 
 			if (!rows || rows.length === 0) return []
@@ -75,7 +78,10 @@ export const getMatchHistory = async (userId: number) => {
 			const history: MatchHistory[] = rows.map(row => ({
 				date: new Date(row.match_end),
 				userScore: row.user_score,
-				opponentInfo: [{opponentId: row.opponent_id, opponentScore: row.opponent_score}],
+				opponentInfo: row.opponent_ids.map((id, i) => ({
+					opponentId: id,
+					opponentScore: row.opponent_scores[i]!,
+				})),
 			}));
 			return history;
 		});
