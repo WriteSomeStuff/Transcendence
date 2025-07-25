@@ -17,7 +17,7 @@
                 <button class="flex-1 px-6 py-3 border-2 border-blue-500 bg-blue-700 hover:border-purple-500 hover:bg-purple-950 rounded-md text-lg" id="createRoom">
                     Create Match
                 </button>
-                <button class="flex-1 px-6 py-3 border-2 border-blue-500 bg-blue-700 hover:border-purple-500 hover:bg-purple-950 rounded-md text-lg">
+                <button class="flex-1 px-6 py-3 border-2 border-blue-500 bg-blue-700 hover:border-purple-500 hover:bg-purple-950 rounded-md text-lg" id="createTournament">
                     Create Tournament
                 </button>
                 <dialog class="modal animate-rainbow" id="roomSettingsModal">
@@ -30,6 +30,30 @@
                         <button type="submit" class="px-3 py-2 sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 mt-2">Submit</button>
                     </form>
                 </dialog>
+				<dialog class="modal m-2" id="total-players-modal">
+					<h2>Choose the amount of players</h2>
+					<button class="flex-1 px-6 py-3 bg-blue-900 hover:bg-blue-950 rounded-md text-lg text-white" id="4players">4</button>
+					<button class="flex-1 px-6 py-3 bg-blue-900 hover:bg-blue-950 rounded-md text-lg text-white" id="8players">8</button>
+					<button class="flex-1 px-6 py-3 bg-blue-900 hover:bg-blue-950 rounded-md text-lg text-white" id="16players">16</button>
+					<button class="sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 text-white mb-2 mt-6 mx-auto" id="close-total-players-modal">Cancel</button>
+				</dialog>
+				<dialog class="modal m-2" id="player-input-modal">
+					<h2>Input players' usernames</h2>
+					<form id="player-input-form">
+						<div id="player-input-div"></div>
+						<label>Tournament name
+							<input
+								type="text"
+								id="tournament-name"
+								placeholder="Enter a tournament name"
+								required
+								class="sm:text-base rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500">
+						</label>
+						<!-- <div id="tournament-name-div"></div> -->
+						<button class="sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 text-white mb-2 mt-6 mx-auto" id="close-player-input-modal">Cancel</button>
+						<button type="submit" class="sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 text-white mt-2">Submit</button>
+					</form>
+				</dialog>
             </div>
             <div class="flex flex-col gap-4 w-full max-w-2xl" id="availableRooms">
                 <!-- Add rooms here depending on if any available -->

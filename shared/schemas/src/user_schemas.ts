@@ -75,3 +75,29 @@ export const HistoryResponseSchema = z.discriminatedUnion("success", [
 ]);
 
 export type MatchHistory = z.infer<typeof HistorySchema>;
+
+export const TournamentCreateResponseSchema = z.discriminatedUnion("success", [
+	z.object({
+		success: z.literal(true),
+		tournamentId: z.number(),
+	}),
+  	z.object({
+   		success: z.literal(false),
+    	error: z.string(),
+  }),
+]);
+
+export type TournamentCreateResponse = z.infer<typeof TournamentCreateResponseSchema>;
+
+export const TournamentMatchCreateResponseSchema = z.discriminatedUnion("success", [
+	z.object({
+		success: z.literal(true),
+		dbMatchId: z.number(),
+	}),
+  	z.object({
+   		success: z.literal(false),
+    	error: z.string(),
+  }),
+]);
+
+export type TournamentMatchCreateResponse = z.infer<typeof TournamentMatchCreateResponseSchema>;

@@ -42,6 +42,7 @@ export const MatchResultSchema = z.object({
   })),
   start: z.coerce.date(),
   end: z.coerce.date(),
+  matchId: z.number().optional(),
 });
 
 export type MatchResult = z.infer<typeof MatchResultSchema>;
