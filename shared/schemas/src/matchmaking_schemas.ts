@@ -69,7 +69,7 @@ export type TournamentBracket = z.infer<typeof TournamentBracketSchema>;
 export const TournamentSchema = z.object({
 	id: z.number(),
 	name: z.string(),
-	size: z.enum(["4", "8", "16"]).transform(Number),
+	size: z.number().refine((n) => [4, 8, 16].includes(n)),
 	joinedUsers: z.array(UserIdSchema),
 	permissions: RoomPermissionsSchema.refine((p) => p.type === "tournament"),
 	gameData: RoomGameDataSchema,
@@ -99,7 +99,7 @@ export type MatchmakingMessage = z.infer<typeof MatchmakingMessageSchema>;
 
 export const TournamentCreateMessageSchema = z.object({
 	name: z.string(),
-	size: z.enum(["4", "8", "16"]).transform(Number),
+	size: z.number().refine((n) => [4, 8, 16].includes(n)),
 	participants: z.array(UsernameSchema),
 	gameData: RoomGameDataSchema,
 })
