@@ -175,18 +175,15 @@ async function promptTournamentParticipantsAndName(
   const closeModalButton = document.getElementById(
     "close-player-input-modal",
   ) as HTMLButtonElement;
-  const tournamentNameInput = document.getElementById(
-    "tournament-name",
-  ) as HTMLInputElement;
   const playersInputDiv = document.getElementById("player-input-div");
-  // const tournamentNameDiv = document.getElementById("tournament-name-div");
+  const tournamentNameDiv = document.getElementById("tournament-name-div");
 
   if (
     !modal ||
     !form ||
     !closeModalButton ||
     !playersInputDiv ||
-    !tournamentNameInput
+    !tournamentNameDiv
   ) {
     return { participants: [], name: "" };
   }
@@ -202,13 +199,13 @@ async function promptTournamentParticipantsAndName(
     playersInputDiv.appendChild(inputElement);
   }
 
-  // const inputElement: HTMLInputElement = document.createElement("input");
-  // inputElement.type = "text";
-  // inputElement.placeholder = "Enter a tournament name";
-  // inputElement.required = true;
-  // inputElement.className = "sm:text-base rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500";
-  // tournamentNameDiv.appendChild(inputElement);
-  // const tournamentNameInput = tournamentNameDiv.querySelector("input") as HTMLInputElement;
+	const inputElement: HTMLInputElement = document.createElement("input");
+	inputElement.type = "text";
+	inputElement.placeholder = "Enter a tournament name";
+	inputElement.required = true;
+	inputElement.className = "sm:text-base rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500";
+	tournamentNameDiv.appendChild(inputElement);
+	const tournamentNameInput = tournamentNameDiv.querySelector("input") as HTMLInputElement;
 
   modal.showModal();
 
@@ -219,6 +216,7 @@ async function promptTournamentParticipantsAndName(
       const inputElements = playersInputDiv.querySelectorAll("input");
       inputElements.forEach((inputElement) => {
         if (users.has(inputElement.value)) {
+		  tournamentNameDiv.innerHTML = "";
           playersInputDiv.innerHTML = "";
           alert("Duplicate users"); // TODO dont close modal but give another chance
           resolve({ participants: [], name: "" });
@@ -226,6 +224,7 @@ async function promptTournamentParticipantsAndName(
         users.add(inputElement.value);
       });
       modal.close();
+	  tournamentNameDiv.innerHTML = "";
       playersInputDiv.innerHTML = "";
       resolve({
         participants: Array.from(users),
@@ -236,10 +235,10 @@ async function promptTournamentParticipantsAndName(
     closeModalButton.addEventListener("click", () => {
       modal.close();
       playersInputDiv.innerHTML = "";
+	  tournamentNameDiv.innerHTML = "";
       resolve({ participants: [], name: "" });
     });
   });
-  // TODO flush the tournament name input
 }
 
 async function handleCreateTournament() {
