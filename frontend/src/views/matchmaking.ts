@@ -243,44 +243,54 @@ async function promptTournamentParticipantsAndName(
 }
 
 async function handleCreateTournament() {
-  const totalPlayers = await promptTotalPlayers();
-  if (totalPlayers === 0) return;
-
-  const tournamentInfo: {
-    participants: Username[];
-    name: string;
-  } = await promptTournamentParticipantsAndName(totalPlayers);
-
-  if (tournamentInfo.participants.length === 0) return;
-  console.log("Sending message:", tournamentInfo);
-
-  const newTournamentMessage: TournamentCreateMessage = {
-    name: tournamentInfo.name,
-    size: totalPlayers,
-    participants: tournamentInfo.participants,
-    gameData: {
-      game: "pong",
-      options: {
-        paddleRatio: 0.4,
-        gameSpeed: 1,
-      },
-    },
-  };
+	console.log("[handleCreateTournament] Start");
+	const totalPlayers = await promptTotalPlayers();
+	console.log("[handleCreateTournament] totalPlayers selected:", totalPlayers);
+	if (totalPlayers === 0) {
+		console.log("[handleCreateTournament] User cancelled totalPlayers prompt");
+		return;
+	}
+	
+	const tournamentInfo: {
+		participants: Username[];
+		name: string;
+	} = await promptTournamentParticipantsAndName(totalPlayers);
+	console.log("[handleCreateTournament] tournamentInfo:", tournamentInfo);
+	
+	if (tournamentInfo.participants.length === 0) {
+		console.log("[handleCreateTournament] No participants provided, aborting");
+		return;
+	}
+	
+	const newTournamentMessage: TournamentCreateMessage = {
+		name: tournamentInfo.name,
+		size: totalPlayers,
+		participants: tournamentInfo.participants,
+		gameData: {
+			game: "pong",
+			options: {
+				paddleRatio: 0.4,
+				gameSpeed: 1,
+			},
+		},
+	};
 
   const url = "/api/user/match/create-tournament";
-  console.log("url:", url);
+  console.log("[handleCreateTournament] Sending POST to", url, "with body:", newTournamentMessage);
   const response = await fetch(url, {
     method: "POST",
     body: JSON.stringify(newTournamentMessage),
   });
 
   const data = await response.json();
+	console.log("[handleCreateTournament] Response:", data);
   if (!response.ok || !data.success) {
-    console.error("Failed to create tournament:", data);
+    console.error("[handleCreateTournament] Failed to create tournament:", data);
     alert(`Failed to create tournament: ${data.error || "Unknown error."}`);
     return;
   }
 
+	console.log("[handleCreateTournament] Tournament created successfully, ID:", data.tournamentId);
   alert(`Tournament created successfully! Tournament ID: ${data.tournamentId}`);
 }
 
@@ -348,6 +358,7 @@ export async function renderMatchmakingView(
   observer.observe(document.body, { childList: true, subtree: true });
   bindRoomCreation(createButton, roomSettingsModal, gameSettingsForm, socket);
   createTournamentButton.addEventListener("click", async () => {
+	console.log("Create Tournament button clicked, handling now");
     await handleCreateTournament();
   });
   socket.onmessage = (e: MessageEvent) => {
