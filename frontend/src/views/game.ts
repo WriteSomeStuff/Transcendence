@@ -92,6 +92,15 @@ export async function renderGameView(
   app.appContainer.innerHTML = await fetch("/views/pong.html").then((res) =>
     res.text(),
   );
+
+  const isMobile = /Mobile|Android|iPhone|iPad/i.test(navigator.userAgent);
+  if (isMobile) {
+	const controls = document.getElementById("mobile-controls");
+	if (controls) {
+	  controls.hidden = false;
+	}
+  }
+
   const canvas = document.getElementById("myCanvas");
   if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
     console.error("Can't find a game canvas");
