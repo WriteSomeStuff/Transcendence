@@ -1,11 +1,11 @@
-<div class="fixed top-0 left-0 w-full overflow-hidden pointer-events-none h-20 z-50">
+<div class="fixed top-0 left-0 w-full overflow-hidden pointer-events-none h-20 z-40">
 	<div class="w-full animate-scrollLeft">
 		<img src="/assets/gifs/ufo.gif" alt="scrolling gif" class="h-full"/>
 	</div>
 </div>
 
 <div class="m-0 p-0 font-comic overflow-y-hidden box-border flex h-screen w-screen items-center justify-center bg-stars bg-10% text-pink-200 relative">
-	<div class="flex flex-col w-full max-w-4xl h-[95vh] bg-black p-4 sm:p-6 md:p-8 text-center border-8 animate-rainbow overflow-y-auto custom-scrollbar">
+	<div class="flex flex-col w-full max-w-4xl h-[95vh] bg-black p-2 sm:p-6 md:p-8 text-center border-8 animate-rainbow overflow-y-auto custom-scrollbar">
 		<div class="flex justify-center items-center py-6">
 			<img src="https://i.picasion.com/gl/92/kjzM.gif" alt="header gif" class="w-full max-w-[750px] h-auto"/>
 		</div>
@@ -14,37 +14,37 @@
 			<button class="px-3 py-2 text-sm sm:px-6 sm:py-4 sm:text-base rounded-md hover:bg-purple-950 w-full sm:w-auto" page="matchmaking">Play game</button>
 			<button class="px-3 py-2 text-sm sm:px-6 sm:py-4 sm:text-base rounded-md hover:bg-purple-950 w-full sm:w-auto" id="logout">Log out</button>
 		</div>
-		<div class="grid grid-cols-1 sm:grid-cols-2 gap-6 p-6 sm:p-10">
-			<div class="grid grid-cols-2 items-center p-8">
+		<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 sm:p-6">
+			<div class="grid grid-cols-2 items-center p-6">
 				<h1 id="username" class="text-base sm:text-lg"></h1>
 				<button id="openUserInfoEditor" class="w-4 h-5 sm:w-5 sm:h-6 md:w-6 md:h-7">
 					<img class="w-full h-full object-contain" src="./assets/gifs/pencil.gif" alt="Edit username or password"/>
 				</button>
-				<dialog class="modal m-2" id="modal">
+				<dialog class="modal animate-rainbow" id="modal">
 					<h2>Update username, password or avatar</h2>
 					<form id="avatarForm" enctype="multipart/form-data">
 		 				<input type="file" id="avatarInput" accept="image/*" name="avatar" class="sm:text-base rounded-md border-2 border-gray-300">
-						<button type="submit" class="sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 text-white mt-2">Upload</button>
+						<button type="submit" class="px-3 py-2 sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 mt-2">Upload</button>
 					</form>
 					<form id="usernameForm">
 						<label>New username
 							<input type="text" id="newUsername"
 								placeholder="Enter new username" required
 								class="sm:text-base rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500"></label>
-						<button type="submit" class="sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 text-white mt-2">Submit</button>
+						<button type="submit" class="px-3 py-2 sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 mt-2">Submit</button>
 					</form>
 					<form id="passwordForm">
 						<label>New password
-							<input type="text" id="newPassword"
+							<input type="password" id="newPassword"
 								placeholder="Enter new password" required
 								class="sm:text-base rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500"></label>
-						<button type="submit" class="sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 text-white mt-2">Submit</button>
+						<button type="submit" class="px-3 py-2 sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 mt-2">Submit</button>
 					</form> 
-					<button id="enable-2fa" class="sm:text-base rounded-md border-2 border-emerald-500 bg-emerald-700 hover:border-purple-500 hover:bg-purple-950 text-white mt-2">Enable 2fa</button>
-					<button id="disable-2fa" class="sm:text-base rounded-md border-2 border-red-500 bg-red-700 hover:border-purple-500 hover:bg-purple-950 text-white mt-2">Disable 2fa</button>
-					<button id="closeUserInfoEditor" class="sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 text-white mb-2 mt-6 mx-auto">Close</button>
+					<button id="enable-2fa" class="px-3 py-2 sm:text-base rounded-md border-2 border-emerald-500 bg-emerald-700 hover:border-purple-500 hover:bg-purple-950 mt-2">Enable 2fa</button>
+					<button id="disable-2fa" class="px-3 py-2 sm:text-base rounded-md border-2 border-red-500 bg-red-700 hover:border-purple-500 hover:bg-purple-950 mt-2">Disable 2fa</button>
+					<button id="closeUserInfoEditor" class="px-3 py-2 sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 mb-2 mt-6 mx-auto">Close</button>
 				</dialog>
-				<dialog class="modal m-2" id="2FAModal">
+				<dialog class="modal animate-rainbow" id="2FAModal">
 					<div id="2fa-instructions" class="text-left my-6 mx-auto">
 						<img id="qr-code" class="mt-4 mb-6 w-48 h-48 sm:w-64 sm:h-64 mx-auto" src="" alt="QR code for 2fa setup"/> <!-- QR code for 2FA setup -->
 						<h2 class="text-lg font-bold mb-2">2FA Setup Instructions</h2>
@@ -53,7 +53,7 @@
 							<li>Scan the QR code displayed above with your authenticator app.</li>
 						</ol>
 					</div>
-					<button id="close2FAModal" class="sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 text-white mb-2 mt-6 mx-auto">Close</button>
+					<button id="close2FAModal" class="px-3 py-2 sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 mb-2 mt-6 mx-auto">Close</button>
 				</dialog>
 				<img class="w-full max-w-xs h-auto" id="avatarImg" alt="User Avatar"/>
 			</div>
@@ -67,21 +67,35 @@
 			</div>
 			<div class="flex flex-col items-center border-8 animate-rainbow p-6 h-64 sm:h-72 w-full">
 				<h1 class="text-base sm:text-lg font-bold">Friends</h1>
-				<ul id="friendsList"></ul>
+				<ul id="friendsList" class="w-full overflow-y-auto custom-scrollbar max-h-48 mt-2"></ul>
 			</div>
 			<div class="flex flex-col items-center border-8 animate-rainbow p-6 h-48 w-full">
 				<h1 class="text-base sm:text-lg font-bold">Friend Requests</h1>
-				<ul id="requests"></ul>
+				<ul id="requests" class="w-full overflow-y-auto custom-scrollbar max-h-48 mt-2"></ul>
 			</div>
 			<div class="flex flex-col items-center border-8 animate-rainbow p-6 h-48 w-full" >
 				<h1 class="text-base sm:text-lg font-bold">Friend Search</h1>
 				<div>
 					<input type="text" id="search-input" placeholder="Search for username...">
-					<button id="search-button" class="sm:text-base rounded-md border-2 border-blue-500 bg-blue-700 hover:border-purple-500 hover:bg-purple-950 text-white mt-2">Send Friend Request</button>
+					<button id="search-button" class="px-3 py-2 sm:text-base rounded-md border-2 border-blue-500 bg-blue-700 hover:border-purple-500 hover:bg-purple-950 mt-2">Send Friend Request</button>
 				</div>
 			</div>
 		</div>
 		<img class="fixed bottom-4 left-4 w-[20vw] max-w-[120px] h-auto z-40" src="/assets/gifs/hellokitty.gif" alt="Hello kitty gif"/>
 		<img class="fixed bottom-4 right-4 w-[20vw] max-w-[120px] h-auto z-40" src="/assets/gifs/eevee.gif" alt="Eevee gif"/>
+		<div class="flex flex-wrap items-center justify-center gap-2 mt-6 p-2">
+			<img class="h-8 sm:h-10" src="/assets/gifs/best_viewed_with_eyes.gif" alt="Eyes gif"/>
+			<img class="h-8 sm:h-10" src="/assets/gifs/borgor.gif" alt="Borgor gif"/>
+			<img class="h-8 sm:h-10" src="/assets/gifs/bunbrowser.gif" alt="Bun gif"/>
+			<img class="h-8 sm:h-10" src="/assets/gifs/DeadNow.jpg" alt="Dead jpg"/>
+			<img class="h-8 sm:h-10" src="/assets/gifs/death.gif" alt="Death gif"/>
+			<img class="h-8 sm:h-10" src="/assets/gifs/homicide.gif" alt="Homicide gif"/>
+			<img class="h-8 sm:h-10" src="/assets/gifs/internet-roadkill.gif" alt="Roadkill gif"/>
+			<img class="h-8 sm:h-10" src="/assets/gifs/killerfish.gif" alt="Killerfish gif"/>
+			<img class="h-8 sm:h-10" src="/assets/gifs/linux_powered.gif" alt="Linux gif"/>
+			<img class="h-8 sm:h-10" src="/assets/gifs/lovenow.gif" alt="Love gif"/>
+			<img class="h-8 sm:h-10" src="/assets/gifs/koolaid.gif" alt="Koolaid gif"/>
+			<a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"><img class="h-8 sm:h-10" src="/assets/gifs/no.gif" alt="No gif"/></a>
+		</div>
 	</div>
 </div>
