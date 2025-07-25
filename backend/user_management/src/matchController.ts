@@ -176,8 +176,8 @@ export function getTournamentHandler(request: FastifyRequest, reply: FastifyRepl
 
 export async function createTournamentHandler(request: FastifyRequest, reply: FastifyReply) {
 	try {
-		console.log("Handlign tournament create");
-		const parsed = TournamentCreateMessageSchema.safeParse(JSON.parse(request.body as string));
+		console.log('Handling tournament create request:', request.body, "is", typeof request.body);
+		const parsed = TournamentCreateMessageSchema.safeParse(request.body as string);
 		if (!parsed.success) {
 			console.error(parsed.error);
 			reply.status(400).send({ success: false, error: parsed.error });
@@ -189,7 +189,8 @@ export async function createTournamentHandler(request: FastifyRequest, reply: Fa
 		console.log("Tournament creation successful");
 
 		reply.status(201).send(TournamentCreateResponseSchema.parse({ success: true, tournamentId }));
-	} catch (e) {
-		reply.status(500).send({ success: false, error: e });
+	} catch (e: any) {
+		console.error('Something went wrong:', e.message);
+		reply.status(500).send({ success: false, error: e.message });
 	}
 }
