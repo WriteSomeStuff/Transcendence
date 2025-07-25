@@ -94,6 +94,7 @@ export function insertTournamentMatchState(matchStatus: string, tournamentId: nu
 			`);
 			
 			const result = stmt.run(matchStatus, tournamentId);
+			console.log('Inserted successful with id:', result.lastInsertRowid);
 			return Number(result.lastInsertRowid);
 		});
 	} catch (e) {

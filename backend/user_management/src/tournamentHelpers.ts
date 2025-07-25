@@ -57,7 +57,7 @@ export async function createTournamentInfo(tournamentInfo: TournamentCreateMessa
 }
 
 async function createTournamentMatchesInUserService(tournamentId: number, bracket: TournamentBracket): Promise<string> {
-	const url = '/user/match/insert-tournament-match';
+	const url = process.env['USER_SERVICE_URL'] + '/match/insert-tournament-match';
 	for (const match of bracket.matches) {
 		const matchInfo: TournamentMatchCreateMessage = {
 			matchId: match.id,
@@ -70,11 +70,12 @@ async function createTournamentMatchesInUserService(tournamentId: number, bracke
 			headers: {
 				'Content-Type': 'application/json',
 			},
-			body: JSON.stringify({ matchInfo }),
+			body: JSON.stringify(matchInfo),
 		});
 
 		const parsed = TournamentMatchCreateResponseSchema.safeParse(await response.json());
-		if (!parsed.success) { // Invalid response		
+		if (!parsed.success) { // Invalid response	
+			console.error('Response incorredt:', parsed.error);
 			return "Invalid response from tournament creation service"; // TODO handle error
 		}
 
@@ -89,7 +90,7 @@ async function createTournamentMatchesInUserService(tournamentId: number, bracke
 }
 
 async function createTournamentInUserService(name: string, bracket: TournamentBracket): Promise<number | string> {
-	const url = '/user/match/insert-tournament';
+	const url = process.env['USER_SERVICE_URL'] + '/match/insert-tournament';
 	const response = await fetch(url, {
 		method: 'POST',
 		headers: {

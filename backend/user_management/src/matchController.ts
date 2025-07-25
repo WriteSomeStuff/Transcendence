@@ -124,15 +124,16 @@ export async function insertTournamentMatchHandler(request: FastifyRequest, repl
 	try {
 		console.log("[Match controller] received a create match request", request.body);
     	
-		const parsed = TournamentMatchCreateMessageSchema.safeParse(JSON.parse(request.body as string));
+		const parsed = TournamentMatchCreateMessageSchema.safeParse(request.body as string);
    		if (!parsed.success) {
+			console.error("Error parsing tournament match request schema");
       		reply.status(400).send({ success: false, error: parsed.error});
       		return;
     	}
 
 		console.log("[Match controller] Inserting t-match intp db");
 		const dbMatchId = insertTournamentMatchState(parsed.data.matchStatus, parsed.data.tournamentId);
-		console.log("[Match controller] Inserting t-match intp db successful");
+		console.log("[Match controller] Inserting t-match intp db successful, id:", dbMatchId);
 
 		// for (const participant of parsed.data.participants) {
       	// 	console.log("[Match controller] inserting tournament matchparticipant into db");
@@ -143,7 +144,7 @@ export async function insertTournamentMatchHandler(request: FastifyRequest, repl
 
 		reply.status(201).send({
 			success: true,
-			matchId: dbMatchId,
+			dbMatchId: dbMatchId,
 		});
 		return;
 	} catch (e: any) {

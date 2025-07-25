@@ -116,6 +116,7 @@ async function promptTournamentParticipantsAndName(totalPlayers: number): Promis
 	// const tournamentNameDiv = document.getElementById("tournament-name-div");
 
 	if (!modal || !form || !closeModalButton || !playersInputDiv || !tournamentNameInput) {
+		console.error("A HTML element does not exist");
 		return { participants: [], name: "" };
 	}
 
@@ -150,10 +151,12 @@ async function promptTournamentParticipantsAndName(totalPlayers: number): Promis
 					alert("Duplicate users"); // TODO dont close modal but give another chance
 					resolve({ participants: [], name: "" });
 				}
+				console.error(`Adding user ${inputElement.value} into array`);
 				users.add(inputElement.value);
 			});
 			modal.close();
 			playersInputDiv.innerHTML = '';
+			console.log('Participants:', users);
       		resolve({ participants: Array.from(users), name: tournamentNameInput.value });
     	});
 
