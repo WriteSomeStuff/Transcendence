@@ -8,7 +8,11 @@ app.get("/health", async (_, res) => {
 });
 
 app.addHook("onRequest", async (req, res) => {
-  const allowedRoutes = ["/user/profile", "/matchmaking/ws"];
+  const allowedRoutes = [
+  	"/user/profile",
+  	"/matchmaking/ws",
+	"/user/match/create-tournament",
+  ];
   void res;
   if (!allowedRoutes.includes(req.url)) {
     console.log("Not allowed"); // TODO return actual error
