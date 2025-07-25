@@ -57,7 +57,7 @@ export async function createTournamentInfo(tournamentInfo: TournamentCreateMessa
 }
 
 async function createTournamentMatchesInUserService(tournamentId: number, bracket: TournamentBracket): Promise<string> {
-	const url = process.env['USER_SERVICE_URL'] + '/match/insert-tournament-match';
+	const url = '/user/match/insert-tournament-match';
 	for (const match of bracket.matches) {
 		const matchInfo: TournamentMatchCreateMessage = {
 			matchId: match.id,
@@ -89,7 +89,7 @@ async function createTournamentMatchesInUserService(tournamentId: number, bracke
 }
 
 async function createTournamentInUserService(name: string, bracket: TournamentBracket): Promise<number | string> {
-	const url = process.env['USER_SERVICE_URL'] + '/match/insert-tournament';
+	const url = '/user/match/insert-tournament';
 	const response = await fetch(url, {
 		method: 'POST',
 		headers: {
@@ -129,6 +129,7 @@ async function getUserIds(usernames: Username[]): Promise<UserId[]> {
 		if (data.success && typeof data.userId === "number") {
 			UserIds.push(data.userId);
 		} else {
+			console.error('Username invalid:', username);
 			return [];
 		}
 	}
