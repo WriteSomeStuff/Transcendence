@@ -30,16 +30,18 @@ export const GameUpdateMessageSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("gameEnded"),
     matchId: z.number().int(), // TODO actually have the match id from the database
-  })
+  }),
 ]);
 
 export type GameUpdateMessage = z.infer<typeof GameUpdateMessageSchema>;
 
 export const MatchResultSchema = z.object({
-  participants: z.array(z.object({
-    userId: z.number().int(),
-    score: z.number().int(),
-  })),
+  participants: z.array(
+    z.object({
+      userId: z.number().int(),
+      score: z.number().int(),
+    }),
+  ),
   start: z.coerce.date(),
   end: z.coerce.date(),
   matchId: z.number().optional(),

@@ -24,7 +24,10 @@ export const PasswordSchema = z
 
 export type Password = z.infer<typeof PasswordSchema>;
 
-export const EmailSchema = z.string().email("Invalid email format").min(1, "Email is required");
+export const EmailSchema = z
+  .string()
+  .email("Invalid email format")
+  .min(1, "Email is required");
 
 export type Email = z.infer<typeof EmailSchema>;
 

@@ -38,6 +38,9 @@ class GameUser {
   }
 
   public sendMessages(messages: object[]): void {
+    if (this.socket === null) {
+      return;
+    }
     for (const message of messages) {
       this.socket!.send(JSON.stringify(message));
     }
@@ -87,10 +90,12 @@ class Game {
     }
     this.controller.update(delta);
     const broadcastMessages = this.controller.getBroadcastMessages();
+    console.log("broadcastMessages", broadcastMessages);
     for (let i = 0; i < this.users.length; i++) {
       this.users[i]!.sendMessages(broadcastMessages);
       this.users[i]!.sendMessages(this.controller.getPlayerMessages(i));
     }
+    console.log("sent messages");
     if (this.controller.isGameOver()) {
       this.isGameOver = true;
       saveMatchResult(this.controller.getGameResult()).then((matchId) => {

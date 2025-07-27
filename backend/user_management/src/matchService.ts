@@ -83,62 +83,62 @@ export const createMatchParticipant = async (
   }
 };
 
-export const createMatchParticipant = async (userId: number, matchId: number, score: number) => {
-  try {
-    runTransaction((db) => {
-      const stmt = db.prepare(`
-				INSERT INTO match_participant (user_id, match_id, score)
-				VALUES (?, ?, ?)
-				`);
-
-      stmt.run(userId, matchId, score);
-    });
-  } catch (e) {
-    throw e;
-  }
-}
-
 export const getMatchHistory = async (userId: number) => {
   try {
     return runTransaction((db) => {
-      const getHistoryStmt = db.prepare(`
-				SELECT
-					ms.match_end,
-					mp.score AS user_score,
-					GROUP_CONCAT(mp2.user_id) AS opponent_ids,
-					GROUP_CONCAT(mp2.score) AS opponent_scores
-				FROM match_participant mp
-				JOIN match_state ms ON ms.match_id = mp.match_id
-				JOIN match_participant mp2 ON mp2.match_id = mp.match_id AND mp2.user_id != mp.user_id
-				WHERE mp.user_id = ?
-					AND ms.match_status = 'finished'
-				GROUP BY ms.match_id, mp.user_id
-				ORDER BY ms.match_end DESC;
-			`)
-
-      const rows = getHistoryStmt.all(userId) as {
-        match_end: string,
-        user_score: number,
-        opponent_ids: number[],
-        opponent_scores: number[],
+      const getMatchIdsStmt = db.prepare(`
+        SELECT mp.match_id AS match_id, ms.match_end AS match_end FROM match_participant mp
+        JOIN match_state ms ON mp.match_id = ms.match_id
+        WHERE mp.user_id = ?
+        ORDER BY ms.match_end DESC;
+      `);
+      const matchIds = getMatchIdsStmt.all(userId) as {
+        match_id: number;
+        match_end: string;
       }[];
-
-      if (!rows || rows.length === 0) return []
-
-      const history: MatchHistory[] = rows.map(row => ({
-        date: new Date(row.match_end),
-        userScore: row.user_score,
-        opponentInfo: row.opponent_ids.map((id, i) => ({
-          opponentId: id,
-          opponentScore: row.opponent_scores[i]!,
-        })),
-      }));
+      const getUsers = db.prepare(`
+        SELECT
+          mp.user_id AS user_id,
+          mp.score AS score
+        FROM match_participant mp
+        WHERE mp.match_id = ?;
+      `);
+      const history: MatchHistory[] = [];
+      for (const row of matchIds) {
+        const participants = getUsers.all(row.match_id) as {
+          user_id: number;
+          score: number;
+        }[];
+        let userScore: number | null = null;
+        let opponentScores: {
+          opponentId: number;
+          opponentScore: number;
+        }[] = [];
+        for (const p of participants) {
+          if (p.user_id === userId) {
+            userScore = p.score;
+          } else {
+            opponentScores.push({
+              opponentId: p.user_id,
+              opponentScore: p.score,
+            });
+          }
+        }
+        if (userScore === null) {
+          throw new Error("Invalid user score in db");
+        }
+        history.push({
+          date: new Date(row.match_end),
+          userScore: userScore,
+          opponentInfo: opponentScores,
+        });
+      }
       return history;
     });
   } catch (e) {
     throw e;
   }
-}
+};
 
 export function insertTournamentMatchState(
   matchStatus: string,
