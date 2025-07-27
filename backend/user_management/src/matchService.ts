@@ -225,3 +225,22 @@ export function getTournamentMatches() {
     throw e;
   }
 }
+
+export function updateBracketWithMatchIds(
+  tournamentId: number,
+  bracket: TournamentBracket,
+) {
+  try {
+    return runTransaction((db) => {
+      const stmt = db.prepare(`
+				UPDATE tournament
+				SET bracket = ?
+				WHERE tournament_id = ?
+			`);
+      const bracketBuffer = Buffer.from(JSON.stringify(bracket));
+      stmt.run(bracketBuffer, tournamentId);
+    });
+  } catch (e) {
+    throw e;
+  }
+}

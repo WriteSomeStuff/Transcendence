@@ -14,6 +14,8 @@ import {
   TournamentMatchCreateResponseSchema,
 } from "schemas";
 
+import { updateBracketWithMatchIds } from "./matchService.js";
+
 import { v4 as uuidv4 } from "uuid";
 
 // TODO what if something goes wrong, matches and tournament should be deleted from db?
@@ -62,6 +64,9 @@ export async function createTournamentInfo(
   if (createMatchResult.length != 0) {
     throw new Error(`Tournament matches creation failed: ${createMatchResult}`);
   }
+
+  // updating bracket with match ids
+  updateBracketWithMatchIds(tournament.id, tournament.bracket);
 
   console.log(JSON.stringify(tournament, null, 2));
   return tournament.id;

@@ -97,7 +97,6 @@ function fillAvailableRooms(
   for (const room of rooms) {
     if (
       room.permissions.type === "public" ||
-      room.permissions.type === "tournament" ||
       room.permissions.allowedUsers.includes(userId)
     ) {
       docRooms.appendChild(createRoomElement(room, socket, userId));
