@@ -1,8 +1,17 @@
-import type { Room, RoomPermissions, RoomGameData } from "schemas";
+import { z } from "zod";
+
+import type {
+  Room,
+  RoomPermissions,
+  RoomGameData,
+  TournamentMatchRoom,
+} from "schemas";
+import { TournamentMatchRoomSchema } from "schemas";
 import type { UserController } from "./user_controller.js";
 import { v4 as uuidv4 } from "uuid";
 
 const rooms = new Map<string, Room>();
+const tournamentMatchToRoomId = new Map<number, string>();
 
 export function createRoom(
   user: UserController,
@@ -67,4 +76,50 @@ export function getRooms(): Room[] {
 
 export function deleteRoom(roomId: string) {
   rooms.delete(roomId);
+}
+
+function updateTournamentRoom(tournamentRoom: TournamentMatchRoom) {
+  const roomId = tournamentMatchToRoomId.get(
+    tournamentRoom.permissions.matchId,
+  );
+  if (roomId === undefined) {
+    const room: Room = {
+      id: uuidv4(),
+      size: tournamentRoom.size,
+      joinedUsers: [],
+      permissions: tournamentRoom.permissions,
+      gameData: tournamentRoom.gameData,
+    };
+    rooms.set(room.id, room);
+    tournamentMatchToRoomId.set(tournamentRoom.permissions.matchId, room.id);
+    return;
+  }
+  const room = rooms.get(roomId);
+  if (room !== undefined) {
+    room.size = tournamentRoom.size;
+    room.permissions = tournamentRoom.permissions;
+    room.gameData = tournamentRoom.gameData;
+  }
+}
+
+export async function fetchTournamentRooms() {
+  try {
+    const response = await fetch(
+      "http://user_service/match/tournament-matches",
+    ).then((res) => res.json());
+    if (!response.success) {
+      console.error(response.error);
+      return;
+    }
+    const parsed = z.array(TournamentMatchRoomSchema).safeParse(response.rooms);
+    if (!parsed.success) {
+      console.error(parsed.error);
+      return;
+    }
+    parsed.data.forEach((room) => {
+      updateTournamentRoom(room);
+    });
+  } catch (e) {
+    console.error(e);
+  }
 }

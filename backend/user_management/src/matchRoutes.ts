@@ -6,15 +6,12 @@ import {
   getMatchHistoryHandler,
   insertTournamentMatchHandler,
   getTournamentHandler,
+  getTournamentMatchesHandler,
   createTournamentHandler,
 } from "./matchController.js";
 
 const matchRoutes = async (app: FastifyInstance) => {
-  app.post(
-    "/insert-tournament",
-    { preHandler: [app.authenticate] },
-    InsertTournamentHandler,
-  );
+  app.post("/insert-tournament", InsertTournamentHandler);
   app.post("/", { preHandler: [app.authenticate] }, createMatchHandler);
 
   app.get(
@@ -23,20 +20,20 @@ const matchRoutes = async (app: FastifyInstance) => {
     getMatchHistoryHandler,
   );
 
-  app.post(
-	"/insert-tournament-match",
-    { preHandler: [app.authenticate] },
-	insertTournamentMatchHandler,
-  );
+  app.post("/insert-tournament-match", insertTournamentMatchHandler);
 
   app.get(
-	"/tournament",
-	getTournamentHandler,
+    "/tournament",
+    { preHandler: [app.authenticate] },
+    getTournamentHandler,
   );
 
+  app.get("/tournament-matches", getTournamentMatchesHandler);
+
   app.post(
-	"/create-tournament",
-	createTournamentHandler
+    "/create-tournament",
+    { preHandler: [app.authenticate] },
+    createTournamentHandler,
   );
 };
 
