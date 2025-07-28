@@ -51,6 +51,8 @@ export function bindCredentialsForm(formBinding: formBinding, app: App) {
 	  .value;
     const password = (document.getElementById("password") as HTMLInputElement)
       .value;
+    const confirmPassword = (document.getElementById("confirm-password") as HTMLInputElement)
+      ?.value;
     const username = (document.getElementById("username") as HTMLInputElement)
       ?.value;
 
@@ -60,7 +62,7 @@ export function bindCredentialsForm(formBinding: formBinding, app: App) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password, username }),
+        body: JSON.stringify({ email, password, username, confirmPassword }),
       });
 
       const data = (await response.json()) as {
@@ -70,6 +72,10 @@ export function bindCredentialsForm(formBinding: formBinding, app: App) {
       };
 
       if (!response.ok || data.success === false) {
+        if (data.error === "Passwords do not match") {
+          alert("Passwords do not match. Please try again.");
+          return;
+        }
         throw new Error(data.error || `HTTP error; status: ${response.status}`);
       }
 

@@ -15,6 +15,13 @@ export const RegisterSchema = z.object({
 		passwordRegex,
 		"Password must contain at least one letter, one number, and one special character, and no spaces",
     ),
+  confirmPassword: z
+    .string()
+    .min(8, "Confirm Password must be at least 8 characters long")
+    .regex(
+      passwordRegex,
+      "Confirm Password must contain at least one letter, one number, and one special character, and no spaces"
+    ),
   username: z
 	  .string()
 	  .min(1, "Username is required")

@@ -42,7 +42,14 @@ export const registerUserHandler = async (request: FastifyRequest, reply: Fastif
 			});
 			return;
 		}
-		const { email, password, username } = parseResult.data;
+		const { email, password, confirmPassword, username } = parseResult.data;
+		if (password !== confirmPassword) {
+			reply.status(400).send({
+				success: false,
+				error: "Passwords do not match"
+			});
+			return;
+		}
 
 		console.log(`[Auth Controller] Registering user '${email}'`);
 		const userId = await register(email, password);
@@ -283,7 +290,15 @@ export const logoutUserHandler = async (request: FastifyRequest, reply: FastifyR
 
 export const updatePasswordHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const { newPassword, userId } = request.body as { newPassword: string, userId: number };
+		const { newPassword, confirmPassword, userId } = request.body as { newPassword: string, confirmPassword: string, userId: number };
+
+		if (newPassword !== confirmPassword) {
+			reply.status(400).send({
+				success: false,
+				error: "Passwords do not match"
+			});
+			return;
+		}
 
 		console.log(`[Auth Controller] Updating password for user ${userId}`);
 		await updatePassword(newPassword, userId);
