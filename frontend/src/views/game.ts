@@ -15,6 +15,38 @@ function sendUpdatePongInput(socket: WebSocket, input: PongPlayerInput): void {
   socket.send(JSON.stringify(message));
 }
 
+function setupMobileControls(socket: WebSocket, input: PongPlayerInput) {
+  const controls = document.getElementById("mobile-controls");
+  if (controls) controls.hidden = false;
+
+  const arrowUp = document.getElementById("arrow-up");
+  const arrowDown = document.getElementById("arrow-down");
+
+  arrowUp?.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    input.upPressed = true;
+    sendUpdatePongInput(socket, input);
+  });
+
+  arrowUp?.addEventListener("touchend", (e) => {
+    e.preventDefault();
+    input.upPressed = false;
+    sendUpdatePongInput(socket, input);
+  });
+
+  arrowDown?.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    input.downPressed = true;
+    sendUpdatePongInput(socket, input);
+  });
+
+  arrowDown?.addEventListener("touchend", (e) => {
+    e.preventDefault();
+    input.downPressed = false;
+    sendUpdatePongInput(socket, input);
+  });
+}
+
 function initCourt(canvas: HTMLCanvasElement, socket: WebSocket, court: Court) {
   const ctx = canvas.getContext("2d");
   if (!ctx) {
@@ -58,6 +90,10 @@ function initCourt(canvas: HTMLCanvasElement, socket: WebSocket, court: Court) {
     }
   });
   observer.observe(document.body, { childList: true, subtree: true });
+
+  if (/Mobile|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+    setupMobileControls(socket, input);
+  }
 }
 
 function updateCourt(canvas: HTMLCanvasElement, court: Court) {
@@ -92,6 +128,15 @@ export async function renderGameView(
   app.appContainer.innerHTML = await fetch("/views/pong.html").then((res) =>
     res.text(),
   );
+
+  const isMobile = /Mobile|Android|iPhone|iPad/i.test(navigator.userAgent);
+  if (isMobile) {
+	const controls = document.getElementById("mobile-controls");
+	if (controls) {
+	  controls.hidden = false;
+	}
+  }
+
   const canvas = document.getElementById("myCanvas");
   if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
     console.error("Can't find a game canvas");

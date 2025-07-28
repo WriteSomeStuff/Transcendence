@@ -1,4 +1,12 @@
 <div class="m-0 p-4 font-comic overflow-hidden box-border h-screen w-screen bg-stars bg-10% text-pink-200 flex flex-col justify-between">
+  <div id="mobile-controls" class="fixed bottom-6 left-6 flex flex-col gap-4 z-50" hidden>
+    <button id="arrow-up" class="bg-white bg-opacity-40 hover:bg-opacity-70 p-4 rounded-full shadow-lg">
+      ⬆️
+    </button>
+    <button id="arrow-down" class="bg-white bg-opacity-40 hover:bg-opacity-70 p-4 rounded-full shadow-lg">
+      ⬇️
+    </button>
+  </div>
   <div class="flex items-center justify-center flex-grow">
     <canvas id="myCanvas" class="bg-black border-8 animate-rainbow w-[90vw] h-[80vh]"></canvas>
   </div>
