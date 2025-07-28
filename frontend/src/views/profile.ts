@@ -28,6 +28,13 @@ function bindAvatarForm(app: App) {
     const file = input.files[0];
     if (!file) return;
 
+	const maxSize = 1024 * 1024; // 1 MB
+	if (file.size > maxSize) {
+	  alert("The file is too big. Maximum allowed size is 1 MB.");
+	  input.value = '';
+	  return;
+	}
+
     const formData = new FormData();
     formData.append("avatar", file);
 
@@ -44,9 +51,8 @@ function bindAvatarForm(app: App) {
     if (!response.ok || data.success === false) {
       console.error("[formHandlers] Uploading new avatar failed");
       alert(data.error || `HTTP error; status: ${response.status}`);
+	  input.value = '';
 	  return;
-      // further handling
-      // throw new Error(data.error || `HTTP error; status: ${response.status}`);
     }
 
     console.log("[formHandlers] Uploading new avatar successful");
@@ -59,7 +65,7 @@ function bindAvatarForm(app: App) {
 function bindUserInfoUpdateForm(app: App, infoType: string) {
   if (infoType != "username" && infoType != "password") {
     alert("Incorrect usage of bindUserInfoUpdateForm function");
-    // throw new Error("Incorrect usage of bindUserInfoUpdateForm function");
+	return;	
   }
 
   const form = document.getElementById(`${infoType}Form`) as HTMLFormElement;
