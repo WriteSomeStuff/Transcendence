@@ -8,16 +8,16 @@
         <div class="flex justify-center items-center py-6">
             <img src="https://i.picasion.com/gl/92/kjzM.gif" alt="header gif" class="w-full max-w-[750px] h-auto"/>
         </div>
-        <div class="flex flex-col sm:flex-row sm:flex-wrap justify-center items-center gap-4 bg-purple-700 p-4">
-            <button class="px-3 py-2 text-sm sm:px-6 sm:py-4 sm:text-base rounded-md hover:bg-purple-950 w-full sm:w-auto" page="profile">Profile</button>
-            <button class="px-3 py-2 text-sm sm:px-6 sm:py-4 sm:text-base rounded-md hover:bg-purple-950 w-full sm:w-auto" id="logout">Log out</button>
+        <div class="flex flex-col sm:flex-row sm:flex-wrap justify-center items-center gap-4 bg-purple-700 p-4 z-20">
+            <button class="cursor-pointer px-3 py-2 text-sm sm:px-6 sm:py-4 sm:text-base rounded-md hover:bg-purple-950 w-full sm:w-auto" page="profile">Profile</button>
+            <button class="cursor-pointer px-3 py-2 text-sm sm:px-6 sm:py-4 sm:text-base rounded-md hover:bg-purple-950 w-full sm:w-auto" id="logout">Log out</button>
         </div>
-        <div class="flex flex-col justify-center items-center gap-12 p-6 sm:p-10 space-y-6">
+        <div class="flex flex-col justify-center items-center gap-12 p-6 sm:p-10 space-y-6 z-20">
             <div class="flex flex-col sm:flex-row justify-center gap-4 mt-8 w-full max-w-2xl">
-                <button class="flex-1 px-6 py-3 border-2 border-blue-500 bg-blue-700 hover:border-purple-500 hover:bg-purple-950 rounded-md text-lg" id="createRoom">
+                <button class="cursor-pointer flex-1 px-6 py-3 border-2 border-blue-500 bg-blue-700 hover:border-purple-500 hover:bg-purple-950 rounded-md text-lg" id="createRoom">
                     Create Match
                 </button>
-                <button class="flex-1 px-6 py-3 border-2 border-blue-500 bg-blue-700 hover:border-purple-500 hover:bg-purple-950 rounded-md text-lg" id="createTournament">
+                <button class="cursor-pointer flex-1 px-6 py-3 border-2 border-blue-500 bg-blue-700 hover:border-purple-500 hover:bg-purple-950 rounded-md text-lg" id="createTournament">
                     Create Tournament
                 </button>
                 <dialog class="modal animate-rainbow" id="roomSettingsModal">
@@ -27,7 +27,7 @@
                             <input type="number" name="gameSize" value="2" min="2" max="8" required
                                    class="sm:text-base rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500">
                         </label>
-                        <button type="submit" class="px-3 py-2 sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 mt-2">Submit</button>
+                        <button type="submit" class="cursor-pointer px-3 py-2 sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 mt-2">Submit</button>
                     </form>
                 </dialog>
 				<dialog class="modal m-2" id="total-players-modal">
