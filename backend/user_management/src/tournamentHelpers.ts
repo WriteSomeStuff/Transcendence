@@ -96,7 +96,7 @@ async function createTournamentMatchesInUserService(
     if (!parsed.success) {
       // Invalid response
       console.error(parsed.error);
-      return "Invalid response from tournament creation service"; // TODO handle error
+      return "Invalid response from tournament creation service";
     }
 
     const data = parsed.data;

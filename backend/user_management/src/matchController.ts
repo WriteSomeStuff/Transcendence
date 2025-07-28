@@ -169,13 +169,6 @@ export async function insertTournamentMatchHandler(
     );
     console.log("[Match controller] Inserting t-match into db successful");
 
-    // for (const participant of parsed.data.participants) {
-    // 	console.log("[Match controller] inserting tournament match participant into db");
-    // 	  // TODO rethink db structure, participant can still be null during the tournament, or add later round matches later?
-    // 	insertTournamentMatchParticipant(participant, dbMatchId);
-    // 	console.log("[Match controller] Inserting match_participant into db successful");
-    // }
-
     reply.status(201).send({
       success: true,
       dbMatchId: dbMatchId,
