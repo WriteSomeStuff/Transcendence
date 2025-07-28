@@ -46,6 +46,7 @@ function createRoomElement(room: Room, socket: WebSocket, userId: number): HTMLE
   infoDiv.appendChild(playersAmount);
   roomDiv.appendChild(infoDiv);
   const button = document.createElement("button");
+  button.classList.add("cursor-pointer");
   button.classList.add("px-4");
   button.classList.add("py-2");
   button.classList.add("border-2");
