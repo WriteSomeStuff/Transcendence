@@ -185,6 +185,7 @@ async function promptTournamentParticipantsAndName(
     !playersInputDiv ||
     !tournamentNameDiv
   ) {
+	console.error("HTML element error");
     return { participants: [], name: "" };
   }
 
@@ -219,6 +220,7 @@ async function promptTournamentParticipantsAndName(
 		  tournamentNameDiv.innerHTML = "";
           playersInputDiv.innerHTML = "";
           alert("Duplicate users"); // TODO dont close modal but give another chance
+		  console.error("Duplicate users");
           resolve({ participants: [], name: "" });
         }
         users.add(inputElement.value);
@@ -236,6 +238,7 @@ async function promptTournamentParticipantsAndName(
       modal.close();
       playersInputDiv.innerHTML = "";
 	  tournamentNameDiv.innerHTML = "";
+	  console.log("Closing tournament modal");
       resolve({ participants: [], name: "" });
     });
   });
