@@ -100,8 +100,8 @@ export const createMatchHandler = async (
     console.log(`[Match controller] Inserting match_state into db successful`);
 
     let winner = {
-      userId: 0,
-      score: 0,
+      userId: -1,
+      score: Number.NEGATIVE_INFINITY,
     };
     for (const participant of parsed.data.participants) {
       console.log(`[Match controller] inserting match_participant into db`);
@@ -118,8 +118,7 @@ export const createMatchHandler = async (
 				winner.score = participant.score;
 	  	}
     }
-    // TODO proceed tournament
-    if (parsed.data.matchId !== undefined) { // 1 match is part of tournament
+    if (parsed.data.matchId !== undefined) {
 	 		await updateMatchStateFinished(
 				parsed.data.start.toISOString(),
         parsed.data.end.toISOString(),

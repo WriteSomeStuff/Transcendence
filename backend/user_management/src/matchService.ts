@@ -75,7 +75,8 @@ export const updateMatchStateFinished = async (
 				UPDATE match_state
 				SET 
 					match_date = ?,
-					match_end = ?
+					match_end = ?,
+				  match_status = 'finished'
 				WHERE match_id = ?
 			`);
 
@@ -228,9 +229,9 @@ export function getTournamentId(matchId: number): number {
 				WHERE match_id = ?
 			`);
 
-			const result = stmt.get(matchId) as number;
+			const result = stmt.get(matchId) as { tournament_id: number };
 			if (!result) throw new Error("Tournament not found");
-			return result;
+			return result.tournament_id;
 		});
 	} catch (e) {
 		throw e;

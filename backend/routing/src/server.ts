@@ -11,7 +11,6 @@ app.addHook("onRequest", async (req, res) => {
   const allowedRoutes = [
     "/user/username",
     "/user/avatar",
-    "/user/status",
     "/user/profile",
     "/user/get-userid",
     "/user/get-username",
@@ -23,11 +22,13 @@ app.addHook("onRequest", async (req, res) => {
     "/user/friends/remove",
     "/user/match/history",
     "/user/match/tournament",
+    "/user/match/create-tournament",
     "/matchmaking/ws",
     "/game/ws",
+    "/game/users",
   ];
-  void res;
-  if (!allowedRoutes.includes(req.url)) {
+  const route = req.url.split("?")[0]!;
+  if (!allowedRoutes.includes(route)) {
     res.status(401).send({ error: "Not allowed route" });
   }
   console.log(req.url);
