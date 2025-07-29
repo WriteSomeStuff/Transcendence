@@ -94,7 +94,12 @@ export function bindCredentialsForm(formBinding: formBinding, app: App) {
       }
     } catch (e) {
       console.error(`${formBinding.serviceName} failed: ${e}`);
-      alert(`${formBinding.serviceName} failed: ${e}`);
+      if (e instanceof Error && e.message.includes("UNIQUE constraint failed")) {
+        alert("Email already exists.");
+      }
+      else {
+        alert(`${formBinding.serviceName} failed: ${e}`);
+      }
       app.resetView();
     }
   });
