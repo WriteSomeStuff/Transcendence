@@ -33,6 +33,7 @@ export type RoomGameData = z.infer<typeof RoomGameDataSchema>;
 export const RoomSchema = z.object({
   id: z.string(),
   size: z.number().int().min(2),
+  maxScore: z.number().int().min(1).max(100),
   joinedUsers: z.array(UserIdSchema),
   permissions: RoomPermissionsSchema,
   gameData: RoomGameDataSchema,
@@ -89,6 +90,7 @@ export const MatchmakingMessageSchema = z.discriminatedUnion("action", [
   z.object({
     action: z.literal("createRoom"),
     size: z.number().int().min(1),
+    maxScore: z.number().int().min(1).max(100),
     permissions: RoomPermissionsSchema.refine((p) => p.type !== "tournament"),
     gameData: RoomGameDataSchema,
   }),

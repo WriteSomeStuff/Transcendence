@@ -103,6 +103,7 @@ export class UserController {
         this.room = createRoom(
           this,
           message.size,
+          message.maxScore,
           message.permissions,
           message.gameData,
         );

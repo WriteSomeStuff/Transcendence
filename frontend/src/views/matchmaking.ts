@@ -5,7 +5,7 @@ import { bindNavbar } from "./utils.js";
 import type { App } from "../app.js";
 import { logOut } from "./profile.js";
 
-import { RoomSchema } from "schemas";
+import {RoomGameData, RoomSchema} from "schemas";
 import type {
   MatchmakingMessage,
   Room,
@@ -105,34 +105,79 @@ function fillAvailableRooms(
   }
 }
 
+async function promptPongSettings(pongSettingsModal: HTMLDialogElement, pongSettingsForm: HTMLFormElement): Promise<RoomGameData | null> {
+  pongSettingsModal.showModal();
+  const closeModalButton = document.getElementById(
+    "closePongSettings",
+  ) as HTMLButtonElement;
+  return new Promise((resolve) => {
+    pongSettingsForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const formData = new FormData(pongSettingsForm);
+      pongSettingsModal.close();
+      resolve({
+        game: "pong",
+        options: {
+          paddleRatio: Number(formData.get("paddleRatio") as string),
+          gameSpeed: Number(formData.get("gameSpeed") as string),
+        },
+      });
+    });
+    closeModalButton.addEventListener("click", () => {
+      pongSettingsModal.close();
+      resolve(null);
+    })
+  });
+}
+
+async function getGameData(
+  gameKind: string,
+  pongSettingsModal: HTMLDialogElement,
+  pongSettingsForm: HTMLFormElement,
+): Promise<RoomGameData | null> {
+  switch (gameKind) {
+    case "pong":
+      return promptPongSettings(pongSettingsModal, pongSettingsForm);
+  }
+  return null;
+}
+
 function bindRoomCreation(
   createButton: HTMLButtonElement,
   roomSettingsModal: HTMLDialogElement,
   gameSettingsForm: HTMLFormElement,
+  pongSettingsModal: HTMLDialogElement,
+  pongSettingsForm: HTMLFormElement,
   socket: WebSocket,
 ) {
   createButton.addEventListener("click", () => {
     roomSettingsModal.showModal();
   });
-  // TODO add close
-  gameSettingsForm.addEventListener("submit", (event) => {
+  const closeModalButton = document.getElementById(
+    "closeGameSettings",
+  ) as HTMLButtonElement;
+  gameSettingsForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     const formData = new FormData(gameSettingsForm);
+    const gameKind = formData.get("game") as string;
+    const gameData = await getGameData(gameKind, pongSettingsModal, pongSettingsForm);
+    if (gameData === null) {
+      roomSettingsModal.close();
+      return;
+    }
     const newRoomMessage: MatchmakingMessage = {
       action: "createRoom",
       size: Number(formData.get("gameSize") as string),
+      maxScore: Number(formData.get("maxScore") as string),
       permissions: {
         type: "public",
       },
-      gameData: {
-        game: "pong",
-        options: {
-          paddleRatio: 0.4,
-          gameSpeed: 1,
-        },
-      },
+      gameData: gameData,
     };
     socket.send(JSON.stringify(newRoomMessage));
+    roomSettingsModal.close();
+  });
+  closeModalButton.addEventListener("click", () => {
     roomSettingsModal.close();
   });
 }
@@ -334,6 +379,18 @@ export async function renderMatchmakingView(
     app.selectView({ view: "profile", params: {} });
     return;
   }
+  const pongSettingsModal = document.getElementById("pongSettingsModal");
+  if (!pongSettingsModal || !(pongSettingsModal instanceof HTMLDialogElement)) {
+    console.error("Couldn't find a pongSettingsModal!");
+    app.selectView({ view: "profile", params: {} });
+    return;
+  }
+  const pongSettingsForm = document.getElementById("pongSettingsForm");
+  if (!pongSettingsForm || !(pongSettingsForm instanceof HTMLFormElement)) {
+    console.error("Couldn't find a pongSettingsForm!");
+    app.selectView({ view: "profile", params: {} });
+    return;
+  }
   const createTournamentButton = document.getElementById(
     "createTournament",
   ) as HTMLButtonElement;
@@ -359,7 +416,7 @@ export async function renderMatchmakingView(
     }
   });
   observer.observe(document.body, { childList: true, subtree: true });
-  bindRoomCreation(createButton, roomSettingsModal, gameSettingsForm, socket);
+  bindRoomCreation(createButton, roomSettingsModal, gameSettingsForm, pongSettingsModal, pongSettingsForm, socket);
   createTournamentButton.addEventListener("click", async () => {
 	console.log("Create Tournament button clicked, handling now");
     await handleCreateTournament();

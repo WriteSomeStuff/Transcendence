@@ -16,12 +16,14 @@ const tournamentMatchToRoomId = new Map<number, string>();
 export function createRoom(
   user: UserController,
   size: number,
+  maxScore: number,
   permissions: RoomPermissions,
   gameData: RoomGameData,
 ) {
   const room: Room = {
     id: uuidv4(),
     size: size,
+    maxScore: maxScore,
     joinedUsers: [],
     permissions: permissions,
     gameData: gameData,
@@ -86,6 +88,7 @@ function updateTournamentRoom(tournamentRoom: TournamentMatchRoom) {
     const room: Room = {
       id: uuidv4(),
       size: tournamentRoom.size,
+      maxScore: 10,
       joinedUsers: [],
       permissions: tournamentRoom.permissions,
       gameData: tournamentRoom.gameData,
