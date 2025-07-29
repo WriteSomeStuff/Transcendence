@@ -62,29 +62,6 @@ export const updateUsername = async (userId: number, newUsername: string) => {
 	}
 };
 
-export const updatePassword = async (userId: number, newPassword: string) => {
-	try {
-		const url = process.env["AUTH_SERVICE_URL"] + '/password';
-		const response = await fetch(url, {
-			method: 'PUT',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				newPassword,
-				userId
-			})
-		});
-	
-		if (!response.ok) {
-			throw new Error(`${response.status} ${response.statusText}`);
-		}
-	} catch (e) {
-		throw e;
-	}
-	
-}
-
 export const updateStatus = async (userId: number, status: string) => {
 	try {
 		runTransaction((db) => {
