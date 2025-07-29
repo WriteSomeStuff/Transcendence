@@ -23,7 +23,9 @@ export const vec2 = {
     return a.x * b.x + a.y * b.y;
   },
   reflect: (a: Vector2, b: Vector2): Vector2 => {
-    return vec2.subtract(a, vec2.scale(b, vec2.dot(a, b) * 2));
+    const perfectReflection = vec2.normalize(vec2.subtract(a, vec2.scale(b, vec2.dot(a, b) * 2)));
+
+    return vec2.scale(vec2.normalize(vec2.add(perfectReflection, vec2.scale(vec2.subtract(b, perfectReflection), Math.random() * Math.random() * 0.25))), vec2.length(a));
   },
   scale: (a: Vector2, k: number): Vector2 => {
     return {
