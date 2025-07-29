@@ -77,7 +77,7 @@ export type TournamentBracket = z.infer<typeof TournamentBracketSchema>;
 export const TournamentSchema = z.object({
   id: z.number(),
   name: z.string(),
-  size: z.enum(["4", "8", "16"]).transform(Number),
+  size: z.number().refine((n) => [4, 8, 16].includes(n)),
   joinedUsers: z.array(UserIdSchema),
   gameData: RoomGameDataSchema,
   bracket: z.union([TournamentBracketSchema, z.null()]),
@@ -105,11 +105,11 @@ export const MatchmakingMessageSchema = z.discriminatedUnion("action", [
 export type MatchmakingMessage = z.infer<typeof MatchmakingMessageSchema>;
 
 export const TournamentCreateMessageSchema = z.object({
-  name: z.string(),
-  size: z.number(),
-  participants: z.array(UsernameSchema),
-  gameData: RoomGameDataSchema,
-});
+	name: z.string(),
+	size: z.number().refine((n) => [4, 8, 16].includes(n)),
+	participants: z.array(UsernameSchema),
+	gameData: RoomGameDataSchema,
+})
 
 export type TournamentCreateMessage = z.infer<
   typeof TournamentCreateMessageSchema

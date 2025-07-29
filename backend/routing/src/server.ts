@@ -9,42 +9,26 @@ app.get("/health", async (_, res) => {
 
 app.addHook("onRequest", async (req, res) => {
   const allowedRoutes = [
-    "/auth/logout",
-    "/auth/register",
-    "/auth/login",
-    "/auth/oauth/login",
-    "/auth/oauth/callback",
-    "/auth/password",
-    "/auth/verify2fa",
-    "/auth/enable2fa",
-    "/auth/disable2fa",
-    "/users/new-user",
-    "/users/username",
-    "/users/password",
-    "/users/avatar",
-    "/users/status",
-    "/users/profile",
-    "/users/get-userid",
-    "/users/get-username",
-    "/users/friends/request",
-    "/users/friends/accept",
-    "/users/friends/reject",
-    "/users/friends/requests",
-    "/users/friends/list",
-    "/users/friends/remove",
-    "/users/match",
-    "/users/match/insert-tournament",
-    "/users/match/insert-tournament-match",
-    "/users/match/history",
-    "/users/match/tournament",
-    "/users/match/tournament-matches",
-    "/users/match/create-tournament",
+    "/user/username",
+    "/user/avatar",
+    "/user/status",
+    "/user/profile",
+    "/user/get-userid",
+    "/user/get-username",
+    "/user/friends/request",
+    "/user/friends/accept",
+    "/user/friends/reject",
+    "/user/friends/requests",
+    "/user/friends/list",
+    "/user/friends/remove",
+    "/user/match/history",
+    "/user/match/tournament",
     "/matchmaking/ws",
     "/game/ws",
   ];
   void res;
   if (!allowedRoutes.includes(req.url)) {
-    console.log("Not allowed"); // TODO return actual error
+    res.status(401).send({ error: "Not allowed route" });
   }
   console.log(req.url);
 });

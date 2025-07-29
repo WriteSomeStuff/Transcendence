@@ -176,19 +176,17 @@ async function promptTournamentParticipantsAndName(
   const closeModalButton = document.getElementById(
     "close-player-input-modal",
   ) as HTMLButtonElement;
-  const tournamentNameInput = document.getElementById(
-    "tournament-name",
-  ) as HTMLInputElement;
   const playersInputDiv = document.getElementById("player-input-div");
-  // const tournamentNameDiv = document.getElementById("tournament-name-div");
+  const tournamentNameDiv = document.getElementById("tournament-name-div");
 
   if (
     !modal ||
     !form ||
     !closeModalButton ||
     !playersInputDiv ||
-    !tournamentNameInput
+    !tournamentNameDiv
   ) {
+	console.error("HTML element error");
     return { participants: [], name: "" };
   }
 
@@ -203,13 +201,13 @@ async function promptTournamentParticipantsAndName(
     playersInputDiv.appendChild(inputElement);
   }
 
-  // const inputElement: HTMLInputElement = document.createElement("input");
-  // inputElement.type = "text";
-  // inputElement.placeholder = "Enter a tournament name";
-  // inputElement.required = true;
-  // inputElement.className = "sm:text-base rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500";
-  // tournamentNameDiv.appendChild(inputElement);
-  // const tournamentNameInput = tournamentNameDiv.querySelector("input") as HTMLInputElement;
+	const inputElement: HTMLInputElement = document.createElement("input");
+	inputElement.type = "text";
+	inputElement.placeholder = "Enter a tournament name";
+	inputElement.required = true;
+	inputElement.className = "sm:text-base rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500";
+	tournamentNameDiv.appendChild(inputElement);
+	const tournamentNameInput = tournamentNameDiv.querySelector("input") as HTMLInputElement;
 
   modal.showModal();
 
@@ -220,13 +218,16 @@ async function promptTournamentParticipantsAndName(
       const inputElements = playersInputDiv.querySelectorAll("input");
       inputElements.forEach((inputElement) => {
         if (users.has(inputElement.value)) {
+		  tournamentNameDiv.innerHTML = "";
           playersInputDiv.innerHTML = "";
           alert("Duplicate users"); // TODO dont close modal but give another chance
+		  console.error("Duplicate users");
           resolve({ participants: [], name: "" });
         }
         users.add(inputElement.value);
       });
       modal.close();
+	  tournamentNameDiv.innerHTML = "";
       playersInputDiv.innerHTML = "";
       resolve({
         participants: Array.from(users),
@@ -237,51 +238,62 @@ async function promptTournamentParticipantsAndName(
     closeModalButton.addEventListener("click", () => {
       modal.close();
       playersInputDiv.innerHTML = "";
+	  tournamentNameDiv.innerHTML = "";
+	  console.log("Closing tournament modal");
       resolve({ participants: [], name: "" });
     });
   });
-  // TODO flush the tournament name input
 }
 
 async function handleCreateTournament() {
-  const totalPlayers = await promptTotalPlayers();
-  if (totalPlayers === 0) return;
-
-  const tournamentInfo: {
-    participants: Username[];
-    name: string;
-  } = await promptTournamentParticipantsAndName(totalPlayers);
-
-  if (tournamentInfo.participants.length === 0) return;
-  console.log("Sending message:", tournamentInfo);
-
-  const newTournamentMessage: TournamentCreateMessage = {
-    name: tournamentInfo.name,
-    size: totalPlayers,
-    participants: tournamentInfo.participants,
-    gameData: {
-      game: "pong",
-      options: {
-        paddleRatio: 0.4,
-        gameSpeed: 1,
-      },
-    },
-  };
+	console.log("[handleCreateTournament] Start");
+	const totalPlayers = await promptTotalPlayers();
+	console.log("[handleCreateTournament] totalPlayers selected:", totalPlayers);
+	if (totalPlayers === 0) {
+		console.log("[handleCreateTournament] User cancelled totalPlayers prompt");
+		return;
+	}
+	
+	const tournamentInfo: {
+		participants: Username[];
+		name: string;
+	} = await promptTournamentParticipantsAndName(totalPlayers);
+	console.log("[handleCreateTournament] tournamentInfo:", tournamentInfo);
+	
+	if (tournamentInfo.participants.length === 0) {
+		console.log("[handleCreateTournament] No participants provided, aborting");
+		return;
+	}
+	
+	const newTournamentMessage: TournamentCreateMessage = {
+		name: tournamentInfo.name,
+		size: totalPlayers,
+		participants: tournamentInfo.participants,
+		gameData: {
+			game: "pong",
+			options: {
+				paddleRatio: 0.4,
+				gameSpeed: 1,
+			},
+		},
+	};
 
   const url = "/api/user/match/create-tournament";
-  console.log("url:", url);
+  console.log("[handleCreateTournament] Sending POST to", url, "with body:", newTournamentMessage);
   const response = await fetch(url, {
     method: "POST",
     body: JSON.stringify(newTournamentMessage),
   });
 
   const data = await response.json();
+	console.log("[handleCreateTournament] Response:", data);
   if (!response.ok || !data.success) {
-    console.error("Failed to create tournament:", data);
+    console.error("[handleCreateTournament] Failed to create tournament:", data);
     alert(`Failed to create tournament: ${data.error || "Unknown error."}`);
     return;
   }
 
+	console.log("[handleCreateTournament] Tournament created successfully, ID:", data.tournamentId);
   alert(`Tournament created successfully! Tournament ID: ${data.tournamentId}`);
 }
 
@@ -349,6 +361,7 @@ export async function renderMatchmakingView(
   observer.observe(document.body, { childList: true, subtree: true });
   bindRoomCreation(createButton, roomSettingsModal, gameSettingsForm, socket);
   createTournamentButton.addEventListener("click", async () => {
+	console.log("Create Tournament button clicked, handling now");
     await handleCreateTournament();
   });
   socket.onmessage = (e: MessageEvent) => {
