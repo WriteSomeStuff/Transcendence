@@ -21,32 +21,33 @@
 					<img class="w-full h-full object-contain" src="./assets/gifs/pencil.gif" alt="Edit username or password"/>
 				</button>
 				<dialog class="modal animate-rainbow" id="modal">
-					<h2>Update username, password or avatar</h2>
-					<form id="avatarForm" enctype="multipart/form-data">
-		 				<input type="file" id="avatarInput" accept="image/*" name="avatar" class="cursor-pointer w-full text-sm sm:text-base rounded-md border-2 border-gray-300">
-						<button type="submit" class="cursor-pointer w-full sm:w-auto px-3 py-2 text-sm sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 mt-2">Upload</button>
+					<button id="closeUserInfoEditor" class="cursor-pointer fixed top-2 right-2" style="display: inline-block;">&#xD7;</button>
+					<h2 class ="text-lg font-bold mb-2">Change avatar, username or password</h2>
+					<form id="avatarForm" enctype="multipart/form-data" class ="flex flex-col">
+						<label>Change avatar
+		 					<input type="file" id="avatarInput" accept="image/*" name="avatar" class="cursor-pointer w-full text-sm sm:text-base rounded-md border-2 px-1 border-gray-300">
+						<button type="submit" class="mb-3 w-full cursor-pointer px-3 py-2 text-sm sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 mt-2">Upload</button>
 					</form>
-					<form id="usernameForm">
+					<form id="usernameForm" class ="flex flex-col">
 						<label>New username
 							<input type="text" id="newUsername"
 								placeholder="Enter new username" required
-								class="sm:text-base rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500"></label>
-						<button type="submit" class="cursor-pointer px-3 py-2 sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 mt-2">Submit</button>
+								class="sm:text-base rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 px-1"></label>
+						<button type="submit" class="mb-3 w-auto cursor-pointer px-3 py-2 sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 mt-2">Submit</button>
 					</form>
-					<form id="passwordForm">
+					<form id="passwordForm" class ="flex flex-col">
 						<label>New password
 							<input type="password" id="newPassword"
 								placeholder="Enter new password" required
-								class="sm:text-base rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500"></label>
+								class="sm:text-base rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 px-1"></label>
 						<label>Confirm password
 							<input type="password" id="confirmPassword"
 								placeholder="Confirm new password" required
-								class="sm:text-base rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500"></label>
-						<button type="submit" class="cursor-pointer px-3 py-2 sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 mt-2">Submit</button>
+								class="md:mt-1  sm:text-base rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 px-1"></label>
+						<button type="submit" class="mb-3 w-auto cursor-pointer px-3 py-2 sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 mt-2">Submit</button>
 					</form> 
-					<button id="enable-2fa" class="cursor-pointer px-3 py-2 sm:text-base rounded-md border-2 border-emerald-500 bg-emerald-700 hover:border-purple-500 hover:bg-purple-950 mt-2">Enable 2fa</button>
-					<button id="disable-2fa" class="cursor-pointer px-3 py-2 sm:text-base rounded-md border-2 border-red-500 bg-red-700 hover:border-purple-500 hover:bg-purple-950 mt-2">Disable 2fa</button>
-					<button id="closeUserInfoEditor" class="cursor-pointer px-3 py-2 sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 mb-2 mt-6 mx-auto">Close</button>
+					<button id="enable-2fa" class="cursor-pointer px-3 py-2 sm:text-base rounded-md border-2 border-emerald-500 bg-emerald-700 hover:border-purple-500 hover:bg-purple-950 mt-2">Enable 2FA</button>
+					<button id="disable-2fa" class="cursor-pointer px-3 py-2 sm:text-base rounded-md border-2 border-red-500 bg-red-700 hover:border-purple-500 hover:bg-purple-950 mt-2">Disable 2FA</button>
 				</dialog>
 				<dialog class="modal animate-rainbow" id="2FAModal">
 					<div id="2fa-instructions" class="text-left my-6 mx-auto">
