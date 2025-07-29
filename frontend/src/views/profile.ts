@@ -63,9 +63,9 @@ function bindAvatarForm(app: App) {
 }
 
 function bindUserInfoUpdateForm(app: App, infoType: string) {
-  if (infoType != "username" && infoType != "password") {
+  if (infoType !== "username" && infoType !== "password") {
     alert("Incorrect usage of bindUserInfoUpdateForm function");
-	return;	
+  return;	
   }
 
   const form = document.getElementById(`${infoType}Form`) as HTMLFormElement;
@@ -96,7 +96,7 @@ function bindUserInfoUpdateForm(app: App, infoType: string) {
 
     const newValue = input.value;
 
-    console.log("new username:", newValue);
+    console.log(`New value for ${infoType}:`, newValue);
 
     const response = await fetch(`/api/user/${infoType}`, {
       method: "PUT",

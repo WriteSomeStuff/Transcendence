@@ -290,15 +290,8 @@ export const logoutUserHandler = async (request: FastifyRequest, reply: FastifyR
 
 export const updatePasswordHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 	try {
-		const { newPassword, confirmPassword, userId } = request.body as { newPassword: string, confirmPassword: string, userId: number };
+		const { newPassword, userId } = request.body as { newPassword: string, userId: number };
 
-		if (newPassword !== confirmPassword) {
-			reply.status(400).send({
-				success: false,
-				error: "Passwords do not match"
-			});
-			return;
-		}
 
 		console.log(`[Auth Controller] Updating password for user ${userId}`);
 		await updatePassword(newPassword, userId);
