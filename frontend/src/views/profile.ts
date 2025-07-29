@@ -28,6 +28,13 @@ function bindAvatarForm(app: App) {
     const file = input.files[0];
     if (!file) return;
 
+	const maxSize = 1024 * 1024; // 1 MB
+	if (file.size > maxSize) {
+	  alert("The file is too big. Maximum allowed size is 1 MB.");
+	  input.value = '';
+	  return;
+	}
+
     const formData = new FormData();
     formData.append("avatar", file);
 
@@ -44,9 +51,8 @@ function bindAvatarForm(app: App) {
     if (!response.ok || data.success === false) {
       console.error("[formHandlers] Uploading new avatar failed");
       alert(data.error || `HTTP error; status: ${response.status}`);
+	  input.value = '';
 	  return;
-      // further handling
-      // throw new Error(data.error || `HTTP error; status: ${response.status}`);
     }
 
     console.log("[formHandlers] Uploading new avatar successful");
@@ -59,7 +65,7 @@ function bindAvatarForm(app: App) {
 function bindUserInfoUpdateForm(app: App, infoType: string) {
   if (infoType != "username" && infoType != "password") {
     alert("Incorrect usage of bindUserInfoUpdateForm function");
-    // throw new Error("Incorrect usage of bindUserInfoUpdateForm function");
+	return;	
   }
 
   const form = document.getElementById(`${infoType}Form`) as HTMLFormElement;
@@ -293,7 +299,7 @@ async function displayFriendList(app: App) {
 
 	// button to remove friend
 	const removeBtn: HTMLButtonElement = document.createElement("button");
-	removeBtn.className = "px-1 py-1 sm:text-base rounded-md border-2 border-red-500 bg-red-700 hover:border-purple-500 hover:bg-purple-950 mt-2";
+	removeBtn.className = "cursor-pointer px-1 py-1 sm:text-base rounded-md border-2 border-red-500 bg-red-700 hover:border-purple-500 hover:bg-purple-950 mt-2";
 	removeBtn.textContent = "Remove";
 	removeBtn.addEventListener('click', async function () {
 		const response: Response = await fetch(`/api/user/friends/remove?userIdToRemove=${friend.userId}`, { method: 'DELETE' });
@@ -373,7 +379,7 @@ async function displayFriendRequestList(app: App) {
 
 		// buttons
 		const acceptBtn: HTMLButtonElement = document.createElement("button");
-		acceptBtn.className = "px-1 py-1 sm:text-base rounded-md border-2 border-emerald-500 bg-emerald-700 hover:border-purple-500 hover:bg-purple-950 mt-2";
+		acceptBtn.className = "cursor-pointer px-1 py-1 sm:text-base rounded-md border-2 border-emerald-500 bg-emerald-700 hover:border-purple-500 hover:bg-purple-950 mt-2";
 		acceptBtn.textContent = "Accept";
 		acceptBtn.addEventListener('click', async function () {
 			const response: Response = await fetch("/api/user/friends/accept", {
@@ -397,7 +403,7 @@ async function displayFriendRequestList(app: App) {
 		});
 
 		const rejectBtn: HTMLButtonElement = document.createElement("button");
-		rejectBtn.className = "px-1 py-1 sm:text-base rounded-md border-2 border-red-500 bg-red-700 hover:border-purple-500 hover:bg-purple-950 mt-2";
+		rejectBtn.className = "cursor-pointer px-1 py-1 sm:text-base rounded-md border-2 border-red-500 bg-red-700 hover:border-purple-500 hover:bg-purple-950 mt-2";
 		rejectBtn.textContent = "Reject";
 		rejectBtn.addEventListener('click', async function () {
 			const response: Response = await fetch("/api/user/friends/reject", {
