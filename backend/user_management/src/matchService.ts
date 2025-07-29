@@ -65,13 +65,13 @@ export const createMatchState = async (
 };
 
 export const updateMatchStateFinished = async (
-	start?: string,
-	end?: string,
-	matchId?: number,
+  start?: string,
+  end?: string,
+  matchId?: number,
 ) => {
-	try {
-		runTransaction((db) => {
-			const stmt = db.prepare(`
+  try {
+    runTransaction((db) => {
+      const stmt = db.prepare(`
 				UPDATE match_state
 				SET 
 					match_date = ?,
@@ -80,11 +80,11 @@ export const updateMatchStateFinished = async (
 				WHERE match_id = ?
 			`);
 
-			stmt.run(start, end, matchId);
-		});
-	} catch (e) {
-		throw e;
-	}
+      stmt.run(start, end, matchId);
+    });
+  } catch (e) {
+    throw e;
+  }
 };
 
 export const createMatchParticipant = async (
@@ -182,7 +182,8 @@ export function insertTournamentMatchState(
   }
 }
 
-export function insertTournamentMatchParticipant( // TODO delete? unused?
+export function insertTournamentMatchParticipant(
+  // TODO delete? unused?
   userId: number | null,
   matchId: number,
 ) {
@@ -221,21 +222,21 @@ export function getTournamentBracket(tournamentId: number): TournamentBracket {
 }
 
 export function getTournamentId(matchId: number): number {
-	try {
-		return runTransaction((db) => {
-			const stmt = db.prepare(`
+  try {
+    return runTransaction((db) => {
+      const stmt = db.prepare(`
 				SELECT tournament_id
 				FROM match_state
 				WHERE match_id = ?
 			`);
 
-			const result = stmt.get(matchId) as { tournament_id: number };
-			if (!result) throw new Error("Tournament not found");
-			return result.tournament_id;
-		});
-	} catch (e) {
-		throw e;
-	}
+      const result = stmt.get(matchId) as { tournament_id: number };
+      if (!result) throw new Error("Tournament not found");
+      return result.tournament_id;
+    });
+  } catch (e) {
+    throw e;
+  }
 }
 
 function extractMatchIds(brackets: TournamentBracket[]): TournamentMatchRoom[] {
@@ -248,18 +249,13 @@ function extractMatchIds(brackets: TournamentBracket[]): TournamentMatchRoom[] {
         }
         result.push({
           size: match.participants.length,
+          maxScore: bracket.maxScore,
           permissions: {
             type: "tournament",
             allowedUsers: match.participants,
             matchId: match.databaseId,
           },
-          gameData: {
-            game: "pong",
-            options: {
-              paddleRatio: 0.4,
-              gameSpeed: 1,
-            },
-          },
+          gameData: bracket.gameData,
         });
       }
     });
@@ -305,12 +301,10 @@ export function updateBracketWithMatchIds(
   }
 }
 
-export function updateTournamentStatusFinished(
-	tournamentId: number,
-) {
-	try {
-		runTransaction((db) => {
-			const stmt = db.prepare(`
+export function updateTournamentStatusFinished(tournamentId: number) {
+  try {
+    runTransaction((db) => {
+      const stmt = db.prepare(`
 				UPDATE tournament
 				SET
 					tournament_end = ?,
@@ -318,9 +312,9 @@ export function updateTournamentStatusFinished(
 				WHERE tournament_id = ?
 			`);
 
-			stmt.run(new Date().toISOString(), tournamentId);
-		})
-	} catch (e) {
-		throw e;
-	}
+      stmt.run(new Date().toISOString(), tournamentId);
+    });
+  } catch (e) {
+    throw e;
+  }
 }

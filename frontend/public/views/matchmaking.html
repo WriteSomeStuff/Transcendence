@@ -56,8 +56,25 @@
                         <button type="submit" class="cursor-pointer px-3 py-2 sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 mt-2">Submit</button>
                     </form>
                 </dialog>
+                <dialog class="modal animate-rainbow" id="tournamentGameModal">
+                    <h2>Choose a game for tournament</h2>
+                    <form id="tournamentGameForm">
+                        <label>Game
+                            <select name="game">
+                                <option value="pong" selected>Pong</option>
+                                <!-- add other games -->
+                            </select>
+                        </label>
+                        <label>Max score
+                            <input type="number" name="maxScore" value="10" min="1" max="100" step="1" required
+                                   class="sm:text-base rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </label>
+                        <button class="sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 text-white mb-2 mt-6 mx-auto" id="closeTournamentGameSettings">Cancel</button>
+                        <button type="submit" class="cursor-pointer px-3 py-2 sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 mt-2">Submit</button>
+                    </form>
+                </dialog>
 				<dialog class="modal m-2" id="total-players-modal">
-					<h2>Choose the amount of players</h2>
+					<h2>Choose the number of players</h2>
 					<button class="flex-1 px-6 py-3 bg-blue-900 hover:bg-blue-950 rounded-md text-lg text-white" id="4players">4</button>
 					<button class="flex-1 px-6 py-3 bg-blue-900 hover:bg-blue-950 rounded-md text-lg text-white" id="8players">8</button>
 					<button class="flex-1 px-6 py-3 bg-blue-900 hover:bg-blue-950 rounded-md text-lg text-white" id="16players">16</button>

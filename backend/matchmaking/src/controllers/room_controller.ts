@@ -88,7 +88,7 @@ function updateTournamentRoom(tournamentRoom: TournamentMatchRoom) {
     const room: Room = {
       id: uuidv4(),
       size: tournamentRoom.size,
-      maxScore: 10,
+      maxScore: tournamentRoom.maxScore,
       joinedUsers: [],
       permissions: tournamentRoom.permissions,
       gameData: tournamentRoom.gameData,
@@ -100,6 +100,7 @@ function updateTournamentRoom(tournamentRoom: TournamentMatchRoom) {
   const room = rooms.get(roomId);
   if (room !== undefined) {
     room.size = tournamentRoom.size;
+    room.maxScore = tournamentRoom.maxScore;
     room.permissions = tournamentRoom.permissions;
     room.gameData = tournamentRoom.gameData;
   }

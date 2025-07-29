@@ -43,6 +43,7 @@ export type Room = z.infer<typeof RoomSchema>;
 
 export const TournamentMatchRoomSchema = z.object({
   size: z.number().int().min(2),
+  maxScore: z.number(),
   permissions: RoomPermissionsSchema.refine((p) => p.type == "tournament"),
   gameData: RoomGameDataSchema,
 });
@@ -63,6 +64,8 @@ export type TournamentMatch = z.infer<typeof TournamentMatchSchema>;
 export const TournamentBracketSchema = z.object({
   matches: z.array(TournamentMatchSchema),
   currentRound: z.number(),
+  maxScore: z.number(), // extra stuff for room creation
+  gameData: RoomGameDataSchema,
 });
 
 export type TournamentBracket = z.infer<typeof TournamentBracketSchema>;
@@ -107,11 +110,12 @@ export const MatchmakingMessageSchema = z.discriminatedUnion("action", [
 export type MatchmakingMessage = z.infer<typeof MatchmakingMessageSchema>;
 
 export const TournamentCreateMessageSchema = z.object({
-	name: z.string(),
-	size: z.number().refine((n) => [4, 8, 16].includes(n)),
-	participants: z.array(UsernameSchema),
-	gameData: RoomGameDataSchema,
-})
+  name: z.string(),
+  size: z.number().refine((n) => [4, 8, 16].includes(n)),
+  maxScore: z.number().int().min(1).max(100),
+  participants: z.array(UsernameSchema),
+  gameData: RoomGameDataSchema,
+});
 
 export type TournamentCreateMessage = z.infer<
   typeof TournamentCreateMessageSchema

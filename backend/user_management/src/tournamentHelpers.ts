@@ -7,6 +7,7 @@ import type {
   TournamentMatchCreateMessage,
   TournamentCreateResponse,
   TournamentCreateMessage,
+  RoomGameData,
 } from "schemas";
 
 import {
@@ -15,11 +16,11 @@ import {
 } from "schemas";
 
 import {
-	updateBracketWithMatchIds,
-	getTournamentId,
-	getTournamentBracket,
-	updateTournamentStatusFinished,
- } from "./matchService.js";
+  updateBracketWithMatchIds,
+  getTournamentId,
+  getTournamentBracket,
+  updateTournamentStatusFinished,
+} from "./matchService.js";
 
 import { v4 as uuidv4 } from "uuid";
 
@@ -45,7 +46,12 @@ export async function createTournamentInfo(
   };
   // 3. pass to create bracket
   console.log("[TOURNAMENT] Creating bracket");
-  tournament.bracket = createBracket(tournament.size, tournament.joinedUsers);
+  tournament.bracket = createBracket(
+    tournament.size,
+    tournament.joinedUsers,
+    tournamentInfo.maxScore,
+    tournamentInfo.gameData,
+  );
 
   // 4. database stuff
   // 4.1. create tournament row
@@ -182,6 +188,8 @@ function shuffle(array: number[]) {
 function createBracket(
   totalPlayers: number,
   participants: number[],
+  maxScore: number,
+  gameData: RoomGameData,
 ): TournamentBracket {
   const totalMatches = totalPlayers - 1;
   const totalRounds = Math.round(Math.log2(totalPlayers));
@@ -189,11 +197,13 @@ function createBracket(
   let bracket: TournamentBracket = {
     matches: [] as TournamentMatch[],
     currentRound: 0,
+    maxScore: maxScore,
+    gameData: gameData,
   };
 
   // 0. random draw
   shuffle(participants);
-  // 1. Create and fill first round: matches[0]-[n/2 - 1]
+  // 1. Create and fill the first round: matches[0]-[n/2 - 1]
   for (let i = 0; i < totalPlayers; i += 2) {
     let match: TournamentMatch = {
       id: uuidv4(),
@@ -207,7 +217,7 @@ function createBracket(
   }
   console.log("[Tournament] First round matches created and filled");
 
-  // 2. Create rest of tournament with empty matches: matches[n/2]-[n - 1]
+  // 2. Create the rest of the tournament with empty matches: matches[n/2]-[n - 1]
   for (let round = 1; round < totalRounds; round++) {
     const matchesInRound = Math.pow(2, totalRounds - 1 - round);
     for (let i = 0; i < matchesInRound; i++) {
@@ -242,18 +252,17 @@ function createBracket(
 }
 
 function AddWinnerToNextRound(
-	userIdWinner: number, 
-	bracket: TournamentBracket,
-	matchIndex: number,
+  userIdWinner: number,
+  bracket: TournamentBracket,
+  matchIndex: number,
 ) {
-	const nextMatchId = bracket.matches[matchIndex]!.nextMatchId!;
-	for (const match of bracket.matches) {
-		if (match.id === nextMatchId) {
-			match.participants.push(userIdWinner);
-			break;
-		}
-	}
-
+  const nextMatchId = bracket.matches[matchIndex]!.nextMatchId!;
+  for (const match of bracket.matches) {
+    if (match.id === nextMatchId) {
+      match.participants.push(userIdWinner);
+      break;
+    }
+  }
 }
 
 function isLastMatchInRound(
@@ -261,48 +270,43 @@ function isLastMatchInRound(
   totalPlayers: number,
   bracket: TournamentBracket,
 ): boolean {
-	// baseValue * totalplayers / 8 = matches in first round
-	// only works for 4, 8 or 16 player tournament
-	let baseValue = 4;
-		for (let i = 1; i <= bracket.currentRound; i++) {
-		baseValue += 3 - i;
-	}
-	return matchIndex === (baseValue * totalPlayers) / 8 - 1;
+  // baseValue * totalplayers / 8 = matches in the first round
+  // only works for 4, 8 or 16 player tournaments
+  let baseValue = 4;
+  for (let i = 1; i <= bracket.currentRound; i++) {
+    baseValue += 3 - i;
+  }
+  return matchIndex === (baseValue * totalPlayers) / 8 - 1;
 }
 
-function isFinal(
-	currentRound: number,
-	totalPlayers: number,
-) {
-	return currentRound === Math.round(Math.log2(totalPlayers)) - 1;
+function isFinal(currentRound: number, totalPlayers: number) {
+  return currentRound === Math.round(Math.log2(totalPlayers)) - 1;
 }
 
-export function proceedTournament(
-	matchId: number,
-	userIdWinner: number,
-) {
-	const tournamentId = getTournamentId(matchId);
-	const bracket = getTournamentBracket(tournamentId);
-	
-	let currMatchIndex = 0;
-	while (currMatchIndex < bracket.matches.length) {
-		if (bracket.matches[currMatchIndex]!.databaseId === matchId) break;
-		currMatchIndex++;
-	}
-	
-	bracket.matches[currMatchIndex]!.winner = userIdWinner;
-	
-	const totalPlayers = bracket.matches.length + 1;
-	if (isFinal(bracket.currentRound, totalPlayers)) {
-		updateTournamentStatusFinished(tournamentId);
-		return;
-	} else if (isLastMatchInRound(currMatchIndex, totalPlayers, bracket)) { // last match in this round
-		bracket.currentRound++;
-	}
-	
-	AddWinnerToNextRound(userIdWinner, bracket, currMatchIndex);
-	updateBracketWithMatchIds(tournamentId, bracket);
-} 
+export function proceedTournament(matchId: number, userIdWinner: number) {
+  const tournamentId = getTournamentId(matchId);
+  const bracket = getTournamentBracket(tournamentId);
+
+  let currMatchIndex = 0;
+  while (currMatchIndex < bracket.matches.length) {
+    if (bracket.matches[currMatchIndex]!.databaseId === matchId) break;
+    currMatchIndex++;
+  }
+
+  bracket.matches[currMatchIndex]!.winner = userIdWinner;
+
+  const totalPlayers = bracket.matches.length + 1;
+  if (isFinal(bracket.currentRound, totalPlayers)) {
+    updateTournamentStatusFinished(tournamentId);
+    return;
+  } else if (isLastMatchInRound(currMatchIndex, totalPlayers, bracket)) {
+    // last match in this round
+    bracket.currentRound++;
+  }
+
+  AddWinnerToNextRound(userIdWinner, bracket, currMatchIndex);
+  updateBracketWithMatchIds(tournamentId, bracket);
+}
 
 //rnd| matches
 // 0 | [0] [1]
