@@ -64,6 +64,28 @@ export const createMatchState = async (
   }
 };
 
+export const updateMatchStateFinished = async (
+	start?: string,
+	end?: string,
+	matchId?: number,
+) => {
+	try {
+		runTransaction((db) => {
+			const stmt = db.prepare(`
+				UPDATE match_state
+				SET 
+					match_date = ?,
+					match_end = ?
+				WHERE match_id = ?
+			`);
+
+			stmt.run(start, end, matchId);
+		});
+	} catch (e) {
+		throw e;
+	}
+};
+
 export const createMatchParticipant = async (
   userId: number,
   matchId: number,
@@ -159,7 +181,7 @@ export function insertTournamentMatchState(
   }
 }
 
-export function insertTournamentMatchParticipant(
+export function insertTournamentMatchParticipant( // TODO delete? unused?
   userId: number | null,
   matchId: number,
 ) {
@@ -177,7 +199,7 @@ export function insertTournamentMatchParticipant(
   }
 }
 
-export function getTournament(tournamentId: number): TournamentBracket {
+export function getTournamentBracket(tournamentId: number): TournamentBracket {
   try {
     return runTransaction((db) => {
       const stmt = db.prepare(`
@@ -195,6 +217,24 @@ export function getTournament(tournamentId: number): TournamentBracket {
   } catch (e) {
     throw e;
   }
+}
+
+export function getTournamentId(matchId: number): number {
+	try {
+		return runTransaction((db) => {
+			const stmt = db.prepare(`
+				SELECT tournament_id
+				FROM match_state
+				WHERE match_id = ?
+			`);
+
+			const result = stmt.get(matchId) as number;
+			if (!result) throw new Error("Tournament not found");
+			return result;
+		});
+	} catch (e) {
+		throw e;
+	}
 }
 
 function extractMatchIds(brackets: TournamentBracket[]): TournamentMatchRoom[] {
@@ -262,4 +302,24 @@ export function updateBracketWithMatchIds(
   } catch (e) {
     throw e;
   }
+}
+
+export function updateTournamentStatusFinished(
+	tournamentId: number,
+) {
+	try {
+		runTransaction((db) => {
+			const stmt = db.prepare(`
+				UPDATE tournament
+				SET
+					tournament_end = ?,
+					tournament_status = 'finished'
+				WHERE tournament_id = ?
+			`);
+
+			stmt.run(new Date().toISOString(), tournamentId);
+		})
+	} catch (e) {
+		throw e;
+	}
 }

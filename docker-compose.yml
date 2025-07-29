@@ -75,7 +75,7 @@ services:
       - internal
     environment:
       - AUTH_SERVICE_URL=http://auth_service/auth
-      - USER_SERVICE_URL=http://user_service/user
+      - USER_SERVICE_URL=http://user_service
       - USER_DB_PATH=/app/data/database/user_db.sqlite3
       - AVATAR_DIR_PATH=/app/data/avatars/
     env_file:

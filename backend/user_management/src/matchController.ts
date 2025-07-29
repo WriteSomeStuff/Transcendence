@@ -12,14 +12,18 @@ import {
   createMatchParticipant,
   createMatchState,
   insertTournament,
-  getTournament,
+  getTournamentBracket,
   getMatchHistory,
   getTournamentMatches,
   insertTournamentMatchState,
   validateExistingTournamentMatchState,
+  updateMatchStateFinished,
 } from "./matchService.ts";
 
-import { createTournamentInfo } from "./tournamentHelpers.js";
+import {
+	createTournamentInfo,
+	proceedTournament,
+} from "./tournamentHelpers.js";
 
 export const InsertTournamentHandler = async (
   request: FastifyRequest,
@@ -95,6 +99,10 @@ export const createMatchHandler = async (
         : await validateExistingTournamentMatchState(parsed.data.matchId);
     console.log(`[Match controller] Inserting match_state into db successful`);
 
+    let winner = {
+      userId: 0,
+      score: 0,
+    };
     for (const participant of parsed.data.participants) {
       console.log(`[Match controller] inserting match_participant into db`);
       await createMatchParticipant(
@@ -105,8 +113,21 @@ export const createMatchHandler = async (
       console.log(
         `[Match controller] Inserting match_participant into db successful`,
       );
+	  	if (participant.score > winner.score) {
+				winner.userId = participant.userId;
+				winner.score = participant.score;
+	  	}
     }
     // TODO proceed tournament
+    if (parsed.data.matchId !== undefined) { // 1 match is part of tournament
+	 		await updateMatchStateFinished(
+				parsed.data.start.toISOString(),
+        parsed.data.end.toISOString(),
+				parsed.data.matchId,
+			);
+			proceedTournament(matchId, winner.userId);
+    }
+
     reply.status(201).send({
       success: true,
       matchId: matchId,
@@ -169,13 +190,6 @@ export async function insertTournamentMatchHandler(
     );
     console.log("[Match controller] Inserting t-match into db successful");
 
-    // for (const participant of parsed.data.participants) {
-    // 	console.log("[Match controller] inserting tournament match participant into db");
-    // 	  // TODO rethink db structure, participant can still be null during the tournament, or add later round matches later?
-    // 	insertTournamentMatchParticipant(participant, dbMatchId);
-    // 	console.log("[Match controller] Inserting match_participant into db successful");
-    // }
-
     reply.status(201).send({
       success: true,
       dbMatchId: dbMatchId,
@@ -205,7 +219,7 @@ export function getTournamentHandler(
 ) {
   try {
     const { tournamentId } = request.query as { tournamentId: number };
-    const bracket: TournamentBracket = getTournament(tournamentId);
+    const bracket: TournamentBracket = getTournamentBracket(tournamentId);
 
     reply.status(200).send({ success: true, bracket });
   } catch (e) {
@@ -230,7 +244,7 @@ export async function createTournamentHandler(
   reply: FastifyReply,
 ) {
   try {
-    console.log("Handling tournament create");
+    console.log("[TOURNAMENT] Handling tournament create");
     const parsed = TournamentCreateMessageSchema.safeParse(
       JSON.parse(request.body as string),
     );
@@ -240,16 +254,17 @@ export async function createTournamentHandler(
       return;
     }
 
-    console.log("Creating the tournament");
+    console.log("[TOURNAMENT] Creating the tournament");
     const tournamentId = await createTournamentInfo(parsed.data);
-    console.log("Tournament creation successful");
+    console.log("[TOURNAMENT] Tournament creation successful");
 
     reply
       .status(201)
       .send(
         TournamentCreateResponseSchema.parse({ success: true, tournamentId }),
       );
-  } catch (e) {
+  } catch (e: any) {
+		console.error('[TOURNAMENT] error', e);
     reply.status(500).send({ success: false, error: e });
   }
 }
