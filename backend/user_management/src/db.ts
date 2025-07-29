@@ -2,16 +2,16 @@ import Database from "better-sqlite3";
 
 const DB_PATH: string = process.env["USER_DB_PATH"] as string;
 if (!DB_PATH) {
-	throw new Error("DB_PATH environment variable is not set");
+  throw new Error("DB_PATH environment variable is not set");
 }
 
 const db = new Database(DB_PATH, {
-	verbose: console.log,
+  verbose: console.log,
 });
 
 export function runTransaction<T>(fn: (db: Database.Database) => T): T {
-	const transaction = db.transaction(fn);
-	return transaction(db);
+  const transaction = db.transaction(fn);
+  return transaction(db);
 }
 
 const sql = `
@@ -28,6 +28,7 @@ const sql = `
 		tournament_id		INTEGER PRIMARY KEY,
 		tournament_name		TEXT	NOT NULL	UNIQUE,
 		created_at			TEXT	DEFAULT (datetime('now')),
+		bracket				BLOB,
 		tournament_end		TEXT,
 		tournament_status	TEXT	DEFAULT ('ongoing')	CHECK(tournament_status IN ('ongoing', 'finished'))
 	);
@@ -35,7 +36,7 @@ const sql = `
 	CREATE TABLE IF NOT EXISTS match_state (
 		match_id		INTEGER PRIMARY KEY,
 		match_date		TEXT,
-		match_status	TEXT	DEFAULT ('finished')	CHECK(match_status IN ('ongoing', 'finished')),
+		match_status	TEXT	DEFAULT ('finished')	CHECK(match_status IN ('pending', 'ongoing', 'finished')),
 		match_end		TEXT,
 		tournament_id	INTEGER,
 		FOREIGN KEY (tournament_id)
@@ -80,13 +81,15 @@ const sql = `
 `;
 
 try {
-	console.log("[user-mgmt-db init] Initialising user management database:");
-	db.pragma('foreign_keys = ON;');
-	db.exec(sql);
-	console.log("[user-mgmt-db init] Successfully initialised user management database");
+  console.log("[user-mgmt-db init] Initialising user management database:");
+  db.pragma("foreign_keys = ON;");
+  db.exec(sql);
+  console.log(
+    "[user-mgmt-db init] Successfully initialised user management database",
+  );
 } catch (e) {
-	console.error('Error creating user database:', e);
-	process.exit(1);
+  console.error("Error creating user database:", e);
+  process.exit(1);
 }
 
 export default db;

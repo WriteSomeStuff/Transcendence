@@ -1,7 +1,7 @@
 import { createCourtGeometry } from "./court_geometry.ts";
 import { initCourtState } from "./court_state.js";
 
-import type {Court, CourtGeometry} from "schemas";
+import type { Court, CourtGeometry } from "schemas";
 
 function chooseGeometry(playerCount: number): CourtGeometry {
   if (playerCount === 2) {

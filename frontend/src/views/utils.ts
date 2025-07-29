@@ -47,8 +47,7 @@ export function bindCredentialsForm(formBinding: formBinding, app: App) {
     event.preventDefault(); // prevents automatic reload and allows manual handling
     console.log("[FRONTEND] Handling login");
 
-	const email = (document.getElementById("email") as HTMLInputElement)
-	  .value;
+    const email = (document.getElementById("email") as HTMLInputElement).value;
     const password = (document.getElementById("password") as HTMLInputElement)
       .value;
     const confirmPassword = (document.getElementById("confirm-password") as HTMLInputElement)

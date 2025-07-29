@@ -2,9 +2,7 @@
   "name": "transcendence",
   "version": "1.0.0",
   "description": "the pong game",
-  "keywords": [
-    "-"
-  ],
+  "keywords": ["-"],
   "repository": {
     "type": "git",
     "url": "-"

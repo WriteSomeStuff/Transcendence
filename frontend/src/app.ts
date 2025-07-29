@@ -77,7 +77,13 @@ async function renderState(
   }
   if (push) {
     const params = new URLSearchParams(toStringRecord(state.viewState.params));
-    const newUrl = window.location.protocol + "//" + window.location.host + "/" + state.viewState.view + ((params.size > 0) ? ("?" + params.toString()) : "");
+    const newUrl =
+      window.location.protocol +
+      "//" +
+      window.location.host +
+      "/" +
+      state.viewState.view +
+      (params.size > 0 ? "?" + params.toString() : "");
     window.history.pushState({ path: newUrl }, "", newUrl);
   }
 }

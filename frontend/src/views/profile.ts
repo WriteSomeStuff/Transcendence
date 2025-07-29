@@ -4,15 +4,11 @@ import { ProfileViewSchema } from "./views.js";
 import { bindNavbar } from "./utils.js";
 import type { App } from "../app.js";
 import {
-	FriendListResponseSchema,
-	FriendRequestListResponseSchema,
-  HistoryResponseSchema
+  FriendListResponseSchema,
+  FriendRequestListResponseSchema,
+  HistoryResponseSchema,
 } from "schemas";
-import type {
-	Friend,
-  MatchHistory,
-	Friendship
-} from "schemas";
+import type { Friend, MatchHistory, Friendship } from "schemas";
 
 function bindAvatarForm(app: App) {
   const form = document.getElementById("avatarForm") as HTMLFormElement;
@@ -173,32 +169,40 @@ async function displayUsername() {
 }
 
 async function fetchMatchHistory(): Promise<MatchHistory[] | string> {
-  	try {
-      const response: Response = await fetch("/api/user/match/history", { method: "GET" });
-      if (!response.ok) {
-        return response.statusText;
-      }
+  try {
+    const response: Response = await fetch("/api/user/match/history", {
+      method: "GET",
+    });
+    if (!response.ok) {
+      return response.statusText;
+    }
 
-		const parsedResponse = HistoryResponseSchema.safeParse(await response.json());
-		console.log(parsedResponse);
+    const parsedResponse = HistoryResponseSchema.safeParse(
+      await response.json(),
+    );
+    console.log(parsedResponse);
 
-		if (!parsedResponse.success) {
-			return parsedResponse.error.toString();
-		}
-		if (!parsedResponse.data.success) {
-			return parsedResponse.data.error;
-		}
-		return parsedResponse.data.data;
-  	} catch (e: any) {
-    	console.error("Error fetching user data:", e);
-    	return e.message;
-  	}
+    if (!parsedResponse.success) {
+      return parsedResponse.error.toString();
+    }
+    if (!parsedResponse.data.success) {
+      return parsedResponse.data.error;
+    }
+    return parsedResponse.data.data;
+  } catch (e: any) {
+    console.error("Error fetching user data:", e);
+    return e.message;
+  }
 }
 
 async function displayMatchHistory() {
   const list: MatchHistory[] | string = await fetchMatchHistory();
-  const matchHistory = document.getElementById("matchHistory") as HTMLUListElement;
-  const matchWins = document.getElementById("winsAndLosses") as HTMLUListElement;
+  const matchHistory = document.getElementById(
+    "matchHistory",
+  ) as HTMLUListElement;
+  const matchWins = document.getElementById(
+    "winsAndLosses",
+  ) as HTMLUListElement;
   if (!matchHistory || !matchWins) return;
 
   if (typeof list === "string") {
@@ -214,11 +218,11 @@ async function displayMatchHistory() {
   var lossAmount: number = 0;
   for (const history of list) {
     const docDate: HTMLSpanElement = document.createElement("span");
-    docDate.textContent = `${history.date.getDate().toString().padStart(2, '0')}/${(history.date.getMonth()+1).toString().padStart(2, '0')}/${history.date.getFullYear()}`;
+    docDate.textContent = `${history.date.getDate().toString().padStart(2, "0")}/${(history.date.getMonth() + 1).toString().padStart(2, "0")}/${history.date.getFullYear()}`;
 
     const docScore: HTMLSpanElement = document.createElement("span");
     docScore.textContent = history.userScore.toString() + " points";
-    
+
     var win: boolean = true;
     for (const opponent of history.opponentInfo) {
       if (history.userScore < opponent.opponentScore) {
@@ -230,8 +234,7 @@ async function displayMatchHistory() {
       lossAmount++;
       var docWin: HTMLSpanElement = document.createElement("span");
       docWin.textContent = "Defeat";
-    }
-    else {
+    } else {
       winAmount++;
       var docWin: HTMLSpanElement = document.createElement("span");
       docWin.textContent = "Victory";
@@ -249,32 +252,38 @@ async function displayMatchHistory() {
 }
 
 async function fetchFriendList(): Promise<Friend[] | string> {
-  	try {
-		const response: Response = await fetch("/api/user/friends/list", { method: "GET" });
+  try {
+    const response: Response = await fetch("/api/user/friends/list", {
+      method: "GET",
+    });
 
-		if (!response.ok) {
-			return response.statusText;
-		}
+    if (!response.ok) {
+      return response.statusText;
+    }
 
-		const parsedResponse = FriendListResponseSchema.safeParse(await response.json());
-		console.log(parsedResponse);
+    const parsedResponse = FriendListResponseSchema.safeParse(
+      await response.json(),
+    );
+    console.log(parsedResponse);
 
-		if (!parsedResponse.success) {
-			return parsedResponse.error.toString();
-		}
-		if (!parsedResponse.data.success) {
-			return parsedResponse.data.error;
-		}
-		return parsedResponse.data.data;
-  	} catch (e: any) {
-    	console.error("Error fetching user data:", e);
-    	return e.message;
-  	}
+    if (!parsedResponse.success) {
+      return parsedResponse.error.toString();
+    }
+    if (!parsedResponse.data.success) {
+      return parsedResponse.data.error;
+    }
+    return parsedResponse.data.data;
+  } catch (e: any) {
+    console.error("Error fetching user data:", e);
+    return e.message;
+  }
 }
 
 async function displayFriendList(app: App) {
   const list: Friend[] | string = await fetchFriendList();
-  const friendsList = document.getElementById("friendsList") as HTMLUListElement;
+  const friendsList = document.getElementById(
+    "friendsList",
+  ) as HTMLUListElement;
   if (!friendsList) return;
 
   if (typeof list === "string") {
@@ -297,143 +306,168 @@ async function displayFriendList(app: App) {
     docStatus.className = "text-right";
     docStatus.textContent = friend.accountStatus;
 
-	// button to remove friend
-	const removeBtn: HTMLButtonElement = document.createElement("button");
-	removeBtn.className = "cursor-pointer px-1 py-1 sm:text-base rounded-md border-2 border-red-500 bg-red-700 hover:border-purple-500 hover:bg-purple-950 mt-2";
-	removeBtn.textContent = "Remove";
-	removeBtn.addEventListener('click', async function () {
-		const response: Response = await fetch(`/api/user/friends/remove?userIdToRemove=${friend.userId}`, { method: 'DELETE' });
+    // button to remove friend
+    const removeBtn: HTMLButtonElement = document.createElement("button");
+    removeBtn.className =
+      "cursor-pointer px-1 py-1 sm:text-base rounded-md border-2 border-red-500 bg-red-700 hover:border-purple-500 hover:bg-purple-950 mt-2";
+    removeBtn.textContent = "Remove";
+    removeBtn.addEventListener("click", async function () {
+      const response: Response = await fetch(
+        `/api/user/friends/remove?userIdToRemove=${friend.userId}`,
+        { method: "DELETE" },
+      );
 
-		const data = await response.json() as { success: boolean, error?: string };
-		if (!response.ok || !data.success) {
-			console.log("Could not remove friend: "
-				+ data.error || `HTTP error; status: ${response.status}`);
-			alert("Something went wrong removing the friend");
-			return;
-		}
+      const data = (await response.json()) as {
+        success: boolean;
+        error?: string;
+      };
+      if (!response.ok || !data.success) {
+        console.log(
+          "Could not remove friend: " + data.error ||
+            `HTTP error; status: ${response.status}`,
+        );
+        alert("Something went wrong removing the friend");
+        return;
+      }
 
-		console.log("Friend removed");
-		app.resetView();
-	});
+      console.log("Friend removed");
+      app.resetView();
+    });
 
-	const listElement = document.createElement("li");
+    const listElement = document.createElement("li");
 
-	listElement.className = "flex justify-between items-center gap-4";
+    listElement.className = "flex justify-between items-center gap-4";
     listElement.appendChild(docUser);
     listElement.appendChild(docStatus);
-	listElement.appendChild(removeBtn);
+    listElement.appendChild(removeBtn);
     friendsList.appendChild(listElement);
   }
 }
 
 async function fetchRequestList(): Promise<Friendship[] | string> {
-	try {
-		const response: Response = await fetch("/api/user/friends/requests", { method: "GET" });
+  try {
+    const response: Response = await fetch("/api/user/friends/requests", {
+      method: "GET",
+    });
 
-		const data = await response.json() as {
-			success: boolean;
-			error?: string;
-			data?: Friendship[];
-		};
+    const data = (await response.json()) as {
+      success: boolean;
+      error?: string;
+      data?: Friendship[];
+    };
 
-		console.log(`data: ${JSON.stringify(data)}`);
-		if (!response.ok || data.success === false) {
-			return data.error || response.statusText;
-		}
+    console.log(`data: ${JSON.stringify(data)}`);
+    if (!response.ok || data.success === false) {
+      return data.error || response.statusText;
+    }
 
-		const parsedResponse = FriendRequestListResponseSchema.safeParse(data);
-		console.log(`parsedResponse: ${JSON.stringify(parsedResponse)}`);
-		if (!parsedResponse.success) {
-			return parsedResponse.error.toString();
-		}
-		if (!parsedResponse.data.success) {
-			return parsedResponse.data.error;
-		}
-		return parsedResponse.data.data;
-	} catch (e: any) {
-		console.error("Error fetching friend requests:", e);
-		return e.message;
-	}
+    const parsedResponse = FriendRequestListResponseSchema.safeParse(data);
+    console.log(`parsedResponse: ${JSON.stringify(parsedResponse)}`);
+    if (!parsedResponse.success) {
+      return parsedResponse.error.toString();
+    }
+    if (!parsedResponse.data.success) {
+      return parsedResponse.data.error;
+    }
+    return parsedResponse.data.data;
+  } catch (e: any) {
+    console.error("Error fetching friend requests:", e);
+    return e.message;
+  }
 }
 
 async function displayFriendRequestList(app: App) {
-	const list: Friendship[] | string = await fetchRequestList();
-	const requestList = document.getElementById("requests") as HTMLUListElement;
-	if (!requestList) return;
+  const list: Friendship[] | string = await fetchRequestList();
+  const requestList = document.getElementById("requests") as HTMLUListElement;
+  if (!requestList) return;
 
-	if (typeof list === "string") {
-		requestList.textContent = "Something went wrong:" + list;
-		return;
-	} else if (list.length === 0) {
-		requestList.textContent = "You don't have any friend requests (yet)";
-		return;
-	}
+  if (typeof list === "string") {
+    requestList.textContent = "Something went wrong:" + list;
+    return;
+  } else if (list.length === 0) {
+    requestList.textContent = "You don't have any friend requests (yet)";
+    return;
+  }
 
-	for (const request of list) {
-		console.log(`Request ${String(request.friendshipId)} from ${String(request.userId)} to ${String(request.friendId)}`);
+  for (const request of list) {
+    console.log(
+      `Request ${String(request.friendshipId)} from ${String(request.userId)} to ${String(request.friendId)}`,
+    );
 
-		// user
-		const docSender = document.createElement("span");
-		docSender.className = "min-w-[8rem] truncate";
-		docSender.textContent = String(request.usernameSender);
+    // user
+    const docSender = document.createElement("span");
+    docSender.className = "min-w-[8rem] truncate";
+    docSender.textContent = String(request.usernameSender);
 
-		// buttons
-		const acceptBtn: HTMLButtonElement = document.createElement("button");
-		acceptBtn.className = "cursor-pointer px-1 py-1 sm:text-base rounded-md border-2 border-emerald-500 bg-emerald-700 hover:border-purple-500 hover:bg-purple-950 mt-2";
-		acceptBtn.textContent = "Accept";
-		acceptBtn.addEventListener('click', async function () {
-			const response: Response = await fetch("/api/user/friends/accept", {
-				method: 'PUT',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ userIdSender: request.userId })
-			});
+    // buttons
+    const acceptBtn: HTMLButtonElement = document.createElement("button");
+    acceptBtn.className =
+      "cursor-pointer px-1 py-1 sm:text-base rounded-md border-2 border-emerald-500 bg-emerald-700 hover:border-purple-500 hover:bg-purple-950 mt-2";
+    acceptBtn.textContent = "Accept";
+    acceptBtn.addEventListener("click", async function () {
+      const response: Response = await fetch("/api/user/friends/accept", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userIdSender: request.userId }),
+      });
 
-			const data = await response.json() as { success: boolean, error?: string };
-			if (!response.ok || !data.success) {
-				console.log("Could not accept friend request: "
-					+ data.error || `HTTP error; status: ${response.status}`);
-				alert("Something went wrong accepting the friend request");
-				return;
-			}
+      const data = (await response.json()) as {
+        success: boolean;
+        error?: string;
+      };
+      if (!response.ok || !data.success) {
+        console.log(
+          "Could not accept friend request: " + data.error ||
+            `HTTP error; status: ${response.status}`,
+        );
+        alert("Something went wrong accepting the friend request");
+        return;
+      }
 
-			console.log("Friend request accepted");
-			app.resetView();
-		});
+      console.log("Friend request accepted");
+      app.resetView();
+    });
 
-		const rejectBtn: HTMLButtonElement = document.createElement("button");
-		rejectBtn.className = "cursor-pointer px-1 py-1 sm:text-base rounded-md border-2 border-red-500 bg-red-700 hover:border-purple-500 hover:bg-purple-950 mt-2";
-		rejectBtn.textContent = "Reject";
-		rejectBtn.addEventListener('click', async function () {
-			const response: Response = await fetch("/api/user/friends/reject", {
-				method: 'PUT',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ userIdSender: request.userId })
-			});
+    const rejectBtn: HTMLButtonElement = document.createElement("button");
+    rejectBtn.className =
+      "cursor-pointer px-1 py-1 sm:text-base rounded-md border-2 border-red-500 bg-red-700 hover:border-purple-500 hover:bg-purple-950 mt-2";
+    rejectBtn.textContent = "Reject";
+    rejectBtn.addEventListener("click", async function () {
+      const response: Response = await fetch("/api/user/friends/reject", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userIdSender: request.userId }),
+      });
 
-			const data = await response.json() as { success: boolean, error?: string };
-			if (!response.ok || !data.success) {
-				console.log("Could not reject friend request: "
-					+ data.error || `HTTP error; status: ${response.status}`);
-				alert("Something went wrong rejecting the friend request");
-				return;
-			}
+      const data = (await response.json()) as {
+        success: boolean;
+        error?: string;
+      };
+      if (!response.ok || !data.success) {
+        console.log(
+          "Could not reject friend request: " + data.error ||
+            `HTTP error; status: ${response.status}`,
+        );
+        alert("Something went wrong rejecting the friend request");
+        return;
+      }
 
-			console.log("Friend request rejected");
-			app.resetView();
-		});
+      console.log("Friend request rejected");
+      app.resetView();
+    });
 
-		const listElement = document.createElement("li");
+    const listElement = document.createElement("li");
 
-		listElement.className = "flex justify-between items-center gap-4";
-		listElement.appendChild(docSender);
-		listElement.appendChild(acceptBtn);
-		listElement.appendChild(rejectBtn);
-		requestList.appendChild(listElement);
-	}
+    listElement.className = "flex justify-between items-center gap-4";
+    listElement.appendChild(docSender);
+    listElement.appendChild(acceptBtn);
+    listElement.appendChild(rejectBtn);
+    requestList.appendChild(listElement);
+  }
 }
 
 async function displayAvatar() {
@@ -567,84 +601,104 @@ export function bind2FAButtons(app: App) {
 }
 
 async function sendRequest(username: string) {
-	try {
-		// get the user id corresponding to the username
-		const userIdResponse: Response = await fetch(`/api/user/get-userid?username=${username}`);
-		const userIdData = await userIdResponse.json() as {
-			success: boolean;
-			error?: string;
-			userId?: number;
-		};
+  try {
+    // get the user id corresponding to the username
+    const userIdResponse: Response = await fetch(
+      `/api/user/get-userid?username=${username}`,
+    );
+    const userIdData = (await userIdResponse.json()) as {
+      success: boolean;
+      error?: string;
+      userId?: number;
+    };
 
-		if (!userIdResponse || userIdData.success === false) {
-			console.error(`[Profile] Sending request not possible: ${userIdData.error}`);
-			alert('Sending request failed: ' + (userIdData.error || `HTTP error; status: ${userIdResponse.status}`));
-			return;
-		}
+    if (!userIdResponse || userIdData.success === false) {
+      console.error(
+        `[Profile] Sending request not possible: ${userIdData.error}`,
+      );
+      alert(
+        "Sending request failed: " +
+          (userIdData.error || `HTTP error; status: ${userIdResponse.status}`),
+      );
+      return;
+    }
 
-		// send the request to the user id
-		const userId = userIdData.userId;
-		console.log(`[FRIEND REQUEST] Sending request to ${userId}`)
-		const friendRequestResponse: Response = await fetch("/api/user/friends/request", {
-			method: "POST",
-			headers: {
-        		"Content-Type": "application/json",
-      		},
-      		body: JSON.stringify({ friendId: userId })
-		});
+    // send the request to the user id
+    const userId = userIdData.userId;
+    console.log(`[FRIEND REQUEST] Sending request to ${userId}`);
+    const friendRequestResponse: Response = await fetch(
+      "/api/user/friends/request",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ friendId: userId }),
+      },
+    );
 
-		const data = await friendRequestResponse.json() as {
-			success: boolean;
-			error?: string;
-		};
+    const data = (await friendRequestResponse.json()) as {
+      success: boolean;
+      error?: string;
+    };
 
-		if (!friendRequestResponse.ok || data.success === false) {
-			console.error(`[profile] Sending request failed`);
-      		alert('Sending request failed: ' + (data.error || `HTTP error; status: ${friendRequestResponse.status}`));
-	  		return;
-		}
+    if (!friendRequestResponse.ok || data.success === false) {
+      console.error(`[profile] Sending request failed`);
+      alert(
+        "Sending request failed: " +
+          (data.error || `HTTP error; status: ${friendRequestResponse.status}`),
+      );
+      return;
+    }
 
-		console.log(`[profile] Sending friend request to ${username} successful`);
-		alert(`Friend request sent to ${username}`);
-	} catch (e) {
-		console.error(`Error sending friend request: ${e}`);
-		alert(`Friend request could not be sent: ${e}`);
-	}
+    console.log(`[profile] Sending friend request to ${username} successful`);
+    alert(`Friend request sent to ${username}`);
+  } catch (e) {
+    console.error(`Error sending friend request: ${e}`);
+    alert(`Friend request could not be sent: ${e}`);
+  }
 }
 
 async function sendFriendRequest() {
-	const sendRequestBtn = document.getElementById("search-button") as HTMLButtonElement;
-	if (!sendRequestBtn) return;
+  const sendRequestBtn = document.getElementById(
+    "search-button",
+  ) as HTMLButtonElement;
+  if (!sendRequestBtn) return;
 
-	sendRequestBtn.addEventListener('click', () => {
-		const searchInput = document.getElementById('search-input') as HTMLInputElement;
-		if (!searchInput) return;
-		const usernameInput = searchInput.value;
-		if (usernameInput.length === 0) return;
-		sendRequest(usernameInput);
-	});
+  sendRequestBtn.addEventListener("click", () => {
+    const searchInput = document.getElementById(
+      "search-input",
+    ) as HTMLInputElement;
+    if (!searchInput) return;
+    const usernameInput = searchInput.value;
+    if (usernameInput.length === 0) return;
+    sendRequest(usernameInput);
+  });
 }
 
 function bindProfileViewElements(app: App) {
-	displayUsername();
+  displayUsername();
   displayMatchHistory();
-	displayFriendList(app);
-	displayFriendRequestList(app);
-	sendFriendRequest();
-	displayAvatar();
-	bindAvatarForm(app);
-	bindProfileModal();
-	bindUserInfoUpdateForm(app, "username");
-	bindUserInfoUpdateForm(app, "password");
-	bind2FAButtons(app);
-	logOut(app);
+  displayFriendList(app);
+  displayFriendRequestList(app);
+  sendFriendRequest();
+  displayAvatar();
+  bindAvatarForm(app);
+  bindProfileModal();
+  bindUserInfoUpdateForm(app, "username");
+  bindUserInfoUpdateForm(app, "password");
+  bind2FAButtons(app);
+  logOut(app);
 }
 
-export async function renderProfileView(view: z.infer<typeof ProfileViewSchema>, app: App): Promise<void> {
-	app.appContainer.innerHTML = await fetch("/views/profile.html").then((res) =>
-		res.text(),
-	);
-	bindNavbar(app);
-	bindProfileViewElements(app);
-	void view;
+export async function renderProfileView(
+  view: z.infer<typeof ProfileViewSchema>,
+  app: App,
+): Promise<void> {
+  app.appContainer.innerHTML = await fetch("/views/profile.html").then((res) =>
+    res.text(),
+  );
+  bindNavbar(app);
+  bindProfileViewElements(app);
+  void view;
 }

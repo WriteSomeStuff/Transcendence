@@ -24,9 +24,9 @@ export class PongController extends GameController {
         type: "scoresUpdate",
         payload: scores,
       });
-	  if (this.scoreController.isMaxScoreReached()) {
-      this.gameEnded = true;
-    }
+      if (this.scoreController.isMaxScoreReached()) {
+        this.gameEnded = true;
+      }
     });
     this.courtController = new CourtController(room, this.scoreController);
   }
@@ -40,7 +40,7 @@ export class PongController extends GameController {
     for (const userIndex of this.usersGaveUp) {
       scores[userIndex] = -1;
     }
-    return {
+    const result: MatchResult = {
       participants: this.room.joinedUsers.map((userId, index) => ({
         userId,
         score: scores[index]!,
@@ -48,6 +48,10 @@ export class PongController extends GameController {
       start: this.startTime,
       end: new Date(),
     };
+    if (this.room.permissions.type === "tournament") {
+      result.matchId = this.room.permissions.matchId;
+    }
+    return result;
   }
 
   getBroadcastMessages(): object[] {

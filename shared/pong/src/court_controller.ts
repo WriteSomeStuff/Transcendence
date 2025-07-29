@@ -1,4 +1,4 @@
-import type {Court, CourtState, Room } from "schemas";
+import type { Court, CourtState, Room } from "schemas";
 
 import { initCourt } from "./court.ts";
 import { initCourtState, updateCourtState } from "./court_state.ts";
