@@ -41,7 +41,7 @@ export function render(court: Court, ctx: CanvasRenderingContext2D) {
       translatePoint,
     );
     if (i === court.state.lastBouncedIndex) {
-      ctx.fillStyle = "red"; // in order to highlight
+      ctx.fillStyle = "red"; // to highlight
     }
     addQuadrilateral(
       ctx,
@@ -50,13 +50,11 @@ export function render(court: Court, ctx: CanvasRenderingContext2D) {
     );
     ctx.fillStyle = "green";
   }
-  const widthRatio = ctx.canvas.width / court.geometry.frameWidth;
-  const heightRatio = ctx.canvas.height / court.geometry.frameHeight;
   ctx.beginPath();
   ctx.ellipse(
     ...vec2.toTuple(translatePoint(court.state.ballPosition)),
-    court.geometry.ballRadius * widthRatio,
-    court.geometry.ballRadius * heightRatio,
+    court.geometry.ballRadius * ratio,
+    court.geometry.ballRadius * ratio,
     0,
     0,
     2 * Math.PI,

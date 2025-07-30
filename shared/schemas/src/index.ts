@@ -6,6 +6,18 @@ export {
   CourtSchema,
   PongPlayerInputSchema,
 } from "./game/pong_schemas.js";
+export {
+  ShootingOptionsSchema,
+  ShootingTargetSchema,
+  ShootingCanvasSchema,
+  ShootingPlayerInputSchema,
+} from "./game/shooting_schemas.js";
+export type {
+  ShootingOptions,
+  ShootingTarget,
+  ShootingCanvas,
+  ShootingPlayerInput,
+} from "./game/shooting_schemas.js";
 export type {
   Vector2,
   PaddleState,
