@@ -1,18 +1,26 @@
 import fastify, { FastifyRequest, FastifyReply } from "fastify";
 import fastifyMultipart from "@fastify/multipart";
+import fastifyWebsocket from "@fastify/websocket";
+
+import type { WebSocket } from "ws";
 
 import userRoutes from "./userRoutes.js";
 import friendRoutes from "./friendRoutes.js";
 import matchRoutes from "./matchRoutes.js";
+import { updateStatus } from "./userService.ts";
+
 
 const PORT: number = 80;
 const HOST: string = "0.0.0.0";
 
 const app = fastify({
-  logger: true,
+  // logger: true,
 });
 
+const onlineUsers: Map<number, WebSocket> = new Map();
+
 app.register(fastifyMultipart);
+app.register(fastifyWebsocket);
 
 app.decorate(
   "authenticate",
@@ -32,6 +40,34 @@ app.register(friendRoutes, {
 
 app.register(matchRoutes, {
   prefix: "/match",
+});
+
+app.get("/ws", { websocket: true }, async (socket: WebSocket, req) => {
+  console.log("Processing ws request", req, req.headers);
+  const userId = Number(req.headers.cookie);
+  if (Number.isNaN(userId)) {
+    socket.close();
+    return;
+  }
+  if (!app.authenticate) {
+    socket.close();
+    await updateStatus(userId, "offline", onlineUsers);
+    onlineUsers.delete(userId);
+    return;
+  }
+  socket.on("open", async () => {
+    await updateStatus(userId, "online", onlineUsers);
+    onlineUsers.set(userId, socket);
+  });
+  socket.on("close", async () => {
+    await updateStatus(userId, "offline", onlineUsers);
+    onlineUsers.delete(userId);
+  });
+  socket.on("message", (event: MessageEvent) => {
+    const message = JSON.parse(event.data.toString());
+    console.log(`Received message from user ${userId}:`, message);
+    // show on frontend
+  });
 });
 
 app.get("/health", async (_, reply) => {

@@ -91,6 +91,7 @@ async function renderState(
 class App {
   private state: GlobalAppState;
   public readonly appContainer: HTMLElement;
+  private onlineWebsocket: WebSocket | null = null;
 
   constructor() {
     const appContainer = document.getElementById("app-container");
@@ -108,11 +109,27 @@ class App {
   public selectView(view: ViewState): void {
     this.state = navigateTo(view);
     renderState(this.state, this, true).then((_) => {});
+    if (this.state.status !== "NotLoggedIn") {
+      if (this.onlineWebsocket === null) {
+        this.onlineWebsocket = new WebSocket("/api/user/ws");
+      }
+    } else {
+      this.onlineWebsocket?.close();
+      this.onlineWebsocket = null;
+    }
   }
 
   public resetView(): void {
     this.state = getGlobalState();
     renderState(this.state, this).then((_) => {});
+    if (this.state.status !== "NotLoggedIn") {
+      if (this.onlineWebsocket === null) {
+        this.onlineWebsocket = new WebSocket("/api/user/ws");
+      }
+    } else {
+      this.onlineWebsocket?.close();
+      this.onlineWebsocket = null;
+    }
   }
 }
 

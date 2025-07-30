@@ -2,6 +2,9 @@ import fs from "fs/promises";
 
 import { runTransaction } from "./db.js";
 import type { User } from "schemas";
+import { getFriendList } from "./friendService.ts";
+
+import type { WebSocket } from "ws";
 
 export const insertUser = async (username: string, userId: number) => {
   try {
@@ -62,7 +65,24 @@ export const updateUsername = async (userId: number, newUsername: string) => {
   }
 };
 
-export const updateStatus = async (userId: number, status: string) => {
+async function notifyFriends(userId: number, status: "online" | "offline", onlineUsers: Map<number, WebSocket>): Promise<void> {
+  const socket = onlineUsers.get(userId);
+  if (!socket) return;
+
+  const friends = await getFriendList(userId);
+  for (const friend of friends) {
+    const friendSocket = onlineUsers.get(friend.userId);
+    if (friendSocket) {
+      friendSocket.send(JSON.stringify({
+        type: "friendStatusUpdate",
+        userId,
+        status,
+      }));
+    }
+  }
+}
+
+export const updateStatus = async (userId: number, status: string, onlineUsers: Map<number, WebSocket>) => {
   try {
     runTransaction((db) => {
       const stmt = db.prepare(`
@@ -74,6 +94,7 @@ export const updateStatus = async (userId: number, status: string) => {
 
       stmt.run(status, userId);
     });
+    notifyFriends(userId, status as "online" | "offline", onlineUsers);
   } catch (e) {
     throw e;
   }
