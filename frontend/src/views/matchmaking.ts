@@ -133,6 +133,38 @@ async function promptPongSettings(
   });
 }
 
+async function promptShootingSettings(): Promise<RoomGameData | null> {
+  const modal = document.getElementById(
+    "shootingSettingsModal",
+  ) as HTMLDialogElement;
+  const form = document.getElementById(
+    "shootingSettingsForm",
+  ) as HTMLFormElement;
+  modal.showModal();
+  const closeModalButton = document.getElementById(
+    "closePongSettings",
+  ) as HTMLButtonElement;
+  return new Promise((resolve) => {
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const formData = new FormData(form);
+      modal.close();
+      resolve({
+        game: "shooting",
+        options: {
+          targetsDisappear:
+            (formData.get("targetsDisappear") as string) === "on",
+          gameSpeed: Number(formData.get("gameSpeed") as string),
+        },
+      });
+    });
+    closeModalButton.addEventListener("click", () => {
+      modal.close();
+      resolve(null);
+    });
+  });
+}
+
 async function getGameData(
   gameKind: string,
   pongSettingsModal: HTMLDialogElement,
@@ -141,6 +173,8 @@ async function getGameData(
   switch (gameKind) {
     case "pong":
       return promptPongSettings(pongSettingsModal, pongSettingsForm);
+    case "shooting":
+      return promptShootingSettings();
   }
   return null;
 }

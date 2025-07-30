@@ -35,12 +35,28 @@
                         <button type="submit" class="cursor-pointer px-3 py-2 sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 mt-2">Submit</button>
                     </form>
                 </dialog>
+                <dialog class="modal animate-rainbow" id="shootingSettingsModal">
+                    <h2>Set up the shooting game</h2>
+                    <form id="shootingSettingsForm">
+                        <label>Targets disappear
+                            <input type="checkbox" name="targetsDisappear"
+                                   class="sm:text-base rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </label>
+                        <label>Game speed
+                            <input type="number" name="gameSpeed" value="1" min="0.5" max="2" step="0.1" required
+                                   class="sm:text-base rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </label>
+                        <button class="sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 text-white mb-2 mt-6 mx-auto" id="closeShootingSettings">Cancel</button>
+                        <button type="submit" class="cursor-pointer px-3 py-2 sm:text-base rounded-md border-2 border-purple-500 bg-purple-700 hover:bg-purple-950 mt-2">Submit</button>
+                    </form>
+                </dialog>
                 <dialog class="modal animate-rainbow" id="roomSettingsModal">
                     <h2>Customize the room</h2>
                     <form onsubmit="" id="gameSettingsForm">
                         <label>Game
                             <select name="game">
                                 <option value="pong" selected>Pong</option>
+                                <option value="shooting">Shooting</option>
                                 <!-- add other games -->
                             </select>
                         </label>
@@ -62,6 +78,7 @@
                         <label>Game
                             <select name="game">
                                 <option value="pong" selected>Pong</option>
+                                <option value="shooting">Shooting</option>
                                 <!-- add other games -->
                             </select>
                         </label>

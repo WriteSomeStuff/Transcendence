@@ -3,8 +3,9 @@ import fastifyWebsocket from "@fastify/websocket";
 
 import { GameController } from "./game_controllers/game_controller.js";
 import { PongController } from "./game_controllers/pong_controller.js";
+import { ShootingController } from "./game_controllers/shooting_controller.js";
 
-import { type MatchResult, RoomSchema } from "schemas";
+import { type MatchResult, Room, RoomSchema } from "schemas";
 
 import { WebSocket } from "ws";
 
@@ -90,12 +91,10 @@ class Game {
     }
     this.controller.update(delta);
     const broadcastMessages = this.controller.getBroadcastMessages();
-    console.log("broadcastMessages", broadcastMessages);
     for (let i = 0; i < this.users.length; i++) {
       this.users[i]!.sendMessages(broadcastMessages);
       this.users[i]!.sendMessages(this.controller.getPlayerMessages(i));
     }
-    console.log("sent messages");
     if (this.controller.isGameOver()) {
       this.isGameOver = true;
       saveMatchResult(this.controller.getGameResult()).then((matchId) => {
@@ -183,6 +182,17 @@ setInterval(() => {
   lastUpdate += delta;
 }, 50);
 
+function createGameController(room: Room): GameController {
+  switch (room.gameData.game) {
+    case "pong": {
+      return new PongController(room);
+    }
+    case "shooting": {
+      return new ShootingController(room);
+    }
+  }
+}
+
 app.post("/create", (req, res) => {
   const gameId = lastGameId.toString();
   lastGameId++;
@@ -194,7 +204,7 @@ app.post("/create", (req, res) => {
     return;
   }
   const userIds = parsed.data.joinedUsers;
-  const controller = new PongController(parsed.data);
+  const controller = createGameController(parsed.data);
   games[gameId] = new Game(gameId, userIds, controller);
   for (const userId of userIds) {
     console.log("adding user", userId);
