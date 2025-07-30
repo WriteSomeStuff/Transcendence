@@ -31,20 +31,24 @@ import {
   disable2FA,
 } from "./authService.ts";
 
-export const registerUserHandler = async (
-  request: FastifyRequest,
-  reply: FastifyReply,
-) => {
-  try {
-    const parseResult = RegisterSchema.safeParse(request.body);
-    if (!parseResult.success) {
-      reply.status(400).send({
-        success: false,
-        error: parseResult.error.errors.map((err) => err.message).join(", "),
-      });
-      return;
-    }
-    const { email, password, username } = parseResult.data;
+export const registerUserHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+	try {
+		const parseResult = RegisterSchema.safeParse(request.body);
+		if (!parseResult.success) {
+			reply.status(400).send({
+				success: false,
+				error: parseResult.error.errors.map((err) => err.message).join(", ")
+			});
+			return;
+		}
+		const { email, password, confirmPassword, username } = parseResult.data;
+		if (password !== confirmPassword) {
+			reply.status(400).send({
+				success: false,
+				error: "Passwords do not match"
+			});
+			return;
+		}
 
     console.log(`[Auth Controller] Registering user '${email}'`);
     const userId = await register(email, password);
@@ -339,15 +343,10 @@ export const logoutUserHandler = async (
   }
 };
 
-export const updatePasswordHandler = async (
-  request: FastifyRequest,
-  reply: FastifyReply,
-) => {
-  try {
-    const { newPassword, userId } = request.body as {
-      newPassword: string;
-      userId: number;
-    };
+export const updatePasswordHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+	try {
+		const { newPassword, userId } = request.body as { newPassword: string, userId: number };
+
 
     console.log(`[Auth Controller] Updating password for user ${userId}`);
     await updatePassword(newPassword, userId);

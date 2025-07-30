@@ -41,6 +41,7 @@ export type Login = z.infer<typeof LoginSchema>;
 export const RegisterSchema = z.object({
   email: EmailSchema,
   password: PasswordSchema,
+  confirmPassword: PasswordSchema,
   username: UsernameSchema,
 });
 

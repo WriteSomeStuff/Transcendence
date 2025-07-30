@@ -12,7 +12,7 @@ import {
 
 const matchRoutes = async (app: FastifyInstance) => {
   app.post("/insert-tournament", InsertTournamentHandler);
-  app.post("/", { preHandler: [app.authenticate] }, createMatchHandler);
+  app.post("/", createMatchHandler);
 
   app.get(
     "/history",

@@ -7,6 +7,7 @@ import type {
   TournamentMatchCreateMessage,
   TournamentCreateResponse,
   TournamentCreateMessage,
+  RoomGameData,
 } from "schemas";
 
 import {
@@ -14,7 +15,12 @@ import {
   TournamentMatchCreateResponseSchema,
 } from "schemas";
 
-import { updateBracketWithMatchIds } from "./matchService.js";
+import {
+  updateBracketWithMatchIds,
+  getTournamentId,
+  getTournamentBracket,
+  updateTournamentStatusFinished,
+} from "./matchService.js";
 
 import { v4 as uuidv4 } from "uuid";
 
@@ -23,13 +29,13 @@ export async function createTournamentInfo(
   tournamentInfo: TournamentCreateMessage,
 ): Promise<number> {
   // 1. fetch user id's
-  console.log("Fetching user ids");
+  console.log("[TOURNAMENT] Fetching user ids");
   const userIds: UserId[] = await getUserIds(tournamentInfo.participants);
   if (userIds.length === 0) {
-    throw new Error("A username was invalid");
+    throw new Error("[TOURNAMENT] A username was invalid");
   }
   // 2. make Tournament room
-  console.log("Found user ids");
+  console.log("[TOURNAMENT] Found user ids");
   const tournament: Tournament = {
     id: 0,
     name: tournamentInfo.name,
@@ -39,12 +45,17 @@ export async function createTournamentInfo(
     bracket: null,
   };
   // 3. pass to create bracket
-  console.log("Creating bracket");
-  tournament.bracket = createBracket(tournament.size, tournament.joinedUsers);
+  console.log("[TOURNAMENT] Creating bracket");
+  tournament.bracket = createBracket(
+    tournament.size,
+    tournament.joinedUsers,
+    tournamentInfo.maxScore,
+    tournamentInfo.gameData,
+  );
 
   // 4. database stuff
   // 4.1. create tournament row
-  console.log("creating in user service");
+  console.log("[TOURNAMENT] creating in user service");
   const createTournamentResult = await createTournamentInUserService(
     tournamentInfo.name,
     tournament.bracket,
@@ -56,7 +67,7 @@ export async function createTournamentInfo(
   }
 
   // 4.2. create all the matches in match table
-  console.log("Creating matches in the table");
+  console.log("[TOURNAMENT] Creating matches in the table");
   const createMatchResult = await createTournamentMatchesInUserService(
     tournament.id,
     tournament.bracket,
@@ -177,18 +188,22 @@ function shuffle(array: number[]) {
 function createBracket(
   totalPlayers: number,
   participants: number[],
+  maxScore: number,
+  gameData: RoomGameData,
 ): TournamentBracket {
   const totalMatches = totalPlayers - 1;
-  const totalRounds = Math.log2(totalPlayers);
+  const totalRounds = Math.round(Math.log2(totalPlayers));
 
   let bracket: TournamentBracket = {
     matches: [] as TournamentMatch[],
     currentRound: 0,
+    maxScore: maxScore,
+    gameData: gameData,
   };
 
   // 0. random draw
   shuffle(participants);
-  // 1. Create and fill first round: matches[0]-[n/2 - 1]
+  // 1. Create and fill the first round: matches[0]-[n/2 - 1]
   for (let i = 0; i < totalPlayers; i += 2) {
     let match: TournamentMatch = {
       id: uuidv4(),
@@ -202,7 +217,7 @@ function createBracket(
   }
   console.log("[Tournament] First round matches created and filled");
 
-  // 2. Create rest of tournament with empty matches: matches[n/2]-[n - 1]
+  // 2. Create the rest of the tournament with empty matches: matches[n/2]-[n - 1]
   for (let round = 1; round < totalRounds; round++) {
     const matchesInRound = Math.pow(2, totalRounds - 1 - round);
     for (let i = 0; i < matchesInRound; i++) {
@@ -236,6 +251,63 @@ function createBracket(
   return bracket;
 }
 
+function AddWinnerToNextRound(
+  userIdWinner: number,
+  bracket: TournamentBracket,
+  matchIndex: number,
+) {
+  const nextMatchId = bracket.matches[matchIndex]!.nextMatchId!;
+  for (const match of bracket.matches) {
+    if (match.id === nextMatchId) {
+      match.participants.push(userIdWinner);
+      break;
+    }
+  }
+}
+
+function isLastMatchInRound(
+  matchIndex: number,
+  totalPlayers: number,
+  bracket: TournamentBracket,
+): boolean {
+  // baseValue * totalplayers / 8 = matches in the first round
+  // only works for 4, 8 or 16 player tournaments
+  let baseValue = 4;
+  for (let i = 1; i <= bracket.currentRound; i++) {
+    baseValue += 3 - i;
+  }
+  return matchIndex === (baseValue * totalPlayers) / 8 - 1;
+}
+
+function isFinal(currentRound: number, totalPlayers: number) {
+  return currentRound === Math.round(Math.log2(totalPlayers)) - 1;
+}
+
+export function proceedTournament(matchId: number, userIdWinner: number) {
+  const tournamentId = getTournamentId(matchId);
+  const bracket = getTournamentBracket(tournamentId);
+
+  let currMatchIndex = 0;
+  while (currMatchIndex < bracket.matches.length) {
+    if (bracket.matches[currMatchIndex]!.databaseId === matchId) break;
+    currMatchIndex++;
+  }
+
+  bracket.matches[currMatchIndex]!.winner = userIdWinner;
+
+  const totalPlayers = bracket.matches.length + 1;
+  if (isFinal(bracket.currentRound, totalPlayers)) {
+    updateTournamentStatusFinished(tournamentId);
+    return;
+  } else if (isLastMatchInRound(currMatchIndex, totalPlayers, bracket)) {
+    // last match in this round
+    bracket.currentRound++;
+  }
+
+  AddWinnerToNextRound(userIdWinner, bracket, currMatchIndex);
+  updateBracketWithMatchIds(tournamentId, bracket);
+}
+
 //rnd| matches
 // 0 | [0] [1]
 // 1 |   [2]
@@ -248,3 +320,11 @@ function createBracket(
 // 1 | 		[8] [9] [10] [11]
 // 3 |			[12] [13]
 // 4 |	  		  [14]
+
+// 4 totalplayers / 8 - 1
+// 4 totalplayers / 8 + 2 totalplayers / 8 - 1
+// 4 totalplayers / 8 + 2 totalplayers / 8 + 1 totalplayers / 8 - 1
+
+// 4 * totalplayers / 8 - 1 round === 0
+// 6 * totalplayers / 8 - 1 round === 1
+// 7 * totalplayers / 8 - 1 round === 2

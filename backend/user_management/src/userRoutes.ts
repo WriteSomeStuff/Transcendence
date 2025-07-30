@@ -3,7 +3,6 @@ import { FastifyInstance } from "fastify";
 import {
   insertUserHandler,
   updateUsernameHandler,
-  updatePasswordHandler,
   updateUserAvatarHandler,
   setStatusHandler,
   getUserAvatarHandler,
@@ -20,11 +19,6 @@ const userRoutes = async (app: FastifyInstance) => {
     "/username",
     { preHandler: [app.authenticate] },
     updateUsernameHandler,
-  );
-  app.put(
-    "/password",
-    { preHandler: [app.authenticate] },
-    updatePasswordHandler,
   );
   app.put(
     "/avatar",

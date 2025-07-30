@@ -59,28 +59,40 @@ function bindAvatarForm(app: App) {
 }
 
 function bindUserInfoUpdateForm(app: App, infoType: string) {
-  if (infoType != "username" && infoType != "password") {
+  if (infoType !== "username" && infoType !== "password") {
     alert("Incorrect usage of bindUserInfoUpdateForm function");
-	return;	
+	return;
   }
 
   const form = document.getElementById(`${infoType}Form`) as HTMLFormElement;
   if (!form) return;
+  if (infoType === "password") {
+    const confirmPasswordInput = document.getElementById("confirmPassword") as HTMLInputElement;
+    if (!confirmPasswordInput) return;
+    confirmPasswordInput.required = true;
+  }
 
   form.addEventListener("submit", async function (event: Event) {
     event.preventDefault();
     console.log(`[formHandlers] Handling ${infoType} update`);
 
-    const infoTypeCapitalized =
-      infoType.charAt(0).toUpperCase() + infoType.slice(1);
+    const infoTypeCapitalized = infoType.charAt(0).toUpperCase() + infoType.slice(1);
     const input = document.getElementById(
       `new${infoTypeCapitalized}`,
     ) as HTMLInputElement;
     if (!input) return;
+    if (infoType === "password") {
+      const confirmPasswordInput = document.getElementById("confirmPassword") as HTMLInputElement;
+      if (!confirmPasswordInput) return;
+      if (input.value !== confirmPasswordInput.value) {
+        alert("Passwords do not match. Please try again.");
+        return;
+      }
+    }
 
     const newValue = input.value;
 
-    console.log("new username:", newValue);
+    console.log(`New value for ${infoType}:`, newValue);
 
     const response = await fetch(`/api/user/${infoType}`, {
       method: "PUT",

@@ -33,6 +33,7 @@ export type RoomGameData = z.infer<typeof RoomGameDataSchema>;
 export const RoomSchema = z.object({
   id: z.string(),
   size: z.number().int().min(2),
+  maxScore: z.number().int().min(1).max(100),
   joinedUsers: z.array(UserIdSchema),
   permissions: RoomPermissionsSchema,
   gameData: RoomGameDataSchema,
@@ -42,6 +43,7 @@ export type Room = z.infer<typeof RoomSchema>;
 
 export const TournamentMatchRoomSchema = z.object({
   size: z.number().int().min(2),
+  maxScore: z.number(),
   permissions: RoomPermissionsSchema.refine((p) => p.type == "tournament"),
   gameData: RoomGameDataSchema,
 });
@@ -62,6 +64,8 @@ export type TournamentMatch = z.infer<typeof TournamentMatchSchema>;
 export const TournamentBracketSchema = z.object({
   matches: z.array(TournamentMatchSchema),
   currentRound: z.number(),
+  maxScore: z.number(), // extra stuff for room creation
+  gameData: RoomGameDataSchema,
 });
 
 export type TournamentBracket = z.infer<typeof TournamentBracketSchema>;
@@ -77,7 +81,7 @@ export type TournamentBracket = z.infer<typeof TournamentBracketSchema>;
 export const TournamentSchema = z.object({
   id: z.number(),
   name: z.string(),
-  size: z.enum(["4", "8", "16"]).transform(Number),
+  size: z.number().refine((n) => [4, 8, 16].includes(n)),
   joinedUsers: z.array(UserIdSchema),
   gameData: RoomGameDataSchema,
   bracket: z.union([TournamentBracketSchema, z.null()]),
@@ -89,6 +93,7 @@ export const MatchmakingMessageSchema = z.discriminatedUnion("action", [
   z.object({
     action: z.literal("createRoom"),
     size: z.number().int().min(1),
+    maxScore: z.number().int().min(1).max(100),
     permissions: RoomPermissionsSchema.refine((p) => p.type !== "tournament"),
     gameData: RoomGameDataSchema,
   }),
@@ -106,7 +111,8 @@ export type MatchmakingMessage = z.infer<typeof MatchmakingMessageSchema>;
 
 export const TournamentCreateMessageSchema = z.object({
   name: z.string(),
-  size: z.number(),
+  size: z.number().refine((n) => [4, 8, 16].includes(n)),
+  maxScore: z.number().int().min(1).max(100),
   participants: z.array(UsernameSchema),
   gameData: RoomGameDataSchema,
 });

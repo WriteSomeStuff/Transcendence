@@ -19,7 +19,7 @@ export class PongController extends GameController {
     super(room);
     this.startTime = new Date();
     this.playerMessages = Array.from({ length: room.size }).map((_) => []);
-    this.scoreController = new PongScoreController(room.size, 2, (scores) => {
+    this.scoreController = new PongScoreController(room.size, room.maxScore, (scores) => {
       this.broadcastMessages.push({
         type: "scoresUpdate",
         payload: scores,

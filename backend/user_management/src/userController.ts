@@ -7,7 +7,6 @@ import {
   insertUser,
   getUserDataFromDb,
   updateUsername,
-  updatePassword,
   updateStatus,
   getUserAvatarPath,
   getUserId,
@@ -116,42 +115,6 @@ export const updateUsernameHandler = async (
         error: "An error occured updating the username:" + e,
       });
     }
-  }
-};
-
-export const updatePasswordHandler = async (
-  request: FastifyRequest,
-  reply: FastifyReply,
-) => {
-  try {
-    const { newValue } = request.body as { newValue: string };
-    const parseResult = RegisterSchema.shape.password.safeParse(newValue);
-    if (!parseResult.success) {
-      reply.status(400).send({
-        success: false,
-        error: parseResult.error.errors.map((err) => err.message).join(", "),
-      });
-      return;
-    }
-
-    console.log(
-      `[User Controller] Updating password in auth db for user ${request.user.userId}`,
-    );
-    await updatePassword(request.user.userId, newValue);
-    console.log(
-      `[User Controller] Updating password for user ${request.user.userId} successful`,
-    );
-
-    reply.status(200).send({
-      success: true,
-      message: "Password successfully changed",
-    });
-  } catch (e: any) {
-    console.error("Error updating password:", e);
-    reply.status(500).send({
-      success: false,
-      error: "An error occured updating the password:" + e,
-    });
   }
 };
 
