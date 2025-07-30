@@ -3,6 +3,7 @@ import { z } from "zod";
 import { UserIdSchema } from "./user_schemas.js";
 import { PongOptionsSchema } from "./game/pong_schemas.js";
 import { UsernameSchema } from "./auth_schemas.js";
+import { ShootingOptionsSchema } from "./game/shooting_schemas.js";
 
 export const RoomPermissionsSchema = z.discriminatedUnion("type", [
   z.object({
@@ -25,6 +26,10 @@ export const RoomGameDataSchema = z.discriminatedUnion("game", [
   z.object({
     game: z.literal("pong"),
     options: PongOptionsSchema,
+  }),
+  z.object({
+    game: z.literal("shooting"),
+    options: ShootingOptionsSchema,
   }),
 ]);
 

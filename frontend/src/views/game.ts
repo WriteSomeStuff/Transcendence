@@ -1,7 +1,13 @@
 import { z } from "zod";
 
 import { render as renderCourt } from "pong";
-import { GameInputMessage, GameUpdateMessageSchema } from "schemas";
+import { render as renderShootingCanvas } from "shooting";
+import {
+  GameInputMessage,
+  GameUpdateMessageSchema,
+  ShootingCanvas,
+  ShootingPlayerInput,
+} from "schemas";
 import type { Court, PongPlayerInput } from "schemas";
 
 import { GameViewSchema } from "./views.js";
@@ -10,6 +16,17 @@ import type { App } from "../app.js";
 function sendUpdatePongInput(socket: WebSocket, input: PongPlayerInput): void {
   const message: GameInputMessage = {
     type: "pongInputUpdate",
+    payload: input,
+  };
+  socket.send(JSON.stringify(message));
+}
+
+function sendShootingInput(
+  socket: WebSocket,
+  input: ShootingPlayerInput,
+): void {
+  const message: GameInputMessage = {
+    type: "shootingPlayerInput",
     payload: input,
   };
   socket.send(JSON.stringify(message));
@@ -101,8 +118,58 @@ function updateCourt(canvas: HTMLCanvasElement, court: Court) {
   if (!ctx) {
     return;
   }
-  console.log("Updating court from game");
   renderCourt(court, ctx);
+}
+
+function initShootingCanvas(
+  canvas: HTMLCanvasElement,
+  socket: WebSocket,
+  shootingCanvas: ShootingCanvas,
+) {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    return;
+  }
+  renderShootingCanvas(shootingCanvas, ctx);
+  const aspectRatio = shootingCanvas.width / shootingCanvas.height;
+  const canvasAspectRatio = canvas.width / canvas.height;
+  const ratio =
+    aspectRatio >= canvasAspectRatio
+      ? ctx.canvas.width / shootingCanvas.width
+      : ctx.canvas.height / shootingCanvas.height;
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const onInput = (clientX: number, clientY: number) => {
+    const x = (clientX - rect.left) * scaleX;
+    const y = (clientY - rect.top) * scaleY;
+    sendShootingInput(socket, {
+      shootX: (x - canvas.width / 2) / ratio + shootingCanvas.width / 2,
+      shootY: (y - canvas.height / 2) / ratio + shootingCanvas.height / 2,
+    });
+  };
+  canvas.addEventListener("mousedown", (e) => {
+    console.log("clicked");
+    onInput(e.clientX, e.clientY);
+  });
+  canvas.addEventListener("touchstart", (e) => {
+    console.log("touched");
+    e.preventDefault();
+    const touch = e.touches[0];
+    if (!touch) return;
+    onInput(touch.clientX, touch.clientY);
+  });
+}
+
+function updateShootingCanvas(
+  canvas: HTMLCanvasElement,
+  shootingCanvas: ShootingCanvas,
+) {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    return;
+  }
+  renderShootingCanvas(shootingCanvas, ctx);
 }
 
 function updateScores(
@@ -131,10 +198,10 @@ export async function renderGameView(
 
   const isMobile = /Mobile|Android|iPhone|iPad/i.test(navigator.userAgent);
   if (isMobile) {
-	const controls = document.getElementById("mobile-controls");
-	if (controls) {
-	  controls.hidden = false;
-	  }
+    const controls = document.getElementById("mobile-controls");
+    if (controls) {
+      controls.hidden = false;
+    }
   }
 
   const canvas = document.getElementById("myCanvas");
@@ -191,6 +258,14 @@ export async function renderGameView(
       }
       case "pongUpdate": {
         updateCourt(canvas, parsed.data.payload);
+        break;
+      }
+      case "shootingInit": {
+        initShootingCanvas(canvas, socket, parsed.data.payload);
+        break;
+      }
+      case "shootingUpdate": {
+        updateShootingCanvas(canvas, parsed.data.payload);
         break;
       }
       case "gameEnded": {
