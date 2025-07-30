@@ -4,6 +4,7 @@ import fastifyWebsocket from "@fastify/websocket";
 import type { WebSocket } from "ws";
 
 import { UserController } from "./controllers/user_controller.js";
+import { fetchTournamentRooms } from "./controllers/room_controller.js";
 
 const app = Fastify();
 await app.register(fastifyWebsocket);
@@ -25,7 +26,7 @@ app.listen(
       process.exit(1);
     }
     setInterval(async () => {
-      // todo fetch tournament rooms and add them to controllers
+      await fetchTournamentRooms();
       UserController.update();
     }, 1000);
     console.log(`Server·listening·on·${address}`);

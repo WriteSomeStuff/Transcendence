@@ -5,8 +5,12 @@ export class PongScoreController implements ScoreController {
   private readonly maxScore: number;
   private readonly sender: (scores: number[]) => void;
 
-  public constructor(playersCount: number, maxScore: number, sender: (scores: number[]) => void) {
-    this.playerScores = Array.from({length: playersCount}).map(_ => 0);
+  public constructor(
+    playersCount: number,
+    maxScore: number,
+    sender: (scores: number[]) => void,
+  ) {
+    this.playerScores = Array.from({ length: playersCount }).map((_) => 0);
     this.maxScore = maxScore;
     this.sender = sender;
   }
@@ -30,5 +34,5 @@ export class PongScoreController implements ScoreController {
       }
     }
     return false;
-	}
+  }
 }

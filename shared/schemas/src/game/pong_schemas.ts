@@ -16,7 +16,7 @@ export type Vector2 = z.infer<typeof Vector2Schema>;
 
 export const PaddleStateSchema = z.object({
   offsetFromCenter: z.number().min(-1).max(1),
-  edgeRatio: z.number().min(0.1).max(0.5).default(0.4),
+  edgeRatio: z.number().default(0.4),
   velocity: z.number().default(0),
 });
 

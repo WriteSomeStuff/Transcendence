@@ -134,7 +134,7 @@ export async function renderGameView(
 	const controls = document.getElementById("mobile-controls");
 	if (controls) {
 	  controls.hidden = false;
-	}
+	  }
   }
 
   const canvas = document.getElementById("myCanvas");

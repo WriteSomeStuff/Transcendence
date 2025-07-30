@@ -8,10 +8,28 @@ app.get("/health", async (_, res) => {
 });
 
 app.addHook("onRequest", async (req, res) => {
-  const allowedRoutes = ["/user/profile", "/matchmaking/ws"];
-  (void res);
-  if (!allowedRoutes.includes(req.url)) {
-    console.log("Not allowed"); // TODO return actual error
+  const allowedRoutes = [
+    "/user/username",
+    "/user/avatar",
+    "/user/profile",
+    "/user/get-userid",
+    "/user/get-username",
+    "/user/friends/request",
+    "/user/friends/accept",
+    "/user/friends/reject",
+    "/user/friends/requests",
+    "/user/friends/list",
+    "/user/friends/remove",
+    "/user/match/history",
+    "/user/match/tournament",
+    "/user/match/create-tournament",
+    "/matchmaking/ws",
+    "/game/ws",
+    "/game/users",
+  ];
+  const route = req.url.split("?")[0]!;
+  if (!allowedRoutes.includes(route)) {
+    res.status(401).send({ error: "Not allowed route" });
   }
   console.log(req.url);
 });

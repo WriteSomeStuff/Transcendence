@@ -160,7 +160,11 @@ export function updateCourtState(
       paddleEnd,
       getPlayerLineNormal(geometry, i),
     );
-    if (Number.isFinite(paddleDistance) && paddleDistance < minDistance) {
+    if (
+      state.paddles[i]!.edgeRatio < 1 &&
+      Number.isFinite(paddleDistance) &&
+      paddleDistance < minDistance
+    ) {
       bouncedPaddleIndex = i;
       if (vec2.dot(getPlayerLineNormal(geometry, i), state.ballVelocity) < 0) {
         newDirection = vec2.reflect(

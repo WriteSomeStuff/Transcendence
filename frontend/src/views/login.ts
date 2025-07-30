@@ -69,9 +69,12 @@ export async function renderLoginView(
   if (view.params.code) {
     console.log("[LoginView] OAuth code received:", view.params.code);
     try {
-      const response = await fetch(`/api/auth/oauth/callback?code=${view.params.code}`, {
-        method: 'GET',
-      });
+      const response = await fetch(
+        `/api/auth/oauth/callback?code=${view.params.code}`,
+        {
+          method: "GET",
+        },
+      );
       if (!response.ok) {
         throw new Error(`OAuth callback failed: ${response.statusText}`);
       }
