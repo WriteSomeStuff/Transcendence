@@ -107,10 +107,12 @@
   .toast {
     background-color: #000000;
     color: #fed7e2;
-    padding: 0.5rem 1rem;
-    border-radius: 0.25rem;
+    border: 2px solid #fed7e2;
+    padding: 1rem 2rem;
+    font-size: 1.5rem;
+    border-radius: 0.5rem;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    animation: fadeInOut 3s ease-in-out forwards;
+    animation: fadeInOut 5s ease-in-out forwards;
   }
 }
 

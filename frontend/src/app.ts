@@ -115,7 +115,7 @@ class App {
       container.appendChild(toast);
       setTimeout(() => {
         container.removeChild(toast);
-      }, 3000); 
+      }, 5000); 
     } else {
       alert(`Friend ${username} is now ${status}`);
     }
