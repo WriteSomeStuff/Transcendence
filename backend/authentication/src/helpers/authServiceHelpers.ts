@@ -26,7 +26,7 @@ export const fetchUserIdByEmail = async (email: string): Promise<number> => {
 			FROM user
 			WHERE email = ?
 		`);
-    const result = stmt.get(email);
+    const result = stmt.get(email) as { user_id: number } | undefined;
     if (!result) {
       console.log(
         `[Auth Service] User '${email}' not found in auth service db`,
@@ -67,7 +67,7 @@ export const fetchEmailByUserId = async (userId: number): Promise<string> => {
 			FROM user
 			WHERE user_id = ?
 		`);
-    const result = stmt.get(userId);
+    const result = stmt.get(userId) as { email: string } | undefined;
     if (!result) {
       console.log(
         `[Auth Service] User with ID '${userId}' not found in auth service db`,
