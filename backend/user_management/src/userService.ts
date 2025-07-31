@@ -89,8 +89,26 @@ async function notifyFriends(userId: number, status: string, onlineUsers: Map<nu
   }
 }
 
-export const updateStatus = async (userId: number, status: string, onlineUsers: Map<number, WebSocket>) => {
+export const updateOnlineStatus = async (userId: number, status: string, onlineUsers: Map<number, WebSocket>) => {
   console.log(`Updating status for user ${userId} to ${status}`);
+  try {
+    runTransaction((db) => {
+      const stmt = db.prepare(`
+				UPDATE user
+				SET online_status = ?
+				WHERE
+					user_id = ?	
+			`);
+
+      stmt.run(status, userId);
+    });
+    await notifyFriends(userId, status, onlineUsers);
+  } catch (e) {
+    throw e;
+  }
+};
+
+export const updateStatus = async (userId: number, status: string) => {
   try {
     runTransaction((db) => {
       const stmt = db.prepare(`
@@ -102,7 +120,6 @@ export const updateStatus = async (userId: number, status: string, onlineUsers: 
 
       stmt.run(status, userId);
     });
-    await notifyFriends(userId, status, onlineUsers);
   } catch (e) {
     throw e;
   }

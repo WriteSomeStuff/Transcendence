@@ -7,7 +7,7 @@ import {
   insertUser,
   getUserDataFromDb,
   updateUsername,
-  // updateStatus,
+  updateStatus,
   getUserAvatarPath,
   getUserId,
   updateAvatar,
@@ -118,33 +118,33 @@ export const updateUsernameHandler = async (
   }
 };
 
-// export const setStatusHandler = async (
-//   request: FastifyRequest,
-//   reply: FastifyReply,
-// ) => {
-//   try {
-//     const { userId, status } = request.body as {
-//       userId: number;
-//       status: string;
-//     };
+export const setStatusHandler = async (
+  request: FastifyRequest,
+  reply: FastifyReply,
+) => {
+  try {
+    const { userId, status } = request.body as {
+      userId: number;
+      status: string;
+    };
 
-//     console.log(
-//       `[User Controller] Setting status for user ${userId} to ${status}`,
-//     );
-//     await updateStatus(userId, status);
-//     console.log(
-//       `[User Controller] Setting status for user ${userId} to ${status} Successful`,
-//     );
+    console.log(
+      `[User Controller] Setting status for user ${userId} to ${status}`,
+    );
+    await updateStatus(userId, status);
+    console.log(
+      `[User Controller] Setting status for user ${userId} to ${status} Successful`,
+    );
 
-//     reply.send({ success: true });
-//   } catch (e) {
-//     console.error("Error setting status:", e);
-//     reply.status(500).send({
-//       success: false,
-//       error: "An error occured setting the status" + e,
-//     });
-//   }
-// };
+    reply.send({ success: true });
+  } catch (e) {
+    console.error("Error setting status:", e);
+    reply.status(500).send({
+      success: false,
+      error: "An error occured setting the status" + e,
+    });
+  }
+};
 
 export const getUserIdByUsernameHandler = async (
   request: FastifyRequest,

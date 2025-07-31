@@ -7,7 +7,7 @@ import type { WebSocket } from "ws";
 import userRoutes from "./userRoutes.js";
 import friendRoutes from "./friendRoutes.js";
 import matchRoutes from "./matchRoutes.js";
-import { updateStatus } from "./userService.ts";
+import { updateOnlineStatus } from "./userService.ts";
 
 
 const PORT: number = 80;
@@ -52,18 +52,18 @@ app.get("/ws", { websocket: true }, async (socket: WebSocket, req) => {
   if (!app.authenticate) {
     console.error("Authentication in WebSocket handler is not set up");
     socket.close();
-    await updateStatus(userId, "offline", onlineUsers);
+    await updateOnlineStatus(userId, "offline", onlineUsers);
     onlineUsers.delete(userId);
     return;
   }
 
   console.log(`User ${userId} connected`);
-  await updateStatus(userId, "online", onlineUsers);
+  await updateOnlineStatus(userId, "online", onlineUsers);
   onlineUsers.set(userId, socket);
 
   socket.on("close", async () => {
     console.log(`User ${userId} disconnected`);
-    await updateStatus(userId, "offline", onlineUsers);
+    await updateOnlineStatus(userId, "offline", onlineUsers);
     onlineUsers.delete(userId);
   });
 });

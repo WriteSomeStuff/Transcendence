@@ -6,7 +6,7 @@ if (!DB_PATH) {
 }
 
 const db = new Database(DB_PATH, {
-  verbose: console.log,
+//   verbose: console.log,
 });
 
 export function runTransaction<T>(fn: (db: Database.Database) => T): T {
@@ -21,8 +21,9 @@ const sql = `
 		created_at		TEXT	DEFAULT (datetime('now')),
 		last_login		TEXT,
 		avatar_path		TEXT,
-		account_status	TEXT	DEFAULT ('offline')	CHECK(account_status IN ('online', 'offline'))
-	);
+		account_status	TEXT	DEFAULT ('loggedout')	CHECK(account_status IN ('loggedin', 'loggedout')),
+		online_status	TEXT	DEFAULT ('offline')	CHECK(online_status IN ('online', 'offline'))
+		);
 
 	CREATE TABLE IF NOT EXISTS tournament (
 		tournament_id		INTEGER PRIMARY KEY,
@@ -70,7 +71,7 @@ const sql = `
 
 	CREATE TRIGGER IF NOT EXISTS update_last_login
 	AFTER UPDATE OF account_status ON user
-	WHEN NEW.account_status = 'online'
+	WHEN NEW.account_status = 'loggedin'
 	BEGIN
 		UPDATE user
 		SET last_login = (datetime('now'))

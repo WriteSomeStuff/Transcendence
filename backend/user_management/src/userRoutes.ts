@@ -4,7 +4,7 @@ import {
   insertUserHandler,
   updateUsernameHandler,
   updateUserAvatarHandler,
-  // setStatusHandler,
+  setStatusHandler,
   getUserAvatarHandler,
   getUserDataHandler,
   getUserIdByUsernameHandler,
@@ -25,7 +25,7 @@ const userRoutes = async (app: FastifyInstance) => {
     { preHandler: [app.authenticate] },
     updateUserAvatarHandler,
   );
-  // app.put("/status", setStatusHandler);
+  app.put("/status", setStatusHandler);
 
   app.get("/avatar", { preHandler: [app.authenticate] }, getUserAvatarHandler);
   app.get("/profile", { preHandler: [app.authenticate] }, getUserDataHandler);

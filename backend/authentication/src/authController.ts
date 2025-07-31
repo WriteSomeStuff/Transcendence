@@ -24,7 +24,7 @@ import {
   registerUserInUserService,
   login,
   OAuthCallback,
-  // setStatusInUserService,
+  setStatusInUserService,
   updatePassword,
   verify2FA,
   enable2FA,
@@ -308,27 +308,27 @@ export const logoutUserHandler = async (
     );
 
     console.log(
-      `[Auth Controller] Setting status to 'offline' for user ${request.user.userId}`,
+      `[Auth Controller] Setting status to 'loggedout' for user ${request.user.userId}`,
     );
-    // const response = await setStatusInUserService(
-    //   request.user.userId,
-    //   "offline",
-    // );
+    const response = await setStatusInUserService(
+      request.user.userId,
+      "loggedout",
+    );
 
-    // if (!response.ok) {
-    //   console.error(
-    //     "Failed to update user service database:",
-    //     response.statusText,
-    //   );
-    //   reply.status(response.status).send({
-    //     success: false,
-    //     error: "Failed to update user service database",
-    //   });
-    //   return;
-    // }
-    // console.log(
-    //   `[Auth Controller] Set status to 'offline' for user ${request.user.userId}`,
-    // );
+    if (!response.ok) {
+      console.error(
+        "Failed to update user service database:",
+        response.statusText,
+      );
+      reply.status(response.status).send({
+        success: false,
+        error: "Failed to update user service database",
+      });
+      return;
+    }
+    console.log(
+      `[Auth Controller] Set status to 'loggedout' for user ${request.user.userId}`,
+    );
 
     return reply.status(200).send({
       success: true,

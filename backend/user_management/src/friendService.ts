@@ -80,7 +80,8 @@ export const getFriendList = async (userId: number): Promise<Friend[]> => {
 						ELSE f.user_id
 					END AS friend_id,
 					u.username,
-					u.account_status
+					u.account_status,
+          u.online_status
 				FROM friendship f
 				JOIN user u ON u.user_id = (
 					CASE
@@ -96,6 +97,7 @@ export const getFriendList = async (userId: number): Promise<Friend[]> => {
         friend_id: number;
         username: string;
         account_status: string;
+        online_status: string;
       }[];
       if (!rows || rows.length === 0) return [];
 
@@ -104,6 +106,7 @@ export const getFriendList = async (userId: number): Promise<Friend[]> => {
         userId: row.friend_id,
         username: row.username,
         accountStatus: row.account_status,
+        onlineStatus: row.online_status,
       }));
 
       return friends;
