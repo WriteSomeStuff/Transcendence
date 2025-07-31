@@ -130,10 +130,11 @@ class App {
 
     this.onlineWebsocket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      const message = data.toString();
+      // const message = data.toString();
 
-      console.log(`Received message from user ${data.username}:`, message);
+      // console.log(`Received message from user ${data.username}:`, message);
       if (data.type === "friendStatusUpdate") {
+        console.log(`Friend ${data.username} is now ${data.status}`);
         this.showStatusMessage(data.username, data.status);
       }
     };

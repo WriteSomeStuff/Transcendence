@@ -9,6 +9,7 @@ app.get("/health", async (_, res) => {
 
 app.addHook("onRequest", async (req, res) => {
   const allowedRoutes = [
+    "/user/ws",
     "/user/username",
     "/user/avatar",
     "/user/profile",
@@ -49,6 +50,7 @@ app.register(proxy, {
 app.register(proxy, {
   upstream: "http://user_service",
   prefix: "/user",
+  websocket: true,
 });
 
 app.listen(

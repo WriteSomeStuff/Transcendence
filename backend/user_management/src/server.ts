@@ -20,7 +20,7 @@ const app = fastify({
 const onlineUsers: Map<number, WebSocket> = new Map();
 
 app.register(fastifyMultipart);
-app.register(fastifyWebsocket);
+await app.register(fastifyWebsocket);
 
 app.decorate(
   "authenticate",
@@ -43,7 +43,7 @@ app.register(matchRoutes, {
 });
 
 app.get("/ws", { websocket: true }, async (socket: WebSocket, req) => {
-  console.log("Processing ws request", req, req.headers);
+  console.log("Processing user/ws request");
   const userId = Number(req.headers.cookie);
   if (Number.isNaN(userId)) {
     socket.close();
@@ -56,11 +56,11 @@ app.get("/ws", { websocket: true }, async (socket: WebSocket, req) => {
     onlineUsers.delete(userId);
     return;
   }
-  socket.on("open", async () => {
-    console.log(`User ${userId} connected`);
-    await updateStatus(userId, "online", onlineUsers);
-    onlineUsers.set(userId, socket);
-  });
+
+  console.log(`User ${userId} connected`);
+  await updateStatus(userId, "online", onlineUsers);
+  onlineUsers.set(userId, socket);
+
   socket.on("close", async () => {
     console.log(`User ${userId} disconnected`);
     await updateStatus(userId, "offline", onlineUsers);

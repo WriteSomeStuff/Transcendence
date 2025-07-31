@@ -65,16 +65,16 @@ export const updateUsername = async (userId: number, newUsername: string) => {
   }
 };
 
-async function notifyFriends(userId: number, status: "online" | "offline", onlineUsers: Map<number, WebSocket>): Promise<void> {
+async function notifyFriends(userId: number, status: string, onlineUsers: Map<number, WebSocket>): Promise<void> {
+  console.log(`Notifying friends of user ${userId} about status ${status}`);
   try {
-      const socket = onlineUsers.get(userId);
-      if (!socket) return;
-    
-      const friends = await getFriendList(userId);
-      const username = await getUsername(userId);
-      for (const friend of friends) {
-        const friendSocket = onlineUsers.get(friend.userId);
+    const friends = await getFriendList(userId);
+    const username = await getUsername(userId);
+    console.log(`Found ${friends.length} friends for user ${username}`);
+    for (const friend of friends) {
+      const friendSocket = onlineUsers.get(friend.userId);
         if (friendSocket) {
+          console.log(`Notifying friend ${friend.username} about ${username}'s status: ${status}`);
           friendSocket.send(JSON.stringify({
             type: "friendStatusUpdate",
             username,
@@ -90,6 +90,7 @@ async function notifyFriends(userId: number, status: "online" | "offline", onlin
 }
 
 export const updateStatus = async (userId: number, status: string, onlineUsers: Map<number, WebSocket>) => {
+  console.log(`Updating status for user ${userId} to ${status}`);
   try {
     runTransaction((db) => {
       const stmt = db.prepare(`
@@ -101,7 +102,7 @@ export const updateStatus = async (userId: number, status: string, onlineUsers: 
 
       stmt.run(status, userId);
     });
-    await notifyFriends(userId, status as "online" | "offline", onlineUsers);
+    await notifyFriends(userId, status, onlineUsers);
   } catch (e) {
     throw e;
   }
