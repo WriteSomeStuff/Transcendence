@@ -9,6 +9,7 @@ import {
   getUserDataHandler,
   getUserIdByUsernameHandler,
   getUsernameByUserIdHandler,
+  getUserStatusbyUserIdHandler,
 } from "./userController.js";
 
 // prefix: /users
@@ -24,13 +25,14 @@ const userRoutes = async (app: FastifyInstance) => {
     "/avatar",
     { preHandler: [app.authenticate] },
     updateUserAvatarHandler,
-  );
+  );  
   app.put("/status", setStatusHandler);
 
   app.get("/avatar", { preHandler: [app.authenticate] }, getUserAvatarHandler);
   app.get("/profile", { preHandler: [app.authenticate] }, getUserDataHandler);
   app.get("/get-userid", getUserIdByUsernameHandler);
   app.get("/get-username", getUsernameByUserIdHandler);
+  app.get("/get-status", getUserStatusbyUserIdHandler );
 };
 
 export default userRoutes;
