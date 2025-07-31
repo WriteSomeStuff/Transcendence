@@ -15,6 +15,7 @@
     "@fastify/cookie": "^11.0.2",
     "@fastify/jwt": "^9.1.0",
     "@fastify/multipart": "^9.0.3",
+    "@fastify/websocket": "^11.1.0",
     "better-sqlite3": "^11.10.0",
     "fastify": "^5.4.0",
     "tsx": "^4.20.3",
@@ -23,6 +24,7 @@
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
-    "@types/node": "^24.0.10"
+    "@types/node": "^24.0.10",
+    "@types/ws": "^8.18.1"
   }
 }

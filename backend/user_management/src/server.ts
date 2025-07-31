@@ -50,23 +50,21 @@ app.get("/ws", { websocket: true }, async (socket: WebSocket, req) => {
     return;
   }
   if (!app.authenticate) {
+    console.error("Authentication in WebSocket handler is not set up");
     socket.close();
     await updateStatus(userId, "offline", onlineUsers);
     onlineUsers.delete(userId);
     return;
   }
   socket.on("open", async () => {
+    console.log(`User ${userId} connected`);
     await updateStatus(userId, "online", onlineUsers);
     onlineUsers.set(userId, socket);
   });
   socket.on("close", async () => {
+    console.log(`User ${userId} disconnected`);
     await updateStatus(userId, "offline", onlineUsers);
     onlineUsers.delete(userId);
-  });
-  socket.on("message", (event: MessageEvent) => {
-    const message = JSON.parse(event.data.toString());
-    console.log(`Received message from user ${userId}:`, message);
-    // show on frontend
   });
 });
 

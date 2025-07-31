@@ -66,19 +66,26 @@ export const updateUsername = async (userId: number, newUsername: string) => {
 };
 
 async function notifyFriends(userId: number, status: "online" | "offline", onlineUsers: Map<number, WebSocket>): Promise<void> {
-  const socket = onlineUsers.get(userId);
-  if (!socket) return;
-
-  const friends = await getFriendList(userId);
-  for (const friend of friends) {
-    const friendSocket = onlineUsers.get(friend.userId);
-    if (friendSocket) {
-      friendSocket.send(JSON.stringify({
-        type: "friendStatusUpdate",
-        userId,
-        status,
-      }));
-    }
+  try {
+      const socket = onlineUsers.get(userId);
+      if (!socket) return;
+    
+      const friends = await getFriendList(userId);
+      const username = await getUsername(userId);
+      for (const friend of friends) {
+        const friendSocket = onlineUsers.get(friend.userId);
+        if (friendSocket) {
+          friendSocket.send(JSON.stringify({
+            type: "friendStatusUpdate",
+            username,
+            status,
+          }));
+        }
+      }
+  }
+  catch (e) {
+    console.error("Error notifying friends:", e);
+    throw e;
   }
 }
 
@@ -94,7 +101,7 @@ export const updateStatus = async (userId: number, status: string, onlineUsers: 
 
       stmt.run(status, userId);
     });
-    notifyFriends(userId, status as "online" | "offline", onlineUsers);
+    await notifyFriends(userId, status as "online" | "offline", onlineUsers);
   } catch (e) {
     throw e;
   }
