@@ -14,6 +14,7 @@ app.addHook("onRequest", async (req, res) => {
     "/user/profile",
     "/user/get-userid",
     "/user/get-username",
+    "/user/get-status",
     "/user/friends/request",
     "/user/friends/accept",
     "/user/friends/reject",
