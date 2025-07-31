@@ -61,7 +61,7 @@ function bindAvatarForm(app: App) {
 function bindUserInfoUpdateForm(app: App, infoType: string) {
   if (infoType !== "username" && infoType !== "password") {
     alert("Incorrect usage of bindUserInfoUpdateForm function");
-  return;	
+	return;
   }
 
   const form = document.getElementById(`${infoType}Form`) as HTMLFormElement;
@@ -221,7 +221,11 @@ async function displayMatchHistory() {
     docDate.textContent = `${history.date.getDate().toString().padStart(2, "0")}/${(history.date.getMonth() + 1).toString().padStart(2, "0")}/${history.date.getFullYear()}`;
 
     const docScore: HTMLSpanElement = document.createElement("span");
-    docScore.textContent = history.userScore.toString() + " points";
+	if (history.userScore === -1) { // User gave up
+		docScore.textContent = "Forfeit";
+	} else {
+		docScore.textContent = history.userScore.toString() + " points";
+	}
 
     var win: boolean = true;
     for (const opponent of history.opponentInfo) {

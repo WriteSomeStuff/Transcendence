@@ -26,7 +26,7 @@ export const fetchUserIdByEmail = async (email: string): Promise<number> => {
 			FROM user
 			WHERE email = ?
 		`);
-    const result = stmt.get(email);
+    const result = stmt.get(email) as { user_id: number } | undefined;
     if (!result) {
       console.log(
         `[Auth Service] User '${email}' not found in auth service db`,
@@ -67,7 +67,7 @@ export const fetchEmailByUserId = async (userId: number): Promise<string> => {
 			FROM user
 			WHERE user_id = ?
 		`);
-    const result = stmt.get(userId);
+    const result = stmt.get(userId) as { email: string } | undefined;
     if (!result) {
       console.log(
         `[Auth Service] User with ID '${userId}' not found in auth service db`,
@@ -78,6 +78,25 @@ export const fetchEmailByUserId = async (userId: number): Promise<string> => {
   });
   console.log(`[Auth Service] Email for user ID '${userId}' is ${email}`);
   return email;
+};
+
+export const fetchUserStatusById = async (userId: number): Promise<string> => {
+  console.log(`[Auth Service] Fetching status for user ID '${userId}'`);
+  const url = process.env['USER_SERVICE_URL'] + '/get-status?userId=' + encodeURIComponent(userId);
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+	});
+
+  const data = await response.json() as { success: boolean, status?: string, error?: string };
+
+  if (data.success && typeof data.status === "string") {
+    return data.status;
+  } else {
+    throw new Error("Status not found");
+  }
 };
 
 export const processOAuthLogin = async (

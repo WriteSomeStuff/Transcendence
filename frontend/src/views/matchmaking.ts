@@ -37,7 +37,6 @@ function createRoomElement(
   roomDiv.classList.add("items-center");
   roomDiv.classList.add("bg-purple-900/80");
   roomDiv.classList.add("border");
-  roomDiv.classList.add("border-purple-600");
   roomDiv.classList.add("rounded-lg");
   roomDiv.classList.add("p-4");
   roomDiv.classList.add("gap-4");
@@ -47,6 +46,12 @@ function createRoomElement(
   gameType.classList.add("text-lg");
   gameType.classList.add("font-semibold");
   gameType.textContent = room.gameData.game;
+  if (room.permissions.type === "tournament") {
+	roomDiv.classList.add("border-amber-200");
+	gameType.textContent += " (tournament)";
+  } else {
+	roomDiv.classList.add("border-purple-600");
+  }
   infoDiv.appendChild(gameType);
   const playersAmount = document.createElement("p");
   playersAmount.classList.add("text-sm");
@@ -133,6 +138,38 @@ async function promptPongSettings(
   });
 }
 
+async function promptShootingSettings(): Promise<RoomGameData | null> {
+  const modal = document.getElementById(
+    "shootingSettingsModal",
+  ) as HTMLDialogElement;
+  const form = document.getElementById(
+    "shootingSettingsForm",
+  ) as HTMLFormElement;
+  modal.showModal();
+  const closeModalButton = document.getElementById(
+    "closePongSettings",
+  ) as HTMLButtonElement;
+  return new Promise((resolve) => {
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const formData = new FormData(form);
+      modal.close();
+      resolve({
+        game: "shooting",
+        options: {
+          targetsDisappear:
+            (formData.get("targetsDisappear") as string) === "on",
+          gameSpeed: Number(formData.get("gameSpeed") as string),
+        },
+      });
+    });
+    closeModalButton.addEventListener("click", () => {
+      modal.close();
+      resolve(null);
+    });
+  });
+}
+
 async function getGameData(
   gameKind: string,
   pongSettingsModal: HTMLDialogElement,
@@ -141,6 +178,8 @@ async function getGameData(
   switch (gameKind) {
     case "pong":
       return promptPongSettings(pongSettingsModal, pongSettingsForm);
+    case "shooting":
+      return promptShootingSettings();
   }
   return null;
 }
@@ -421,7 +460,7 @@ export async function renderMatchmakingView(
   );
   bindNavbar(app);
   await logOut(app);
-  const createButton = document.getElementById("createRoom"); // TODO suggestion: change to createMatchButton
+  const createButton = document.getElementById("createRoom");
   if (!createButton || !(createButton instanceof HTMLButtonElement)) {
     console.error("Couldn't find a button!");
     app.selectView({ view: "profile", params: {} });

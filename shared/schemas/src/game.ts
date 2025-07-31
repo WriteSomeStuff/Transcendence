@@ -1,11 +1,19 @@
 import { z } from "zod";
 
 import { CourtSchema, PongPlayerInputSchema } from "./game/pong_schemas.js";
+import {
+  ShootingCanvasSchema,
+  ShootingPlayerInputSchema,
+} from "./game/shooting_schemas.js";
 
 export const GameInputMessageSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("pongInputUpdate"),
     payload: PongPlayerInputSchema,
+  }),
+  z.object({
+    type: z.literal("shootingPlayerInput"),
+    payload: ShootingPlayerInputSchema,
   }),
   z.object({
     type: z.literal("giveUp"),
@@ -22,6 +30,14 @@ export const GameUpdateMessageSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("pongUpdate"),
     payload: CourtSchema,
+  }),
+  z.object({
+    type: z.literal("shootingInit"),
+    payload: ShootingCanvasSchema,
+  }),
+  z.object({
+    type: z.literal("shootingUpdate"),
+    payload: ShootingCanvasSchema,
   }),
   z.object({
     type: z.literal("scoresUpdate"),
