@@ -182,25 +182,6 @@ export function insertTournamentMatchState(
   }
 }
 
-export function insertTournamentMatchParticipant(
-  // TODO delete? unused?
-  userId: number | null,
-  matchId: number,
-) {
-  try {
-    runTransaction((db) => {
-      const stmt = db.prepare(`
-				INSERT INTO match_participant (user_id, match_id)
-				VALUES (?, ?)
-			`);
-
-      stmt.run(userId, matchId);
-    });
-  } catch (e) {
-    throw e;
-  }
-}
-
 export function getTournamentBracket(tournamentId: number): TournamentBracket {
   try {
     return runTransaction((db) => {
@@ -317,4 +298,21 @@ export function updateTournamentStatusFinished(tournamentId: number) {
   } catch (e) {
     throw e;
   }
+}
+
+export function clearTournamentFromDb(tournamentId: number) {
+	runTransaction((db) => {
+		const deleteMatchesStmt = db.prepare(`
+			DELETE FROM match_state
+			WHERE tournament_id = ?
+		`);
+		
+		const deleteTournamentStmt = db.prepare(`
+			DELETE FROM tournament
+			WHERE tournament_id = ?	
+		`);
+		
+		deleteMatchesStmt.run(tournamentId);
+		deleteTournamentStmt.run(tournamentId);
+	});
 }
