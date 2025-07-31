@@ -130,6 +130,28 @@ export const getUsername = async (userId: number): Promise<string> => {
   }
 };
 
+export const getUserStatusById = async (userId: number): Promise<string> => {
+  try {
+    const status = runTransaction((db) => {
+      const stmt = db.prepare(`
+        SELECT account_status
+        FROM user
+        WHERE user_id = ?
+      `);
+
+      const row = stmt.get(userId) as { account_status: string } | undefined;
+      if (!row) {
+        throw new Error("User not found");
+      }
+      return row.account_status;
+    });
+
+    return status;
+  } catch (e) {
+    throw e;
+  }
+};
+
 export const getUserAvatarPath = async (userId: number): Promise<string> => {
   try {
     const avatarPath = runTransaction((db) => {

@@ -10,6 +10,7 @@ import {
   updateStatus,
   getUserAvatarPath,
   getUserId,
+  getUserStatusById,
   updateAvatar,
   getUsername,
 } from "./userService.js";
@@ -211,6 +212,26 @@ export const getUsernameByUserIdHandler = async (
         error: e,
       });
     }
+  }
+};
+
+export const getUserStatusbyUserIdHandler = async (
+  request: FastifyRequest,
+  reply: FastifyReply,
+) => {
+  try {
+    const { userId } = request.query as { userId: number };
+    const status = await getUserStatusById(userId);
+    reply.status(200).send({
+      success: true,
+      status: status,
+    });
+  } catch (e) {
+    console.error("Error getting user status:", e);
+    reply.status(500).send({
+      success: false,
+      error: "An error occurred getting user status: " + e,
+    });
   }
 };
 
