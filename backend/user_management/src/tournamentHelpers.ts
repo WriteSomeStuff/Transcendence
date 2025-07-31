@@ -20,11 +20,11 @@ import {
   getTournamentId,
   getTournamentBracket,
   updateTournamentStatusFinished,
+  clearTournamentFromDb,
 } from "./matchService.js";
 
 import { v4 as uuidv4 } from "uuid";
 
-// TODO what if something goes wrong, matches and tournament should be deleted from db?
 export async function createTournamentInfo(
   tournamentInfo: TournamentCreateMessage,
 ): Promise<number> {
@@ -71,12 +71,13 @@ export async function createTournamentInfo(
   const createMatchResult = await createTournamentMatchesInUserService(
     tournament.id,
     tournament.bracket,
-  ); // continue here
+  );
+
   if (createMatchResult.length != 0) {
+	clearTournamentFromDb(tournament.id);
     throw new Error(`Tournament matches creation failed: ${createMatchResult}`);
   }
 
-  // updating bracket with match ids
   updateBracketWithMatchIds(tournament.id, tournament.bracket);
 
   console.log(JSON.stringify(tournament, null, 2));
@@ -105,14 +106,13 @@ async function createTournamentMatchesInUserService(
     const parsed = TournamentMatchCreateResponseSchema.safeParse(response);
     console.log("parsed", parsed);
     if (!parsed.success) {
-      // Invalid response
       console.error(parsed.error);
       return "Invalid response from tournament creation service";
     }
 
     const data = parsed.data;
     if (!data.success) {
-      return data.error; // TODO handle error in data.error
+      return data.error;
     }
 
     console.log("database id", data.dbMatchId);
@@ -136,7 +136,6 @@ async function createTournamentInUserService(
     await response.json(),
   );
   if (!parsed.success) {
-    // Invalid response
     return "Invalid response from tournament creation service";
   }
 
@@ -300,31 +299,9 @@ export function proceedTournament(matchId: number, userIdWinner: number) {
     updateTournamentStatusFinished(tournamentId);
     return;
   } else if (isLastMatchInRound(currMatchIndex, totalPlayers, bracket)) {
-    // last match in this round
     bracket.currentRound++;
   }
 
   AddWinnerToNextRound(userIdWinner, bracket, currMatchIndex);
   updateBracketWithMatchIds(tournamentId, bracket);
 }
-
-//rnd| matches
-// 0 | [0] [1]
-// 1 |   [2]
-
-// 0 | [0] [1] [2] [3]
-// 1 | 	[4] [5]
-// 2 | 	  [6]
-
-// 0 | [0] [1] [2] [3] [4] [5] [6] [7]
-// 1 | 		[8] [9] [10] [11]
-// 3 |			[12] [13]
-// 4 |	  		  [14]
-
-// 4 totalplayers / 8 - 1
-// 4 totalplayers / 8 + 2 totalplayers / 8 - 1
-// 4 totalplayers / 8 + 2 totalplayers / 8 + 1 totalplayers / 8 - 1
-
-// 4 * totalplayers / 8 - 1 round === 0
-// 6 * totalplayers / 8 - 1 round === 1
-// 7 * totalplayers / 8 - 1 round === 2

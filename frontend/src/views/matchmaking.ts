@@ -460,7 +460,7 @@ export async function renderMatchmakingView(
   );
   bindNavbar(app);
   await logOut(app);
-  const createButton = document.getElementById("createRoom"); // TODO suggestion: change to createMatchButton
+  const createButton = document.getElementById("createRoom");
   if (!createButton || !(createButton instanceof HTMLButtonElement)) {
     console.error("Couldn't find a button!");
     app.selectView({ view: "profile", params: {} });
