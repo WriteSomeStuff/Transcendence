@@ -11,7 +11,7 @@ import {
   getUsernameByUserIdHandler,
 } from "./userController.js";
 
-// prefix: /users
+// prefix: /user
 const userRoutes = async (app: FastifyInstance) => {
   app.post("/new-user", insertUserHandler);
 
