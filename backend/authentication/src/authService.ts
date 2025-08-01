@@ -10,6 +10,7 @@ import {
   processOAuthLogin,
   fetchUserInfoFrom42,
 } from "./helpers/authServiceHelpers.js";
+import { checkIfLoggedIn } from "helpers/authControllerHelpers.js";
 
 // @ts-ignore
 export const register = async (
@@ -57,6 +58,11 @@ export const login = async (
 ): Promise<AuthResultObj> => {
   try {
     const userId = await fetchUserIdByEmail(email);
+
+    const res = await checkIfLoggedIn(userId);
+    if (!res.success) {
+      return { success: false, error: "User is already logged in" };
+    }
 
     console.log(`[Auth Service] Fetching user info for user ID ${userId}`);
     const userInfo = runTransaction((db) => {

@@ -147,7 +147,7 @@ async function promptShootingSettings(): Promise<RoomGameData | null> {
   ) as HTMLFormElement;
   modal.showModal();
   const closeModalButton = document.getElementById(
-    "closePongSettings",
+    "closeShootingSettings",
   ) as HTMLButtonElement;
   return new Promise((resolve) => {
     form.addEventListener("submit", async (event) => {
@@ -184,6 +184,33 @@ async function getGameData(
   return null;
 }
 
+async function promptRoomSettings(
+  roomSettingsModal: HTMLDialogElement,
+  gameSettingsForm: HTMLFormElement,
+): Promise<{ gameKind: string; size: number; maxScore: number } | null> {
+  roomSettingsModal.showModal();
+  const closeModalButton = document.getElementById(
+    "closeGameSettings",
+  ) as HTMLButtonElement;
+  return new Promise((resolve) => {
+    gameSettingsForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const formData = new FormData(gameSettingsForm);
+      const gameKind = formData.get("game") as string;
+      roomSettingsModal.close();
+      resolve({
+        gameKind: gameKind,
+        size: Number(formData.get("gameSize") as string),
+        maxScore: Number(formData.get("maxScore") as string),
+      });
+    });
+    closeModalButton.addEventListener("click", () => {
+      roomSettingsModal.close();
+      resolve(null);
+    });
+  });
+}
+
 function bindRoomCreation(
   createButton: HTMLButtonElement,
   roomSettingsModal: HTMLDialogElement,
@@ -192,39 +219,29 @@ function bindRoomCreation(
   pongSettingsForm: HTMLFormElement,
   socket: WebSocket,
 ) {
-  createButton.addEventListener("click", () => {
-    roomSettingsModal.showModal();
-  });
-  const closeModalButton = document.getElementById(
-    "closeGameSettings",
-  ) as HTMLButtonElement;
-  gameSettingsForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const formData = new FormData(gameSettingsForm);
-    const gameKind = formData.get("game") as string;
+  createButton.addEventListener("click", async () => {
+    const roomSettings = await promptRoomSettings(roomSettingsModal, gameSettingsForm);
+    if (roomSettings === null) {
+      return;
+    }
     const gameData = await getGameData(
-      gameKind,
+      roomSettings.gameKind,
       pongSettingsModal,
       pongSettingsForm,
     );
     if (gameData === null) {
-      roomSettingsModal.close();
       return;
     }
     const newRoomMessage: MatchmakingMessage = {
       action: "createRoom",
-      size: Number(formData.get("gameSize") as string),
-      maxScore: Number(formData.get("maxScore") as string),
+      size: roomSettings.size,
+      maxScore: roomSettings.maxScore,
       permissions: {
         type: "public",
       },
       gameData: gameData,
     };
     socket.send(JSON.stringify(newRoomMessage));
-    roomSettingsModal.close();
-  });
-  closeModalButton.addEventListener("click", () => {
-    roomSettingsModal.close();
   });
 }
 
@@ -340,8 +357,8 @@ async function promptTournamentParticipantsAndName(
 }
 
 async function promptTournamentGameSettings(): Promise<{
+  gameKind: string;
   maxScore: number;
-  gameData: RoomGameData;
 } | null> {
   const modal = document.getElementById(
     "tournamentGameModal",
@@ -356,19 +373,11 @@ async function promptTournamentGameSettings(): Promise<{
       event.preventDefault();
       const formData = new FormData(form);
       const gameKind = formData.get("game") as string;
-      const gameData = await getGameData(
-        gameKind,
-        document.getElementById("pongSettingsModal") as HTMLDialogElement,
-        document.getElementById("pongSettingsForm") as HTMLFormElement,
-      );
-      if (gameData === null) {
-        modal.close();
-        resolve(null);
-        return;
-      }
-      const maxScore = Number(formData.get("maxScore") as string);
       modal.close();
-      resolve({ maxScore, gameData });
+      resolve({
+        gameKind: gameKind,
+        maxScore: Number(formData.get("maxScore") as string),
+      });
     });
     closeButton.addEventListener("click", () => {
       modal.close();
@@ -403,12 +412,21 @@ async function handleCreateTournament() {
     return;
   }
 
+  const gameData = await getGameData(
+    gameSettings.gameKind,
+    document.getElementById("pongSettingsModal") as HTMLDialogElement,
+    document.getElementById("pongSettingsForm") as HTMLFormElement,
+  );
+  if (gameData === null) {
+    return;
+  }
+
   const newTournamentMessage: TournamentCreateMessage = {
     name: tournamentInfo.name,
     size: totalPlayers,
     maxScore: gameSettings.maxScore,
     participants: tournamentInfo.participants,
-    gameData: gameSettings.gameData,
+    gameData: gameData,
   };
 
   const url = "/api/user/match/create-tournament";

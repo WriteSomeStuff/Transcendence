@@ -300,7 +300,7 @@ async function displayFriendList(app: App) {
 
   for (const friend of list) {
     console.log(
-      `Friend: ${String(friend.userId)} ${friend.username} ${friend.accountStatus}`,
+      `Friend: ${String(friend.userId)} ${friend.username} ${friend.onlineStatus}`,
     );
     const docUser = document.createElement("span");
     docUser.className = "min-w-[8rem] truncate";
@@ -308,7 +308,7 @@ async function displayFriendList(app: App) {
 
     const docStatus = document.createElement("span");
     docStatus.className = "text-right";
-    docStatus.textContent = friend.accountStatus;
+    docStatus.textContent = friend.onlineStatus;
 
     // button to remove friend
     const removeBtn: HTMLButtonElement = document.createElement("button");

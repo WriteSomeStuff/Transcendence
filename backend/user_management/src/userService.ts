@@ -2,6 +2,9 @@ import fs from "fs/promises";
 
 import { runTransaction } from "./db.js";
 import type { User } from "schemas";
+import { getFriendList } from "./friendService.ts";
+
+import type { WebSocket } from "ws";
 
 export const insertUser = async (username: string, userId: number) => {
   try {
@@ -58,6 +61,49 @@ export const updateUsername = async (userId: number, newUsername: string) => {
       stmt.run(newUsername, userId);
     });
   } catch (e: any) {
+    throw e;
+  }
+};
+
+async function notifyFriends(userId: number, status: string, onlineUsers: Map<number, WebSocket>): Promise<void> {
+  console.log(`Notifying friends of user ${userId} about status ${status}`);
+  try {
+    const friends = await getFriendList(userId);
+    const username = await getUsername(userId);
+    console.log(`Found ${friends.length} friends for user ${username}`);
+    for (const friend of friends) {
+      const friendSocket = onlineUsers.get(friend.userId);
+        if (friendSocket) {
+          console.log(`Notifying friend ${friend.username} about ${username}'s status: ${status}`);
+          friendSocket.send(JSON.stringify({
+            type: "friendStatusUpdate",
+            username,
+            status,
+          }));
+        }
+      }
+  }
+  catch (e) {
+    console.error("Error notifying friends:", e);
+    throw e;
+  }
+}
+
+export const updateOnlineStatus = async (userId: number, status: string, onlineUsers: Map<number, WebSocket>) => {
+  console.log(`Updating status for user ${userId} to ${status}`);
+  try {
+    runTransaction((db) => {
+      const stmt = db.prepare(`
+				UPDATE user
+				SET online_status = ?
+				WHERE
+					user_id = ?	
+			`);
+
+      stmt.run(status, userId);
+    });
+    await notifyFriends(userId, status, onlineUsers);
+  } catch (e) {
     throw e;
   }
 };
@@ -125,6 +171,28 @@ export const getUsername = async (userId: number): Promise<string> => {
       return row.username;
     });
     return username;
+  } catch (e) {
+    throw e;
+  }
+};
+
+export const getUserStatusById = async (userId: number): Promise<string> => {
+  try {
+    const status = runTransaction((db) => {
+      const stmt = db.prepare(`
+        SELECT account_status
+        FROM user
+        WHERE user_id = ?
+      `);
+
+      const row = stmt.get(userId) as { account_status: string } | undefined;
+      if (!row) {
+        throw new Error("User not found");
+      }
+      return row.account_status;
+    });
+
+    return status;
   } catch (e) {
     throw e;
   }

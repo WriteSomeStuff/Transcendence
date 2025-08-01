@@ -17,6 +17,7 @@ import {
   handleUserDbError,
   handleSuccessfulLogin,
   handleAuthInvalidation,
+  checkIfLoggedIn,
 } from "./helpers/authControllerHelpers.ts";
 
 import {
@@ -213,6 +214,15 @@ export const OAuthCallbackHandler = async (
       return;
     }
 
+    const res = await checkIfLoggedIn(userId);
+    if (!res.success) {
+      reply.status(401).send({
+        success: false,
+        error: "User is already logged in",
+      });
+      return;
+    }
+
     console.log(`[Auth Controller] User ID from OAuth callback: ${userId}`);
     await handleSuccessfulLogin(request, reply, userId);
     console.log(
@@ -308,11 +318,11 @@ export const logoutUserHandler = async (
     );
 
     console.log(
-      `[Auth Controller] Setting status to 'offline' for user ${request.user.userId}`,
+      `[Auth Controller] Setting status to 'loggedout' for user ${request.user.userId}`,
     );
     const response = await setStatusInUserService(
       request.user.userId,
-      "offline",
+      "loggedout",
     );
 
     if (!response.ok) {
@@ -327,7 +337,7 @@ export const logoutUserHandler = async (
       return;
     }
     console.log(
-      `[Auth Controller] Set status to 'offline' for user ${request.user.userId}`,
+      `[Auth Controller] Set status to 'loggedout' for user ${request.user.userId}`,
     );
 
     return reply.status(200).send({

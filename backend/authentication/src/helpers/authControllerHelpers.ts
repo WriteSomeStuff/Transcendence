@@ -1,5 +1,6 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { setStatusInUserService, removeUser } from "../authService.ts";
+import { removeUser, setStatusInUserService } from "../authService.ts";
+import { fetchUserStatusById } from "./authServiceHelpers.js";
 
 export const handleUserDbError = async (
   response: Response,
@@ -21,6 +22,22 @@ export const handleUserDbError = async (
     success: false,
     error: errorMsg,
   });
+};
+
+export const checkIfLoggedIn = async (
+  userId: number | undefined,
+): Promise<{ success: boolean; error?: string }> => {
+  if (!userId) {
+    return { success: false, error: "User ID is not defined" };
+  }
+  const status = await fetchUserStatusById(userId);
+  if (status === "loggedin") {
+    return {
+      success: false,
+          error: "User is already logged in",
+        };
+      }
+      return { success: true };
 };
 
 export const handleSuccessfulLogin = async (
@@ -47,9 +64,9 @@ export const handleSuccessfulLogin = async (
     console.log(`[Auth Controller] Cookie set for user '${userId}'`);
 
     console.log(
-      `[Auth Controller] Setting status to 'online' for user '${userId}'`,
+      `[Auth Controller] Setting status to 'loggedin' for user '${userId}'`,
     );
-    const response = await setStatusInUserService(userId, "online");
+    const response = await setStatusInUserService(userId, "loggedin");
 
     if (!response.ok) {
       reply.status(response.status).send({
@@ -58,7 +75,7 @@ export const handleSuccessfulLogin = async (
       });
     }
     console.log(
-      `[Auth Controller] Set status to 'online' for user '${userId}'`,
+      `[Auth Controller] Set status to 'loggedin' for user '${userId}'`,
     );
   } catch (e) {
     console.error();
@@ -90,9 +107,9 @@ export const handleAuthInvalidation = async (
     console.log(`[Auth Controller] Cookie erased for user '${userId}'`);
 
     console.log(
-      `[Auth Controller] Setting status to 'offline' for user '${userId}'`,
+      `[Auth Controller] Setting status to 'loggedout' for user '${userId}'`,
     );
-    const response = await setStatusInUserService(userId, "offline");
+    const response = await setStatusInUserService(userId, "loggedout");
 
     if (!response.ok) {
       reply.status(response.status).send({
@@ -101,7 +118,7 @@ export const handleAuthInvalidation = async (
       });
     }
     console.log(
-      `[Auth Controller] Set status to 'offline' for user '${userId}'`,
+      `[Auth Controller] Set status to 'loggedout' for user '${userId}'`,
     );
   } catch (e) {
     console.error();

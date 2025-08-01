@@ -1,18 +1,26 @@
 import fastify, { FastifyRequest, FastifyReply } from "fastify";
 import fastifyMultipart from "@fastify/multipart";
+import fastifyWebsocket from "@fastify/websocket";
+
+import type { WebSocket } from "ws";
 
 import userRoutes from "./userRoutes.js";
 import friendRoutes from "./friendRoutes.js";
 import matchRoutes from "./matchRoutes.js";
+import { updateOnlineStatus } from "./userService.ts";
+
 
 const PORT: number = 80;
 const HOST: string = "0.0.0.0";
 
 const app = fastify({
-  logger: true,
+  // logger: true,
 });
 
+const onlineUsers: Map<number, WebSocket> = new Map();
+
 app.register(fastifyMultipart);
+await app.register(fastifyWebsocket);
 
 app.decorate(
   "authenticate",
@@ -32,6 +40,32 @@ app.register(friendRoutes, {
 
 app.register(matchRoutes, {
   prefix: "/match",
+});
+
+app.get("/ws", { websocket: true }, async (socket: WebSocket, req) => {
+  console.log("Processing user/ws request");
+  const userId = Number(req.headers.cookie);
+  if (Number.isNaN(userId)) {
+    socket.close();
+    return;
+  }
+  if (!app.authenticate) {
+    console.error("Authentication in WebSocket handler is not set up");
+    socket.close();
+    await updateOnlineStatus(userId, "offline", onlineUsers);
+    onlineUsers.delete(userId);
+    return;
+  }
+
+  console.log(`User ${userId} connected`);
+  await updateOnlineStatus(userId, "online", onlineUsers);
+  onlineUsers.set(userId, socket);
+
+  socket.on("close", async () => {
+    console.log(`User ${userId} disconnected`);
+    await updateOnlineStatus(userId, "offline", onlineUsers);
+    onlineUsers.delete(userId);
+  });
 });
 
 app.get("/health", async (_, reply) => {

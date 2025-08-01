@@ -91,6 +91,7 @@ async function renderState(
 class App {
   private state: GlobalAppState;
   public readonly appContainer: HTMLElement;
+  private onlineWebsocket: WebSocket | null = null;
 
   constructor() {
     const appContainer = document.getElementById("app-container");
@@ -100,19 +101,71 @@ class App {
     this.appContainer = appContainer;
     this.state = getGlobalState();
     renderState(this.state, this).then((_) => {});
+    if (this.state.status !== "NotLoggedIn") {
+      this.watchOnlineWebsocket();
+    } else {
+      this.onlineWebsocket?.close();
+      this.onlineWebsocket = null;
+    }
     window.addEventListener("popstate", () => {
       this.resetView();
     });
   }
 
+  private showStatusMessage(username: string, status: string) {
+    const container = document.getElementById(`toast-container`);
+    if (container) {
+      const toast = document.createElement("div");
+      toast.className = "toast";
+      toast.textContent = `Friend ${username} is now ${status}`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        container.removeChild(toast);
+      }, 5000); 
+    } else {
+      alert(`Friend ${username} is now ${status}`);
+    }
+  }
+
+  public watchOnlineWebsocket(): void {
+    console.log("Watching online websocket for friend status updates");
+    if (this.onlineWebsocket === null) {
+      this.onlineWebsocket = new WebSocket("/api/user/ws");
+      console.log("WebSocket created");
+    }
+
+    this.onlineWebsocket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      // const message = data.toString();
+
+      // console.log(`Received message from user ${data.username}:`, message);
+      if (data.type === "friendStatusUpdate") {
+        console.log(`Friend ${data.username} is now ${data.status}`);
+        this.showStatusMessage(data.username, data.status);
+      }
+    };
+  }
+
   public selectView(view: ViewState): void {
     this.state = navigateTo(view);
     renderState(this.state, this, true).then((_) => {});
+    if (this.state.status !== "NotLoggedIn") {
+      this.watchOnlineWebsocket();
+    } else {
+      this.onlineWebsocket?.close();
+      this.onlineWebsocket = null;
+    }
   }
 
   public resetView(): void {
     this.state = getGlobalState();
     renderState(this.state, this).then((_) => {});
+    if (this.state.status !== "NotLoggedIn") {
+      this.watchOnlineWebsocket();
+    } else {
+      this.onlineWebsocket?.close();
+      this.onlineWebsocket = null;
+    }
   }
 }
 
