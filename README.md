@@ -12,7 +12,7 @@
 	# 42 API OAuth credentials
 	OAUTH_CLIENT_ID=your_42_client_id
 	OAUTH_CLIENT_SECRET=your_42_client_secret
-	OAUTH_REDIRECT_URI=https://localhost:8443/login
+	OAUTH_REDIRECT_URI=https://[HOST IP]:8443/login
 	```
 
 	Replace the placeholder values with your actual secrets and configuration.
