@@ -75,10 +75,10 @@ export async function renderLoginView(
           method: "GET",
         },
       );
-      if (!response.ok) {
-        throw new Error(`OAuth callback failed: ${response.statusText}`);
-      }
       const data = await response.json();
+      if (!response.ok) {
+        throw new Error(`OAuth callback failed: ${data.error || response.statusText}`);
+      }
       console.log("[LoginView] OAuth login successful:", data);
       app.resetView();
       return;

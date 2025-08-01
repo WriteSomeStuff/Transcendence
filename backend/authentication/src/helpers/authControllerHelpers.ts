@@ -1,5 +1,6 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { removeUser, setStatusInUserService } from "../authService.ts";
+import { fetchUserStatusById } from "./authServiceHelpers.js";
 
 export const handleUserDbError = async (
   response: Response,
@@ -21,6 +22,22 @@ export const handleUserDbError = async (
     success: false,
     error: errorMsg,
   });
+};
+
+export const checkIfLoggedIn = async (
+  userId: number | undefined,
+): Promise<{ success: boolean; error?: string }> => {
+  if (!userId) {
+    return { success: false, error: "User ID is not defined" };
+  }
+  const status = await fetchUserStatusById(userId);
+  if (status === "loggedin") {
+    return {
+      success: false,
+          error: "User is already logged in",
+        };
+      }
+      return { success: true };
 };
 
 export const handleSuccessfulLogin = async (
