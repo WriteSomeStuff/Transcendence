@@ -308,11 +308,11 @@ export const logoutUserHandler = async (
     );
 
     console.log(
-      `[Auth Controller] Setting status to 'offline' for user ${request.user.userId}`,
+      `[Auth Controller] Setting status to 'loggedout' for user ${request.user.userId}`,
     );
     const response = await setStatusInUserService(
       request.user.userId,
-      "offline",
+      "loggedout",
     );
 
     if (!response.ok) {
@@ -327,7 +327,7 @@ export const logoutUserHandler = async (
       return;
     }
     console.log(
-      `[Auth Controller] Set status to 'offline' for user ${request.user.userId}`,
+      `[Auth Controller] Set status to 'loggedout' for user ${request.user.userId}`,
     );
 
     return reply.status(200).send({

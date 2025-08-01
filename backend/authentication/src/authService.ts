@@ -60,7 +60,7 @@ export const login = async (
     const userId = await fetchUserIdByEmail(email);
 
     const status = await fetchUserStatusById(userId);
-    if (status === "online") {
+    if (status === "loggedin") {
       return {
         success: false,
         error: "User is already logged in",
