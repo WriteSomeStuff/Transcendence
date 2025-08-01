@@ -196,14 +196,6 @@ export async function renderGameView(
     res.text(),
   );
 
-  const isMobile = /Mobile|Android|iPhone|iPad/i.test(navigator.userAgent);
-  if (isMobile) {
-    const controls = document.getElementById("mobile-controls");
-    if (controls) {
-      controls.hidden = false;
-    }
-  }
-
   const canvas = document.getElementById("myCanvas");
   if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
     console.error("Can't find a game canvas");
