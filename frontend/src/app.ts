@@ -101,6 +101,12 @@ class App {
     this.appContainer = appContainer;
     this.state = getGlobalState();
     renderState(this.state, this).then((_) => {});
+    if (this.state.status !== "NotLoggedIn") {
+      this.watchOnlineWebsocket();
+    } else {
+      this.onlineWebsocket?.close();
+      this.onlineWebsocket = null;
+    }
     window.addEventListener("popstate", () => {
       this.resetView();
     });
