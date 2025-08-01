@@ -9,6 +9,7 @@ import {
   fetchEmailByUserId,
   processOAuthLogin,
   fetchUserInfoFrom42,
+  fetchUserStatusById,
 } from "./helpers/authServiceHelpers.js";
 
 // @ts-ignore
@@ -57,6 +58,14 @@ export const login = async (
 ): Promise<AuthResultObj> => {
   try {
     const userId = await fetchUserIdByEmail(email);
+
+    const status = await fetchUserStatusById(userId);
+    if (status === "loggedin") {
+      return {
+        success: false,
+        error: "User is already logged in",
+      };
+    }
 
     console.log(`[Auth Service] Fetching user info for user ID ${userId}`);
     const userInfo = runTransaction((db) => {

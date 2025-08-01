@@ -16,6 +16,7 @@ export const FriendSchema = z.object({
   userId: z.number(),
   username: z.string(),
   accountStatus: z.string(),
+  onlineStatus: z.string(),
 });
 
 export type Friend = z.infer<typeof FriendSchema>;

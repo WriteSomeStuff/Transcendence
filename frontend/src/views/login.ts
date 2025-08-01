@@ -81,6 +81,7 @@ export async function renderLoginView(
       const data = await response.json();
       console.log("[LoginView] OAuth login successful:", data);
       app.resetView();
+      return;
     } catch (error) {
       console.error("[LoginView] OAuth login error:", error);
       alert(`OAuth login failed: ${error}`);

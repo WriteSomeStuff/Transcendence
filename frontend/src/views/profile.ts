@@ -61,7 +61,7 @@ function bindAvatarForm(app: App) {
 function bindUserInfoUpdateForm(app: App, infoType: string) {
   if (infoType !== "username" && infoType !== "password") {
     alert("Incorrect usage of bindUserInfoUpdateForm function");
-  return;	
+	return;
   }
 
   const form = document.getElementById(`${infoType}Form`) as HTMLFormElement;
@@ -221,7 +221,11 @@ async function displayMatchHistory() {
     docDate.textContent = `${history.date.getDate().toString().padStart(2, "0")}/${(history.date.getMonth() + 1).toString().padStart(2, "0")}/${history.date.getFullYear()}`;
 
     const docScore: HTMLSpanElement = document.createElement("span");
-    docScore.textContent = history.userScore.toString() + " points";
+	if (history.userScore === -1) { // User gave up
+		docScore.textContent = "Forfeit";
+	} else {
+		docScore.textContent = history.userScore.toString() + " points";
+	}
 
     var win: boolean = true;
     for (const opponent of history.opponentInfo) {
@@ -296,7 +300,7 @@ async function displayFriendList(app: App) {
 
   for (const friend of list) {
     console.log(
-      `Friend: ${String(friend.userId)} ${friend.username} ${friend.accountStatus}`,
+      `Friend: ${String(friend.userId)} ${friend.username} ${friend.onlineStatus}`,
     );
     const docUser = document.createElement("span");
     docUser.className = "min-w-[8rem] truncate";
@@ -304,7 +308,7 @@ async function displayFriendList(app: App) {
 
     const docStatus = document.createElement("span");
     docStatus.className = "text-right";
-    docStatus.textContent = friend.accountStatus;
+    docStatus.textContent = friend.onlineStatus;
 
     // button to remove friend
     const removeBtn: HTMLButtonElement = document.createElement("button");
