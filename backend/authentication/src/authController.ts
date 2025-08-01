@@ -17,6 +17,7 @@ import {
   handleUserDbError,
   handleSuccessfulLogin,
   handleAuthInvalidation,
+  checkIfLoggedIn,
 } from "./helpers/authControllerHelpers.ts";
 
 import {
@@ -209,6 +210,15 @@ export const OAuthCallbackHandler = async (
       reply.status(404).send({
         success: false,
         error: "User not found in OAuth callback",
+      });
+      return;
+    }
+
+    const res = await checkIfLoggedIn(userId);
+    if (!res.success) {
+      reply.status(401).send({
+        success: false,
+        error: "User is already logged in",
       });
       return;
     }
