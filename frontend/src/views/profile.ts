@@ -60,7 +60,7 @@ function bindAvatarForm(app: App) {
 
 function bindUserInfoUpdateForm(app: App, infoType: string) {
   if (infoType !== "username" && infoType !== "password") {
-    alert("Incorrect usage of bindUserInfoUpdateForm function");
+    console.error("Incorrect usage of bindUserInfoUpdateForm function");
 	return;
   }
 
