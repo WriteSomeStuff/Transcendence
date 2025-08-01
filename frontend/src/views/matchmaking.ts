@@ -147,7 +147,7 @@ async function promptShootingSettings(): Promise<RoomGameData | null> {
   ) as HTMLFormElement;
   modal.showModal();
   const closeModalButton = document.getElementById(
-    "closePongSettings",
+    "closeShootingSettings",
   ) as HTMLButtonElement;
   return new Promise((resolve) => {
     form.addEventListener("submit", async (event) => {
